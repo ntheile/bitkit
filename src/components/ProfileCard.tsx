@@ -108,10 +108,10 @@ const ProfileCard = ({
 						<View style={styles.cameraIconOverlay}>
 							<CameraIcon />
 						</View>
-						<ProfileImage url={url} image={profile?.image} size={96} />
+						<ProfileImage image={profile?.image} size={96} />
 					</TouchableOpacity>
 				) : (
-					<ProfileImage url={url} image={profile?.image} size={96} />
+					<ProfileImage image={profile?.image} size={96} />
 				)}
 			</View>
 

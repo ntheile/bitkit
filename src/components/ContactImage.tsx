@@ -14,7 +14,7 @@ const ContactImage = ({
 }): ReactElement => {
 	const { profile } = useProfile(url);
 	return (
-		<ProfileImage style={style} url={url} image={profile.image} size={size} />
+		<ProfileImage style={style} image={profile.image} size={size} />
 	);
 };
 

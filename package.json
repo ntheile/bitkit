@@ -3,10 +3,10 @@
   "author": "Synonym",
   "version": "1.1.3",
   "scripts": {
-    "start": "react-native start --client-logs",
-    "android": "react-native run-android",
-    "ios": "react-native run-ios --simulator='iPhone 16'",
-    "ios:se": "react-native run-ios --simulator='iPhone SE (3rd generation)'",
+    "start": "NODE_OPTIONS=--preserve-symlinks react-native start --client-logs",
+    "android": "NODE_OPTIONS=--preserve-symlinks react-native run-android",
+    "ios": "NODE_OPTIONS=--preserve-symlinks react-native run-ios --simulator='iPhone 16'",
+    "ios:se": "NODE_OPTIONS=--preserve-symlinks react-native run-ios --simulator='iPhone SE (3rd generation)'",
     "test": "jest --forceExit",
     "test:coverage": "jest --forceExit --coverage=true",
     "e2e:build:ios-debug": "detox build --configuration ios.debug",
@@ -26,7 +26,7 @@
     "clean:ios": "cd ios && npx del-cli Pods build && pod install",
     "bundle": "yarn clean:android && react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.jsbundle --assets-dest android/app/build/intermediates/res/merged/release/ && cd android && ./gradlew assembleRelease --no-daemon",
     "prepare": "husky",
-    "postinstall": "node postinstall.js; yarn patch-package"
+    "postinstall": "node postinstall.js"
   },
   "dependencies": {
     "@bitcoinerlab/secp256k1": "1.2.0",
@@ -69,6 +69,7 @@
     "i18next-icu": "2.3.0",
     "intl-messageformat": "10.5.11",
     "jdenticon": "3.2.0",
+    "lni_react_native": "link:./modules/lni_react_native",
     "lodash": "4.17.21",
     "lottie-react-native": "7.2.2",
     "react": "19.0.0",
@@ -117,6 +118,7 @@
     "rn-qr-generator": "1.4.3",
     "sodium-react-native-direct": "0.4.4",
     "styled-components": "5.3.11",
+    "uniffi-bindgen-react-native": "0.29.0-0",
     "url-parse": "1.5.10",
     "uuid": "9.0.1",
     "web-streams-polyfill": "3.3.3"
@@ -155,6 +157,7 @@
     "nano-staged": "^0.8.0",
     "node-fetch": "^2.6.7",
     "patch-package": "^8.0.0",
+    "react-native-builder-bob": "^0.39.0",
     "react-native-bundle-visualizer": "^3.1.3",
     "react-native-skia-stub": "0.0.1",
     "react-native-svg-transformer": "^1.3.0",
@@ -172,5 +175,5 @@
     "net": "react-native-tcp-socket",
     "tls": "react-native-tcp-socket"
   },
-  "packageManager": "yarn@3.6.4"
+  "packageManager": "yarn@4.9.4"
 }

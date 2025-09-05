@@ -97,12 +97,17 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('BITKIT_UPLOAD_STORE_FILE')) {
-                storeFile file(BITKIT_UPLOAD_STORE_FILE)
-                storePassword BITKIT_UPLOAD_STORE_PASSWORD
-                keyAlias BITKIT_UPLOAD_KEY_ALIAS
-                keyPassword BITKIT_UPLOAD_KEY_PASSWORD
-            }
+            // TODO zaprite fix
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            // if (project.hasProperty('BITKIT_UPLOAD_STORE_FILE')) {
+            //     storeFile file(BITKIT_UPLOAD_STORE_FILE)
+            //     storePassword BITKIT_UPLOAD_STORE_PASSWORD
+            //     keyAlias BITKIT_UPLOAD_KEY_ALIAS
+            //     keyPassword BITKIT_UPLOAD_KEY_PASSWORD
+            // }
         }
     }
     buildTypes {
@@ -139,6 +144,14 @@ android {
         pickFirst 'lib/x86_64/liblog.so'
         pickFirst 'lib/armeabi-v7a/liblog.so'
         pickFirst 'lib/arm64-v8a/liblog.so'
+        pickFirst 'lib/x86/libjsi.so'
+        pickFirst 'lib/x86_64/libjsi.so'
+        pickFirst 'lib/armeabi-v7a/libjsi.so'
+        pickFirst 'lib/arm64-v8a/libjsi.so'
+        pickFirst 'lib/x86/libreactnative.so'
+        pickFirst 'lib/x86_64/libreactnative.so'
+        pickFirst 'lib/armeabi-v7a/libreactnative.so'
+        pickFirst 'lib/arm64-v8a/libreactnative.so'
     }
 }
 

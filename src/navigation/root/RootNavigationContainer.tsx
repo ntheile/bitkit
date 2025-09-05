@@ -71,7 +71,9 @@ const RootNavigationContainer = ({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: sheetRefs don't change
 	useEffect(() => {
 		const unsubscribe = navigationRef.addListener('state', () => {
-			const openSheets = sheetRefs.filter(({ ref }) => ref.current?.isOpen());
+			const openSheets = sheetRefs.filter(({ ref }: any) => {
+				// return ref.current?.isOpen();
+			});
 			openSheets.forEach(({ ref }) => ref.current?.close());
 		});
 

@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	buttonError: {
-		color: '#FF4400',
+		color: '#20c998',
 	},
 	pressed: {
 		opacity: ACTIVE_OPACITY,

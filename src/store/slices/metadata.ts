@@ -49,6 +49,25 @@ export const metadataSlice = createSlice({
 			const tags = [...new Set([action.payload.tag, ...state.lastUsedTags])];
 			state.lastUsedTags = tags.slice(0, 10);
 		},
+		batchAddMetaTxTags: (
+			state,
+			action: PayloadAction<{ txId: string; tag: string }[]>,
+		) => {
+			const uniqueTags = new Set<string>();
+			
+			for (const { txId, tag } of action.payload) {
+				let txTags = state.tags[txId] ?? [];
+				txTags = [...new Set([...txTags, tag])];
+				state.tags[txId] = txTags;
+				uniqueTags.add(tag);
+			}
+
+			// add to last used tags (batch unique tags)
+			if (uniqueTags.size > 0) {
+				const tags = [...new Set([...Array.from(uniqueTags), ...state.lastUsedTags])];
+				state.lastUsedTags = tags.slice(0, 10);
+			}
+		},
 		deleteMetaTxTag: (
 			state,
 			action: PayloadAction<{ txId: string; tag: string }>,
@@ -133,6 +152,7 @@ export const {
 	updateMetaTxTags,
 	updateMetaTxComment,
 	addMetaTxTag,
+	batchAddMetaTxTags,
 	deleteMetaTxTag,
 	updatePendingInvoice,
 	deletePendingInvoice,

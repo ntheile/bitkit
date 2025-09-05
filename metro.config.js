@@ -16,6 +16,10 @@ const { assetExts, sourceExts } = defaultConfig.resolver;
  */
 const config = {
 	resetCache: true,
+	watchFolders: [
+		// Ensure Metro watches the external portal dependency so it can resolve sources
+		
+	],
 	transformer: {
 		// Need this here because of some metro weirdness
 		getTransformOptions: async () => ({}),

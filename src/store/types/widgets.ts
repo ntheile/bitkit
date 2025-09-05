@@ -17,6 +17,13 @@ export type TBlocksWidgetOptions = {
 	showSource: boolean;
 };
 
+export type TConnectWalletWidgetOptions = {
+	showInstructions: boolean;
+	showWalletSelector: boolean;
+	showConnectionForm: boolean;
+	showSource: boolean;
+};
+
 export type TFactsWidgetOptions = {
 	showSource: boolean;
 };
@@ -42,6 +49,7 @@ export type TWeatherWidgetOptions = {
 
 export type TWidgetOptions =
 	| TBlocksWidgetOptions
+	| TConnectWalletWidgetOptions
 	| TFactsWidgetOptions
 	| TNewsWidgetOptions
 	| TPriceWidgetOptions

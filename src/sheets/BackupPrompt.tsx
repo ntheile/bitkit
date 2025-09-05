@@ -37,7 +37,11 @@ const BackupPrompt = (): ReactElement => {
 		// and no other bottom-sheets are shown
 		// and user on home screen for CHECK_DELAY
 		const shouldShow = () => {
-			const isAnySheetOpen = sheetRefs.some(({ ref }) => ref.current?.isOpen());
+			const isAnySheetOpen = sheetRefs.some(({ ref }) => {
+				// if (ref.current && ref.current?.isOpen) {
+				// 	ref.current?.isOpen();
+				// }
+			});
 			const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
 			const hasBalance = totalBalance > 0;
 

@@ -41,7 +41,10 @@ import { findLnUrl, handleLnurlAuth, isLnurlAddress } from '../lnurl';
 import { EAvailableNetwork } from '../networks';
 import { showToast } from '../notifications';
 import { getSlashPayConfig, handleSlashtagURL } from '../slashtags';
-import { getBalance, getSelectedNetwork, getSelectedWallet } from '../wallet';
+import { getSelectedNetwork, getSelectedWallet } from '../wallet';
+import { getStore } from '../../store/helpers';
+import { balanceSelector } from '../../store/reselect/aggregations';
+import { defaultExternalWalletSelector } from '../../store/reselect/externalWallets';
 import {
 	getOnchainTransactionData,
 	getTransactionInputValue,
@@ -392,7 +395,9 @@ export const processPaymentData = async ({
 	skipLightning?: boolean;
 	showErrors?: boolean;
 }): Promise<Result<TPaymentUri>> => {
-	let { onchainBalance, spendingBalance } = await getBalance();
+	// Get balance including external wallet balance from Redux store
+	const balance = balanceSelector(getStore());
+	let { onchainBalance, spendingBalance } = balance;
 	const isUnified = data.type === EQRDataType.unified;
 	const isOnchain = data.type === EQRDataType.onchain;
 	const isLightning = data.type === EQRDataType.lightning;
@@ -747,20 +752,30 @@ const handleData = async ({
 			pParams.minSendable = Math.floor(pParams.minSendable / 1000);
 			pParams.maxSendable = Math.floor(pParams.maxSendable / 1000);
 
-			// Determine if we have enough sending capacity before proceeding.
-			const lightningBalance = getLightningBalance({ includeReserve: false });
+			// TODO Determine if we have enough sending capacity before proceeding.
+			// const lightningBalance = getLightningBalance({ includeReserve: false });
 
 			dispatch(updateSendTransaction({ paymentMethod: 'lightning' }));
 
-			if (lightningBalance.localBalance < pParams.minSendable) {
-				showToast({
-					type: 'warning',
-					title: i18n.t('other:lnurl_pay_error'),
-					description: i18n.t('other:lnurl_pay_error_no_capacity'),
-				});
-				return err(
-					'Not enough outbound/sending capacity to complete lnurl-pay request.',
-				);
+			// Check if there's a connected external default wallet
+			const state = getStore();
+			const defaultExternalWallet = defaultExternalWalletSelector(state);
+			const hasConnectedExternalWallet = defaultExternalWallet && state.externalWallets[defaultExternalWallet]?.connected;
+
+			// Only check internal LDK balance if no external wallet is available
+			if (!hasConnectedExternalWallet) {
+				const lightningBalance = getLightningBalance({ includeReserve: false });
+
+				if (lightningBalance.localBalance < pParams.minSendable) {
+					showToast({
+						type: 'warning',
+						title: i18n.t('other:lnurl_pay_error'),
+						description: i18n.t('other:lnurl_pay_error_no_capacity'),
+					});
+					return err(
+						'Not enough outbound/sending capacity to complete lnurl-pay request.',
+					);
+				}
 			}
 
 			if (pParams.minSendable === pParams.maxSendable) {

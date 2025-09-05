@@ -50,8 +50,8 @@ export const useBottomSheetBackPress = (): void => {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: sheetRefs don't change
 	useEffect(() => {
 		const backAction = () => {
-			const openSheets = sheetRefs.filter(({ ref }) => {
-				return ref.current?.isOpen();
+			const openSheets = sheetRefs.filter(({ ref }: any) => {
+				// return ref.current?.isOpen();
 			});
 
 			if (openSheets.length !== 0) {

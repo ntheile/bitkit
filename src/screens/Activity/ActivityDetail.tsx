@@ -354,7 +354,7 @@ const OnchainActivityDetail = ({
 		status = (
 			<View style={styles.row} testID="StatusBoosting">
 				<TimerIconAlt style={styles.rowIcon} color="yellow" height={14} />
-				<BodySSB color="yellow">{t('activity_boosting')}</BodySSB>
+				<BodySSB color="green">{t('activity_boosting')}</BodySSB>
 			</View>
 		);
 	}

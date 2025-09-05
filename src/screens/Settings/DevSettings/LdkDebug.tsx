@@ -885,8 +885,8 @@ const styles = StyleSheet.create({
 		marginRight: 12,
 	},
 	radioButtonSelected: {
-		borderColor: '#FF6600',
-		backgroundColor: '#FF6600',
+		borderColor: '#20c998',
+		backgroundColor: '#20c998',
 	},
 	radioLabel: {
 		flex: 1,

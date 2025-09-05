@@ -233,7 +233,7 @@ const AddressViewer = (): ReactElement => {
 		currentWalletSelector(state, selectedWallet),
 	);
 	const [sendNavigationHasOpened, setSendNavigationHasOpened] = useState(false);
-	const sendNavigationIsOpen = sendSheetRef.current?.isOpen();
+	const sendNavigationIsOpen = false; //(sendSheetRef.current as any)?.isOpen();
 
 	const flatListRef = useRef<FlatList>(null);
 	const scrollViewRef = useRef<ScrollView>(null);

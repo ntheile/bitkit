@@ -56,7 +56,7 @@ const ContactsScreen = ({
 			<NavigationHeader
 				title={t('contacts')}
 				actionIcon={
-					<ProfileImage size={28} url={myProfileURL} image={profile?.image} />
+					<ProfileImage size={28} image={profile?.image} />
 				}
 				onActionPress={(): void => navigation.navigate('Profile')}
 			/>

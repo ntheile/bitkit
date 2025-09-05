@@ -10,6 +10,7 @@ import SafeAreaInset from '../../components/SafeAreaInset';
 import Button from '../../components/buttons/Button';
 import BlocksWidget from '../../components/widgets/BlocksWidget';
 import CalculatorWidget from '../../components/widgets/CalculatorWidget';
+import ConnectWalletWidget from '../../components/widgets/ConnectWalletWidget';
 import FactsWidget from '../../components/widgets/FactsWidget';
 import NewsWidget from '../../components/widgets/NewsWidget';
 import PriceWidget from '../../components/widgets/PriceWidget';
@@ -22,6 +23,7 @@ import { widgetSelector } from '../../store/reselect/widgets';
 import { deleteWidget, saveWidget } from '../../store/slices/widgets';
 import {
 	TBlocksWidgetOptions,
+	TConnectWalletWidgetOptions,
 	TFactsWidgetOptions,
 	TNewsWidgetOptions,
 	TPriceWidgetOptions,
@@ -82,6 +84,10 @@ const Widget = ({
 			}
 			case 'calculator': {
 				return <CalculatorWidget />;
+			}
+			case 'connectwallet': {
+				const connectWalletOptions = options as TConnectWalletWidgetOptions;
+				return <ConnectWalletWidget options={connectWalletOptions} />;
 			}
 			case 'facts': {
 				const factsOptions = options as TFactsWidgetOptions;

@@ -1,6 +1,7 @@
 import { EActivityType } from '../types/activity';
 import { ETransferType } from '../types/wallet';
 import { activityItemsSelector } from './activity';
+import { defaultExternalWalletBalanceSelector } from './externalWallets';
 import { lightningBalanceSelector, pendingPaymentsSelector } from './lightning';
 import { newChannelsNotificationsSelector } from './todos';
 import { createShallowEqualSelector } from './utils';
@@ -34,6 +35,7 @@ export const balanceSelector = createShallowEqualSelector(
 		pendingPaymentsSelector,
 		newChannelsNotificationsSelector,
 		lightningBalanceSelector,
+		defaultExternalWalletBalanceSelector,
 	],
 	(
 		onchainBalance,
@@ -41,6 +43,7 @@ export const balanceSelector = createShallowEqualSelector(
 		pendingPayments,
 		newChannels,
 		lnBalance,
+		externalWalletBalance,
 	): TBalance => {
 		const {
 			lightningBalance,
@@ -48,7 +51,12 @@ export const balanceSelector = createShallowEqualSelector(
 			reserveBalance,
 			claimableBalance,
 		} = lnBalance;
-		const spendableBalance = onchainBalance + spendingBalance;
+		
+		// Add external wallet balance to spending balance and lightning balance
+		const totalSpendingBalance = spendingBalance + externalWalletBalance;
+		const totalLightningBalance = lightningBalance + externalWalletBalance;
+		
+		const spendableBalance = onchainBalance + totalSpendingBalance;
 		const pendingPaymentsBalance = pendingPayments.reduce(
 			(acc, payment) => acc + payment.amount,
 			0,
@@ -68,14 +76,14 @@ export const balanceSelector = createShallowEqualSelector(
 
 		const totalBalance =
 			onchainBalance +
-			lightningBalance +
+			totalLightningBalance +
 			claimableBalance +
 			inTransferToSpending;
 
 		return {
 			onchainBalance,
-			lightningBalance,
-			spendingBalance,
+			lightningBalance: totalLightningBalance,
+			spendingBalance: totalSpendingBalance,
 			reserveBalance,
 			claimableBalance,
 			spendableBalance,

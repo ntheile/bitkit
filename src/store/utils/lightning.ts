@@ -8,7 +8,13 @@ import { Result, err, ok } from '@synonymdev/result';
 import { EPaymentType } from 'beignet';
 import { LNURLChannelParams } from 'js-lnurl';
 
-import { reduceValue } from '../../utils/helpers';
+import { reduceValue, vibrate } from '../../utils/helpers';
+import { getStore } from '../helpers';
+import { showSheet, closeSheet } from './ui';
+import { showToast } from '../../utils/notifications';
+import i18n from '../../utils/i18n';
+import { createExternalWalletInvoice, createNodeInstance } from './externalWallets';
+import { InteractionManager, AppState } from 'react-native';
 import {
 	addPeers,
 	createPaymentRequest,
@@ -50,6 +56,7 @@ import {
 	TLightningNodeVersion,
 } from '../types/lightning';
 import { ETransferStatus, ETransferType, TWalletName } from '../types/wallet';
+import { Transaction } from "lni_react_native"
 
 /**
  * Attempts to update the node id for the selected wallet and network.
@@ -277,7 +284,192 @@ export const claimChannel = async (
 };
 
 /**
+ * Starts polling for invoice payment status using external wallet's onInvoiceEvents
+ * This runs in a background task to avoid blocking the UI thread
+ * @param {string} paymentHash
+ */
+const startInvoicePolling = (paymentHash: string): void => {
+	console.log(`[POLLING] Starting payment detection for hash: ${paymentHash}`);
+	console.log('[POLLING] Using external wallet onInvoiceEvents with background task');
+	
+	try {
+		const store = getStore();
+		const externalWallets = store.externalWallets;
+		const defaultWallet = externalWallets.defaultWallet;
+		
+		if (!defaultWallet) {
+			console.warn('[POLLING] No default external wallet configured for invoice polling');
+			return;
+		}
+
+		const walletConfig = externalWallets[defaultWallet];
+		if (!walletConfig || !walletConfig.connected) {
+			console.warn(`[POLLING] Default wallet ${defaultWallet} is not connected`);
+			return;
+		}
+
+		// Create node instance for the external wallet
+		const node = createNodeInstance(defaultWallet, walletConfig);
+		
+		if (!node || !node.onInvoiceEvents) {
+			console.warn(`[POLLING] onInvoiceEvents not available for ${defaultWallet}`);
+			return;
+		}
+
+		console.log(`[POLLING] Starting background task for polling hash: ${paymentHash} with wallet: ${defaultWallet}`);
+
+		// Start a background task to prevent UI blocking
+		let backgroundTaskId: number | NodeJS.Timeout | undefined;
+		
+		const startBackgroundPolling = () => {
+			// Register background task for iOS or use fallback
+			if (AppState.currentState === 'active') {
+				try {
+					// Try to start a background task (iOS specific)
+					backgroundTaskId = require('react-native').BackgroundTask?.start?.({
+						taskName: 'InvoicePolling',
+						taskKey: paymentHash,
+					}) || setTimeout(() => {}, 0); // Fallback timeout ID
+					
+					console.log(`[POLLING] Background task started with ID: ${backgroundTaskId}`);
+				} catch (_e) {
+					console.log('[POLLING] Background task API not available, using fallback approach');
+					backgroundTaskId = setTimeout(() => {}, 0);
+				}
+			}
+			
+			// Use setImmediate to ensure UI renders first
+			setImmediate(() => {
+				console.log('[POLLING] Initializing polling in background thread...');
+				
+				// Use InteractionManager to wait for UI interactions to complete
+				InteractionManager.runAfterInteractions(() => {
+					console.log(`[POLLING] UI ready, starting background onInvoiceEvents for hash: ${paymentHash}`);
+					
+					// Additional delay to ensure everything is rendered
+					setTimeout(() => {
+						console.log('[POLLING] Executing onInvoiceEvents in background task...');
+						
+						// Start the polling - key: run without awaiting to avoid blocking
+						node.onInvoiceEvents(
+							{
+								paymentHash,
+								pollingDelaySec: BigInt(2), // poll every 2 seconds
+								maxPollingSec: BigInt(60), // poll for up to 1 minute
+							},
+							{
+								success(transaction: Transaction | undefined): void {
+									console.log(`[POLLING] SUCCESS! Payment received for hash: ${paymentHash}`);
+									
+									// End background task immediately on success
+									if (backgroundTaskId) {
+										try {
+											require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
+											console.log(`[POLLING] Background task ${backgroundTaskId} finished on success`);
+										} catch (_e) {
+											clearTimeout(backgroundTaskId as NodeJS.Timeout); // Fallback for timeout IDs
+											console.log('[POLLING] Background task cleanup completed');
+										}
+									}
+									
+									// Handle success UI in non-blocking way
+									setImmediate(() => {
+										if (transaction) {
+											console.log('[POLLING] Transaction details:', {
+												hash: transaction.paymentHash,
+												amountMsats: transaction.amountMsats.toString(),
+												amountSats: Math.floor(Number(transaction.amountMsats) / 1000),
+												description: transaction.description,
+												settledAt: transaction.settledAt.toString(),
+											});
+										}
+										
+										// Queue UI updates to run after current execution
+										setTimeout(() => {
+											// Show success celebration
+											vibrate({ type: 'default' });
+											
+											// Close the receive sheet
+											closeSheet('receive');
+											
+											// Show success sheet
+											if (transaction) {
+												const amountSats = Number(transaction.amountMsats) / 1000;
+												showSheet('receivedTx', {
+													id: transaction.paymentHash || paymentHash,
+													activityType: EActivityType.lightning,
+													value: Math.floor(amountSats),
+												});
+											}
+											
+											// Show success toast
+											showToast({
+												type: 'lightning',
+												title: i18n.t('wallet:toast_payment_received_title'),
+												description: i18n.t('wallet:toast_payment_received_description'),
+											});
+											
+											console.log(`[POLLING] Success UI displayed for payment: ${paymentHash}`);
+										}, 50);
+										
+										// Sync activity list in background
+										setTimeout(() => {
+											syncLightningTxsWithActivityList().catch(error => {
+												console.error('[POLLING] Activity sync error after success:', error);
+											});
+										}, 200);
+									});
+								},
+								pending(_transaction: Transaction | undefined): void {
+									console.log(`[POLLING] Payment still pending for hash: ${paymentHash}`);
+								},
+								failure(_transaction: Transaction | undefined): void {
+									console.log(`[POLLING] Payment failed for hash: ${paymentHash}`);
+									
+									// End background task on failure
+									if (backgroundTaskId) {
+										try {
+											require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
+											console.log(`[POLLING] Background task ${backgroundTaskId} finished on failure`);
+										} catch (_e) {
+											clearTimeout(backgroundTaskId as NodeJS.Timeout);
+											console.log('[POLLING] Background task cleanup on failure completed');
+										}
+									}
+								},
+							}
+						).catch((error: any) => {
+							console.error('[POLLING] onInvoiceEvents error:', error);
+							
+							// End background task on error
+							if (backgroundTaskId) {
+								try {
+									require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
+								} catch (_e) {
+									clearTimeout(backgroundTaskId);
+								}
+							}
+						});
+						
+						console.log(`[POLLING] Background onInvoiceEvents setup complete for hash: ${paymentHash}`);
+					}, 800); // Longer delay to ensure UI is completely ready
+				});
+			});
+		};
+		
+		// Start background polling after UI is ready
+		setTimeout(startBackgroundPolling, 1000);
+		
+		console.log('[POLLING] Background polling initialization complete');
+		
+	} catch (error) {
+		console.error('[POLLING] Error setting up background polling:', error);
+	}
+};
+
+/**
  * Creates and stores a lightning invoice, for the specified amount, and refreshes/re-adds peers.
+ * First attempts to use external wallets if available, then falls back to LDK.
  * @param {number} amountSats
  * @param {string} [description]
  * @param {number} [expiryDeltaSeconds]
@@ -291,18 +483,102 @@ export const createLightningInvoice = async ({
 	selectedWallet = getSelectedWallet(),
 	selectedNetwork = getSelectedNetwork(),
 }: TCreateLightningInvoice): Promise<Result<TInvoice>> => {
-	const invoice = await createPaymentRequest({
-		amountSats,
-		description,
-		expiryDeltaSeconds,
-	});
-	if (invoice.isErr()) {
-		return err(invoice.error.message);
+	try {
+		// First, check if there's a default external wallet configured
+		const store = getStore();
+		const externalWallets = store.externalWallets;
+		
+		if (externalWallets.defaultWallet) {
+			console.log('Attempting invoice creation with external wallet:', externalWallets.defaultWallet);
+			console.log('External wallet config:', externalWallets[externalWallets.defaultWallet]);
+			
+			// Import the external wallet invoice creation function
+			const externalInvoice = await createExternalWalletInvoice(
+				() => getStore(),
+				amountSats || 0,
+				description,
+				expiryDeltaSeconds
+			);
+			
+			console.log('External invoice creation result:', externalInvoice);
+			
+			if (externalInvoice?.paymentRequest) {
+				console.log('Invoice created successfully with external wallet. Payment request:', `${externalInvoice.paymentRequest.substring(0, 50)}...`);
+				console.log('Payment hash:', externalInvoice.paymentHash);
+				console.log(`[TIMING] About to start polling at: ${Date.now()}`);
+				
+				// Start polling for invoice payment (non-blocking)
+				startInvoicePolling(externalInvoice.paymentHash);
+				
+				console.log(`[TIMING] Polling started, about to return invoice at: ${Date.now()}`);
+				
+				// Return in the expected TInvoice format
+				const result = {
+					to_str: externalInvoice.paymentRequest,
+					payment_hash: externalInvoice.paymentHash,
+					description: description || '',
+					amount_satoshis: amountSats,
+					is_expired: false,
+					expiry_time: Date.now() + ((expiryDeltaSeconds || 3600) * 1000),
+				} as TInvoice;
+				
+				console.log('Returning TInvoice result:', {
+					to_str: `${result.to_str.substring(0, 50)}...`,
+					payment_hash: result.payment_hash,
+					amount_satoshis: result.amount_satoshis
+				});
+				console.log(`[TIMING] Returning invoice result at: ${Date.now()}`);
+				
+				return ok(result);
+			}
+			
+			console.log('External wallet invoice creation failed or returned null, falling back to LDK');
+		}
+
+		// Fallback to original LDK invoice creation logic only if no external wallet is configured
+		if (!externalWallets.defaultWallet) {
+			const invoice = await createPaymentRequest({
+				amountSats,
+				description,
+				expiryDeltaSeconds,
+			});
+			if (invoice.isErr()) {
+				return err(invoice.error.message);
+			}
+
+			addPeers({ selectedNetwork, selectedWallet }).then();
+
+			return ok(invoice.value);
+		}
+
+		// If we have external wallet configured but creation failed, don't fallback to LDK
+		return err('External wallet invoice creation failed and no LDK fallback available');
+	} catch (e) {
+		console.log('Error in createLightningInvoice:', e);
+		
+		// Get store again in case it changed
+		const store = getStore();
+		const externalWallets = store.externalWallets;
+		
+		// Only fallback to LDK if no external wallet is configured
+		if (!externalWallets.defaultWallet) {
+			const invoice = await createPaymentRequest({
+				amountSats,
+				description,
+				expiryDeltaSeconds,
+			});
+			if (invoice.isErr()) {
+				return err(invoice.error.message);
+			}
+
+			addPeers({ selectedNetwork, selectedWallet }).then();
+
+			return ok(invoice.value);
+		}
+
+		// If external wallet is configured but failed, return the error
+		return err(e instanceof Error ? e.message : 'External wallet invoice creation failed');
 	}
-
-	addPeers({ selectedNetwork, selectedWallet }).then();
-
-	return ok(invoice.value);
 };
 
 /**

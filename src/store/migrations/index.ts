@@ -189,6 +189,10 @@ const migrations = {
 			},
 		};
 	},
+	56: (state): PersistedState => {
+		// External wallet slice added; no transformation needed.
+		return state;
+	},
 };
 
 export default migrations;

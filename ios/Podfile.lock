@@ -9,6 +9,27 @@ PODS:
   - hermes-engine (0.78.0):
     - hermes-engine/Pre-built (= 0.78.0)
   - hermes-engine/Pre-built (0.78.0)
+  - LniReactNative (0.1.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - lottie-ios (4.5.0)
   - lottie-react-native (7.2.2):
     - DoubleConversion
@@ -1426,7 +1447,7 @@ PODS:
     - React-Core
   - react-native-safe-area-context (5.2.0):
     - React-Core
-  - react-native-skia (1.11.9-next.1):
+  - react-native-skia (2.0.0-next.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2026,6 +2047,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - SSZipArchive (2.5.5)
+  - uniffi-bindgen-react-native (0.29.0-0):
+    - React-Core
   - Yoga (0.0.0)
   - ZXingObjC (3.6.9):
     - ZXingObjC/All (= 3.6.9)
@@ -2039,6 +2062,7 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - LniReactNative (from `../node_modules/lni_react_native`)
   - lottie-react-native (from `../node_modules/lottie-react-native`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -2133,6 +2157,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNZipArchive (from `../node_modules/react-native-zip-archive`)
   - sodium-react-native-direct (from `../node_modules/sodium-react-native-direct`)
+  - uniffi-bindgen-react-native (from `../node_modules/uniffi-bindgen-react-native`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2162,6 +2187,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2025-01-13-RNv0.78.0-a942ef374897d85da38e9c8904574f8376555388
+  LniReactNative:
+    :path: "../node_modules/lni_react_native"
   lottie-react-native:
     :path: "../node_modules/lottie-react-native"
   RCT-Folly:
@@ -2346,6 +2373,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-zip-archive"
   sodium-react-native-direct:
     :path: "../node_modules/sodium-react-native-direct"
+  uniffi-bindgen-react-native:
+    :path: "../node_modules/uniffi-bindgen-react-native"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -2358,6 +2387,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   hermes-engine: b417d2b2aee3b89b58e63e23a51e02be91dc876d
+  LniReactNative: b5338ab6284bbcaf95e784e1e4df44361f6f74cb
   lottie-ios: a881093fab623c467d3bce374367755c272bdd59
   lottie-react-native: 35b7c1125a01f847fa5905d380e54951132d2450
   MMKV: ce484c1ac40bf76d5f09a0195d2ec5b3d3840d55
@@ -2405,7 +2435,7 @@ SPEC CHECKSUMS:
   react-native-quick-crypto: 43bac82b1ce916efb64a6dccb8e020678d8d9c14
   react-native-restart: 0bc732f4461709022a742bb29bcccf6bbc5b4863
   react-native-safe-area-context: 3e33e7c43c8b74dba436a5a32651cb8d7064c740
-  react-native-skia: 78dfcd1f530419f762a56988969f6430b4eabdc2
+  react-native-skia: 82f88cbd8e49dc63823d4a9a670bd279803cef4f
   react-native-tcp-socket: ae8abcfebc071216302a09d9ed1e375d4e877484
   react-native-webview: 079eca50edf657503318b66687dadfb903731aa8
   React-NativeModulesApple: 88433b6946778bea9c153e27b671de15411bf225
@@ -2456,6 +2486,7 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   sodium-react-native-direct: daae90d1cfeea4837002395183ade1cac0d49795
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
+  uniffi-bindgen-react-native: 20ce7eab7d614cfc6555d5b228462f18b0fdbe9e
   Yoga: afd04ff05ebe0121a00c468a8a3c8080221cb14c
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 

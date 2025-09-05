@@ -18,6 +18,7 @@ import {
 import { setWidgetsSortOrder } from '../store/slices/widgets';
 import {
 	TBlocksWidgetOptions,
+	TConnectWalletWidgetOptions,
 	TFactsWidgetOptions,
 	TNewsWidgetOptions,
 	TPriceWidgetOptions,
@@ -29,6 +30,7 @@ import { Caption13Up } from '../styles/text';
 import Button from './buttons/Button';
 import BlocksWidget from './widgets/BlocksWidget';
 import CalculatorWidget from './widgets/CalculatorWidget';
+import ConnectWalletWidget from './widgets/ConnectWalletWidget';
 import FactsWidget from './widgets/FactsWidget';
 import NewsWidget from './widgets/NewsWidget';
 import PriceWidget from './widgets/PriceWidget';
@@ -90,6 +92,20 @@ const Widgets = (): ReactElement => {
 						style={styles.widget}
 						isEditing={editing}
 						testID="CalculatorWidget"
+						onLongPress={initiateDrag}
+						onPressIn={initiateDrag}
+					/>
+				);
+			}
+
+			if (id === 'connectwallet') {
+				const options = widgets[id] as TConnectWalletWidgetOptions;
+				return (
+					<ConnectWalletWidget
+						style={styles.widget}
+						options={options}
+						isEditing={editing}
+						testID="ConnectWalletWidget"
 						onLongPress={initiateDrag}
 						onPressIn={initiateDrag}
 					/>

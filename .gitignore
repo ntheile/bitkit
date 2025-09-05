@@ -99,3 +99,21 @@ android/app/release/
 
 # Optimized SVGs
 src/assets/svgs/optimized/
+
+# LNI React Native module - large compiled binaries and generated files
+# Additional specific large file patterns (in case the above doesn't catch everything)
+# Android JNI Libraries (very large ~300-500MB each)
+**/jniLibs/**/*.a
+**/liblni.a
+
+# Generated code files
+**/generated/lni.cpp
+**/generated/lni.ts
+**/generated/lni.js
+**/generated/lni.js.map
+
+# Compiled module output
+**/lib/commonjs/generated/
+**/lib/module/generated/
+**/lib/typescript/commonjs/src/generated/
+**/android/app/build/intermediates/

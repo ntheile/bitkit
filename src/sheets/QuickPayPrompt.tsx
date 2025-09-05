@@ -35,7 +35,9 @@ const QuickPayPrompt = (): ReactElement => {
 		// and no other bottom-sheets are shown
 		// and user on home screen for CHECK_DELAY
 		const shouldShow = () => {
-			const isAnySheetOpen = sheetRefs.some(({ ref }) => ref.current?.isOpen());
+			const isAnySheetOpen = sheetRefs.some(({ ref }) => {
+				// ref.current?.isOpen());
+			});
 			const hasSpendingBalance = spendingBalance > 0;
 
 			return (

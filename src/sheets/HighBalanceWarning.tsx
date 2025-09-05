@@ -51,7 +51,9 @@ const HighBalanceWarning = (): ReactElement => {
 		// and user on home screen for CHECK_DELAY
 		const shouldShow = () => {
 			const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
-			const isAnySheetOpen = sheetRefs.some(({ ref }) => ref.current?.isOpen());
+			const isAnySheetOpen = sheetRefs.some(({ ref }) => { 
+				// ref.current?.isOpen())
+			});
 			const belowMaxWarnings = count < MAX_WARNINGS;
 			const thresholdReached =
 				// fallback in case exchange rates are not available

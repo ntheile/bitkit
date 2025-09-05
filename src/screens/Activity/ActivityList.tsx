@@ -4,6 +4,7 @@ import React, {
 	ReactElement,
 	memo,
 	useCallback,
+	useEffect,
 	useMemo,
 	useState,
 } from 'react';
@@ -23,9 +24,12 @@ import Button from '../../components/buttons/Button';
 import useColors from '../../hooks/colors';
 import { useAppSelector } from '../../hooks/redux';
 import { RootNavigationProp } from '../../navigation/types';
+import store from '../../store';
 import { activityItemsSelector } from '../../store/reselect/activity';
+import { externalWalletsState } from '../../store/reselect/externalWallets';
 import { tagsSelector } from '../../store/reselect/metadata';
 import { IActivityItem } from '../../store/types/activity';
+import { syncExternalWalletTransactions } from '../../store/utils/externalWallets';
 import { BodyM, Caption13Up } from '../../styles/text';
 import {
 	TActivityFilter,
@@ -34,6 +38,11 @@ import {
 } from '../../utils/activity';
 import { refreshWallet } from '../../utils/wallet';
 import ListItem from './ListItem';
+
+// import {
+//   LndNode,
+//   LndConfig,
+// } from 'lni_react_native';
 
 const ListFooter = ({ showButton }: { showButton?: boolean }): ReactElement => {
 	const { t } = useTranslation('wallet');
@@ -84,7 +93,24 @@ const ActivityList = ({
 	const navigation = useNavigation<RootNavigationProp>();
 	const items = useAppSelector(activityItemsSelector);
 	const tags = useAppSelector(tagsSelector);
+	const externalWallets = useAppSelector(externalWalletsState);
 	const [refreshing, setRefreshing] = useState(false);
+
+	// Sync external wallet transactions on component mount and when external wallets change
+	useEffect(() => {
+		const hasConnectedWallets = Object.values(externalWallets).some(
+			(wallet) => wallet?.connected
+		);
+		
+		if (hasConnectedWallets) {
+			// Debounce the sync to avoid calling it too frequently
+			const timeoutId = setTimeout(() => {
+				syncExternalWalletTransactions(() => store.getState());
+			}, 500);
+			
+			return () => clearTimeout(timeoutId);
+		}
+	}, [externalWallets]);
 
 	const groupedItems = useMemo(() => {
 		// Apply search filter
@@ -126,7 +152,23 @@ const ActivityList = ({
 
 	const onRefresh = async (): Promise<void> => {
 		setRefreshing(true);
+		
+		// Refresh main wallet
 		await refreshWallet();
+		
+		// Sync external wallet transactions if any are connected
+		const hasConnectedWallets = Object.values(externalWallets).some(
+			(wallet) => wallet?.connected
+		);
+		
+		if (hasConnectedWallets) {
+			try {
+				await syncExternalWalletTransactions(() => store.getState());
+			} catch (error) {
+				console.warn('Failed to sync external wallet transactions:', error);
+			}
+		}
+		
 		setRefreshing(false);
 	};
 
