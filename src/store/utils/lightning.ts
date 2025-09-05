@@ -349,107 +349,103 @@ const startInvoicePolling = (paymentHash: string): void => {
 					// Additional delay to ensure everything is rendered
 					setTimeout(() => {
 						console.log('[POLLING] Executing onInvoiceEvents in background task...');
+
+						const invoiceEventParams = {
+							paymentHash,
+							pollingDelaySec: BigInt(2), // poll every 2 seconds
+							maxPollingSec: BigInt(60), // poll for up to 1 minute
+						}
+						const callbacks = {
+							success(transaction: Transaction | undefined): void {
+								console.log(`[POLLING] SUCCESS! Payment received for hash: ${paymentHash}`);
+								
+								// End background task immediately on success
+								if (backgroundTaskId) {
+									try {
+										require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
+										console.log(`[POLLING] Background task ${backgroundTaskId} finished on success`);
+									} catch (_e) {
+										clearTimeout(backgroundTaskId as NodeJS.Timeout); // Fallback for timeout IDs
+										console.log('[POLLING] Background task cleanup completed');
+									}
+								}
+								
+								// Handle success UI in non-blocking way
+								setImmediate(() => {
+									if (transaction) {
+										console.log('[POLLING] Transaction details:', {
+											hash: transaction.paymentHash,
+											amountMsats: transaction.amountMsats.toString(),
+											amountSats: Math.floor(Number(transaction.amountMsats) / 1000),
+											description: transaction.description,
+											settledAt: transaction.settledAt.toString(),
+										});
+									}
+									
+									// Queue UI updates to run after current execution
+									setTimeout(() => {
+										// Show success celebration
+										vibrate({ type: 'default' });
+										
+										// Close the receive sheet
+										closeSheet('receive');
+										
+										// Show success sheet
+										if (transaction) {
+											const amountSats = Number(transaction.amountMsats) / 1000;
+											showSheet('receivedTx', {
+												id: transaction.paymentHash || paymentHash,
+												activityType: EActivityType.lightning,
+												value: Math.floor(amountSats),
+											});
+										}
+										
+										// Show success toast
+										showToast({
+											type: 'lightning',
+											title: i18n.t('wallet:toast_payment_received_title'),
+											description: i18n.t('wallet:toast_payment_received_description'),
+										});
+										
+										console.log(`[POLLING] Success UI displayed for payment: ${paymentHash}`);
+									}, 50);
+									
+									// Sync activity list in background
+									setTimeout(() => {
+										syncLightningTxsWithActivityList().catch(error => {
+											console.error('[POLLING] Activity sync error after success:', error);
+										});
+									}, 200);
+								});
+							},
+							pending(_transaction: Transaction | undefined): void {
+								console.log(`[POLLING] Payment still pending for hash: ${paymentHash}`);
+							},
+							failure(_transaction: Transaction | undefined): void {
+								console.log(`[POLLING] Payment failed for hash: ${paymentHash}`);
+								
+								// End background task on failure
+								if (backgroundTaskId) {
+									try {
+										require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
+										console.log(`[POLLING] Background task ${backgroundTaskId} finished on failure`);
+									} catch (_e) {
+										clearTimeout(backgroundTaskId as NodeJS.Timeout);
+										console.log('[POLLING] Background task cleanup on failure completed');
+									}
+								}
+							},
+						}
 						
 						// Start the polling - key: run without awaiting to avoid blocking
-						node.onInvoiceEvents(
-							{
-								paymentHash,
-								pollingDelaySec: BigInt(2), // poll every 2 seconds
-								maxPollingSec: BigInt(60), // poll for up to 1 minute
-							},
-							{
-								success(transaction: Transaction | undefined): void {
-									console.log(`[POLLING] SUCCESS! Payment received for hash: ${paymentHash}`);
-									
-									// End background task immediately on success
-									if (backgroundTaskId) {
-										try {
-											require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
-											console.log(`[POLLING] Background task ${backgroundTaskId} finished on success`);
-										} catch (_e) {
-											clearTimeout(backgroundTaskId as NodeJS.Timeout); // Fallback for timeout IDs
-											console.log('[POLLING] Background task cleanup completed');
-										}
-									}
-									
-									// Handle success UI in non-blocking way
-									setImmediate(() => {
-										if (transaction) {
-											console.log('[POLLING] Transaction details:', {
-												hash: transaction.paymentHash,
-												amountMsats: transaction.amountMsats.toString(),
-												amountSats: Math.floor(Number(transaction.amountMsats) / 1000),
-												description: transaction.description,
-												settledAt: transaction.settledAt.toString(),
-											});
-										}
-										
-										// Queue UI updates to run after current execution
-										setTimeout(() => {
-											// Show success celebration
-											vibrate({ type: 'default' });
-											
-											// Close the receive sheet
-											closeSheet('receive');
-											
-											// Show success sheet
-											if (transaction) {
-												const amountSats = Number(transaction.amountMsats) / 1000;
-												showSheet('receivedTx', {
-													id: transaction.paymentHash || paymentHash,
-													activityType: EActivityType.lightning,
-													value: Math.floor(amountSats),
-												});
-											}
-											
-											// Show success toast
-											showToast({
-												type: 'lightning',
-												title: i18n.t('wallet:toast_payment_received_title'),
-												description: i18n.t('wallet:toast_payment_received_description'),
-											});
-											
-											console.log(`[POLLING] Success UI displayed for payment: ${paymentHash}`);
-										}, 50);
-										
-										// Sync activity list in background
-										setTimeout(() => {
-											syncLightningTxsWithActivityList().catch(error => {
-												console.error('[POLLING] Activity sync error after success:', error);
-											});
-										}, 200);
-									});
-								},
-								pending(_transaction: Transaction | undefined): void {
-									console.log(`[POLLING] Payment still pending for hash: ${paymentHash}`);
-								},
-								failure(_transaction: Transaction | undefined): void {
-									console.log(`[POLLING] Payment failed for hash: ${paymentHash}`);
-									
-									// End background task on failure
-									if (backgroundTaskId) {
-										try {
-											require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
-											console.log(`[POLLING] Background task ${backgroundTaskId} finished on failure`);
-										} catch (_e) {
-											clearTimeout(backgroundTaskId as NodeJS.Timeout);
-											console.log('[POLLING] Background task cleanup on failure completed');
-										}
-									}
-								},
-							}
-						).catch((error: any) => {
-							console.error('[POLLING] onInvoiceEvents error:', error);
-							
-							// End background task on error
-							if (backgroundTaskId) {
-								try {
-									require('react-native').BackgroundTask?.finish?.(backgroundTaskId);
-								} catch (_e) {
-									clearTimeout(backgroundTaskId);
-								}
-							}
-						});
+						node?.onInvoiceEventsAsync 
+							? node.onInvoiceEventsAsync(
+								invoiceEventParams,
+								callbacks
+							) : node.onInvoiceEvents(
+								invoiceEventParams,
+								callbacks
+							)
 						
 						console.log(`[POLLING] Background onInvoiceEvents setup complete for hash: ${paymentHash}`);
 					}, 800); // Longer delay to ensure UI is completely ready
@@ -503,7 +499,7 @@ export const createLightningInvoice = async ({
 			console.log('External invoice creation result:', externalInvoice);
 			
 			if (externalInvoice?.paymentRequest) {
-				console.log('Invoice created successfully with external wallet. Payment request:', `${externalInvoice.paymentRequest.substring(0, 50)}...`);
+				console.log('Invoice created successfully with external wallet. Payment request:', `${externalInvoice.paymentRequest}...`);
 				console.log('Payment hash:', externalInvoice.paymentHash);
 				console.log(`[TIMING] About to start polling at: ${Date.now()}`);
 				

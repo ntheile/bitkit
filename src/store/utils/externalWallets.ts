@@ -31,7 +31,7 @@ import {
   PayInvoiceParams,
   CreateInvoiceParams,
   InvoiceType,
-  getInfoAsync,
+  type NodeInfo,
 } from 'lni_react_native'
 
 type LniListTransactionsArgs = {
@@ -178,11 +178,14 @@ export const syncExternalWalletTransactions = async (
         }
 
         if (node?.listTransactions) {
-          const txns = await node.listTransactions({
+          const txnParams: LniListTransactionsArgs = {
             from: BigInt(0),
             limit: LIMIT,
             paymentHash: undefined,
-          } as LniListTransactionsArgs)
+          }
+          const txns = node?.listTransactionsAsync
+            ? await node.listTransactionsAsync(txnParams)
+            : await node.listTransactions(txnParams)
 
           console.log('LNI list txns', txns)
 
@@ -355,22 +358,16 @@ export const fetchDefaultExternalWalletInfo = async (
       return
     }
 
+    let nodeInfo: NodeInfo
     if (node.getInfoAsync) {
       console.log('node.getInfoAsync fn', node.getInfoAsync)
       console.log('walletConfig', walletConfig)
-      const info2 = await getInfoAsync(
-        LndConfig.create({
-          url: walletConfig.url,
-          macaroon: walletConfig.macaroon,
-          socks5Proxy: '',
-          acceptInvalidCerts: true,
-          httpTimeout: BigInt(60),
-        }),
-      )
-      console.log('getInfoAsync result 2', info2)
+      nodeInfo = await node.getInfoAsync()
+      console.log('getInfoAsync result', nodeInfo)
+    } else {
+      nodeInfo = await node.getInfo()
     }
 
-    const nodeInfo = await node.getInfo()
     console.log(`Node info for ${defaultWallet}:`, nodeInfo)
 
     // Create a serializable version of nodeInfo for Redux storage
@@ -509,7 +506,9 @@ export const createExternalWalletInvoice = async (
     })
 
     console.log(`[TIMING] Starting invoice creation at: ${Date.now()}`)
-    const response = await node.createInvoice(createInvoiceParams)
+    const response = node?.createInvoiceAsync 
+      ? await node.createInvoiceAsync(createInvoiceParams) 
+      : await node.createInvoice(createInvoiceParams)
     console.log(`[TIMING] Invoice creation completed at: ${Date.now()}`)
 
     console.log(`Invoice created successfully with ${defaultWallet}:`, {

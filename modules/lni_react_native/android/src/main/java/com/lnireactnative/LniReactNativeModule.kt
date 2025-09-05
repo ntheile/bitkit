@@ -2,13 +2,15 @@
 package com.lnireactnative
 
 import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.Promise
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.turbomodule.core.interfaces.CallInvokerHolder
-import com.facebook.fbreact.specs.NativeLniReactNativeSpec
 
 @ReactModule(name = LniReactNativeModule.NAME)
 class LniReactNativeModule(reactContext: ReactApplicationContext) :
-  NativeLniReactNativeSpec(reactContext) {
+  ReactContextBaseJavaModule(reactContext) {
 
   override fun getName(): String {
     return NAME
@@ -20,7 +22,8 @@ class LniReactNativeModule(reactContext: ReactApplicationContext) :
   external fun nativeInstallRustCrate(runtimePointer: Long, callInvoker: CallInvokerHolder): Boolean
   external fun nativeCleanupRustCrate(runtimePointer: Long): Boolean
 
-  override fun installRustCrate(): Boolean {
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun installRustCrate(): Boolean {
     val context = this.reactApplicationContext
     return nativeInstallRustCrate(
       context.javaScriptContextHolder!!.get(),
@@ -28,7 +31,8 @@ class LniReactNativeModule(reactContext: ReactApplicationContext) :
     )
   }
 
-  override fun cleanupRustCrate(): Boolean {
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun cleanupRustCrate(): Boolean {
     return nativeCleanupRustCrate(
       this.reactApplicationContext.javaScriptContextHolder!!.get()
     )
