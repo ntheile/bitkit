@@ -69,17 +69,18 @@ export const handleLnurlPay = async ({
 	amountSats: number;
 	comment?: string;
 }): Promise<Result<string>> => {
-	const nodeId = getNodeIdFromStorage();
+	// TODO - re-enable for LDK
+	// const nodeId = getNodeIdFromStorage();
 
-	if (!nodeId) {
-		const message = i18n.t('other:lnurl_ln_error_msg');
-		showToast({
-			type: 'warning',
-			title: i18n.t('other:lnurl_pay_error'),
-			description: message,
-		});
-		return err(message);
-	}
+	// if (!nodeId) {
+	// 	const message = i18n.t('other:lnurl_ln_error_msg');
+	// 	showToast({
+	// 		type: 'warning',
+	// 		title: i18n.t('other:lnurl_pay_error'),
+	// 		description: message,
+	// 	});
+	// 	return err(message);
+	// }
 
 	const milliSats = Math.floor(amountSats * 1000);
 
