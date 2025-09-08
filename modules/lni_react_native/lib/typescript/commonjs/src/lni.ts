@@ -51,7 +51,6 @@ import {
   FfiConverterObjectAsError,
   FfiConverterOptional,
   FfiConverterUInt16,
-  FfiConverterUInt32,
   FfiConverterUInt64,
   RustBuffer,
   UniffiAbstractObject,
@@ -79,7 +78,7 @@ const uniffiIsDebug =
   false;
 // Public interface members begin here.
 
-export async function createInvoiceAsync(
+export async function createInvoice(
   config: LndConfig,
   params: CreateInvoiceParams,
   asyncOpts_?: { signal: AbortSignal }
@@ -89,7 +88,7 @@ export async function createInvoiceAsync(
     return await uniffiRustCallAsync(
       /*rustCaller:*/ uniffiCaller,
       /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_create_invoice_async(
+        return nativeModule().ubrn_uniffi_lni_fn_func_create_invoice(
           FfiConverterTypeLndConfig.lower(config),
           FfiConverterTypeCreateInvoiceParams.lower(params)
         );
@@ -116,7 +115,7 @@ export async function createInvoiceAsync(
     throw __error;
   }
 }
-export async function decodeAsync(
+export async function decode(
   config: LndConfig,
   invoiceStr: string,
   asyncOpts_?: { signal: AbortSignal }
@@ -126,7 +125,7 @@ export async function decodeAsync(
     return await uniffiRustCallAsync(
       /*rustCaller:*/ uniffiCaller,
       /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_decode_async(
+        return nativeModule().ubrn_uniffi_lni_fn_func_decode(
           FfiConverterTypeLndConfig.lower(config),
           FfiConverterString.lower(invoiceStr)
         );
@@ -151,7 +150,7 @@ export async function decodeAsync(
     throw __error;
   }
 }
-export async function getInfoAsync(
+export async function getInfo(
   config: LndConfig,
   asyncOpts_?: { signal: AbortSignal }
 ): Promise<NodeInfo> /*throws*/ {
@@ -160,7 +159,7 @@ export async function getInfoAsync(
     return await uniffiRustCallAsync(
       /*rustCaller:*/ uniffiCaller,
       /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_get_info_async(
+        return nativeModule().ubrn_uniffi_lni_fn_func_get_info(
           FfiConverterTypeLndConfig.lower(config)
         );
       },
@@ -186,7 +185,7 @@ export async function getInfoAsync(
     throw __error;
   }
 }
-export async function listTransactionsAsync(
+export async function listTransactions(
   config: LndConfig,
   from: /*i64*/ bigint | undefined,
   limit: /*i64*/ bigint | undefined,
@@ -198,7 +197,7 @@ export async function listTransactionsAsync(
     return await uniffiRustCallAsync(
       /*rustCaller:*/ uniffiCaller,
       /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_list_transactions_async(
+        return nativeModule().ubrn_uniffi_lni_fn_func_list_transactions(
           FfiConverterTypeLndConfig.lower(config),
           FfiConverterOptionalInt64.lower(from),
           FfiConverterOptionalInt64.lower(limit),
@@ -227,7 +226,7 @@ export async function listTransactionsAsync(
     throw __error;
   }
 }
-export async function lookupInvoiceAsync(
+export async function lookupInvoice(
   config: LndConfig,
   paymentHash: string | undefined,
   from: /*i64*/ bigint | undefined,
@@ -240,7 +239,7 @@ export async function lookupInvoiceAsync(
     return await uniffiRustCallAsync(
       /*rustCaller:*/ uniffiCaller,
       /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_lookup_invoice_async(
+        return nativeModule().ubrn_uniffi_lni_fn_func_lookup_invoice(
           FfiConverterTypeLndConfig.lower(config),
           FfiConverterOptionalString.lower(paymentHash),
           FfiConverterOptionalInt64.lower(from),
@@ -270,82 +269,7 @@ export async function lookupInvoiceAsync(
     throw __error;
   }
 }
-export async function nwcLookupInvoiceAsync(
-  config: NwcConfig,
-  paymentHash: string | undefined,
-  invoice: string | undefined,
-  asyncOpts_?: { signal: AbortSignal }
-): Promise<Transaction> /*throws*/ {
-  const __stack = uniffiIsDebug ? new Error().stack : undefined;
-  try {
-    return await uniffiRustCallAsync(
-      /*rustCaller:*/ uniffiCaller,
-      /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_nwc_lookup_invoice_async(
-          FfiConverterTypeNwcConfig.lower(config),
-          FfiConverterOptionalString.lower(paymentHash),
-          FfiConverterOptionalString.lower(invoice)
-        );
-      },
-      /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
-      /*cancelFunc:*/ nativeModule()
-        .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
-      /*completeFunc:*/ nativeModule()
-        .ubrn_ffi_lni_rust_future_complete_rust_buffer,
-      /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
-      /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
-        FfiConverterTypeTransaction
-      ),
-      /*liftString:*/ FfiConverterString.lift,
-      /*asyncOpts:*/ asyncOpts_,
-      /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
-        FfiConverterTypeApiError__as_error
-      )
-    );
-  } catch (__error: any) {
-    if (uniffiIsDebug && __error instanceof Error) {
-      __error.stack = __stack;
-    }
-    throw __error;
-  }
-}
-export function nwcOnInvoiceEventsWithCancellation(
-  config: NwcConfig,
-  params: OnInvoiceEventParams,
-  callback: OnInvoiceEventCallback
-): InvoiceEventsCancellationInterface {
-  return FfiConverterTypeInvoiceEventsCancellation.lift(
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_nwc_on_invoice_events_with_cancellation(
-          FfiConverterTypeNwcConfig.lower(config),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    )
-  );
-}
-export function nwcStartInvoicePolling(
-  config: NwcConfig,
-  params: OnInvoiceEventParams
-): InvoicePollingStateInterface {
-  return FfiConverterTypeInvoicePollingState.lift(
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_nwc_start_invoice_polling(
-          FfiConverterTypeNwcConfig.lower(config),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    )
-  );
-}
-export async function onInvoiceEventsAsync(
+export async function onInvoiceEvents(
   config: LndConfig,
   params: OnInvoiceEventParams,
   callback: OnInvoiceEventCallback,
@@ -356,7 +280,7 @@ export async function onInvoiceEventsAsync(
     return await uniffiRustCallAsync(
       /*rustCaller:*/ uniffiCaller,
       /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_on_invoice_events_async(
+        return nativeModule().ubrn_uniffi_lni_fn_func_on_invoice_events(
           FfiConverterTypeLndConfig.lower(config),
           FfiConverterTypeOnInvoiceEventParams.lower(params),
           FfiConverterTypeOnInvoiceEventCallback.lower(callback)
@@ -377,7 +301,7 @@ export async function onInvoiceEventsAsync(
     throw __error;
   }
 }
-export async function payInvoiceAsync(
+export async function payInvoice(
   config: LndConfig,
   params: PayInvoiceParams,
   asyncOpts_?: { signal: AbortSignal }
@@ -387,7 +311,7 @@ export async function payInvoiceAsync(
     return await uniffiRustCallAsync(
       /*rustCaller:*/ uniffiCaller,
       /*rustFutureFunc:*/ () => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_pay_invoice_async(
+        return nativeModule().ubrn_uniffi_lni_fn_func_pay_invoice(
           FfiConverterTypeLndConfig.lower(config),
           FfiConverterTypePayInvoiceParams.lower(params)
         );
@@ -453,22 +377,6 @@ export async function sayAfterWithTokio(
     }
     throw __error;
   }
-}
-export function testSync(config: LndConfig): string /*throws*/ {
-  return FfiConverterString.lift(
-    uniffiCaller.rustCallWithError(
-      /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-        FfiConverterTypeApiError__as_error
-      ),
-      /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_lni_fn_func_test_sync(
-          FfiConverterTypeLndConfig.lower(config),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    )
-  );
 }
 
 export interface OnInvoiceEventCallback {
@@ -625,6 +533,8 @@ const FfiConverterTypeBalancesResponse = (() => {
 export type BlinkConfig = {
   baseUrl: string | undefined;
   apiKey: string;
+  socks5Proxy: string | undefined;
+  acceptInvalidCerts: boolean | undefined;
   httpTimeout: /*i64*/ bigint | undefined;
 };
 
@@ -634,6 +544,8 @@ export type BlinkConfig = {
 export const BlinkConfig = (() => {
   const defaults = () => ({
     baseUrl: 'https://api.blink.sv/graphql',
+    socks5Proxy: '',
+    acceptInvalidCerts: true,
     httpTimeout: BigInt('120'),
   });
   const create = (() => {
@@ -668,18 +580,24 @@ const FfiConverterTypeBlinkConfig = (() => {
       return {
         baseUrl: FfiConverterOptionalString.read(from),
         apiKey: FfiConverterString.read(from),
+        socks5Proxy: FfiConverterOptionalString.read(from),
+        acceptInvalidCerts: FfiConverterOptionalBool.read(from),
         httpTimeout: FfiConverterOptionalInt64.read(from),
       };
     }
     write(value: TypeName, into: RustBuffer): void {
       FfiConverterOptionalString.write(value.baseUrl, into);
       FfiConverterString.write(value.apiKey, into);
+      FfiConverterOptionalString.write(value.socks5Proxy, into);
+      FfiConverterOptionalBool.write(value.acceptInvalidCerts, into);
       FfiConverterOptionalInt64.write(value.httpTimeout, into);
     }
     allocationSize(value: TypeName): number {
       return (
         FfiConverterOptionalString.allocationSize(value.baseUrl) +
         FfiConverterString.allocationSize(value.apiKey) +
+        FfiConverterOptionalString.allocationSize(value.socks5Proxy) +
+        FfiConverterOptionalBool.allocationSize(value.acceptInvalidCerts) +
         FfiConverterOptionalInt64.allocationSize(value.httpTimeout)
       );
     }
@@ -820,7 +738,11 @@ export type ClnConfig = {
  * Generated factory for {@link ClnConfig} record objects.
  */
 export const ClnConfig = (() => {
-  const defaults = () => ({});
+  const defaults = () => ({
+    socks5Proxy: '',
+    acceptInvalidCerts: true,
+    httpTimeout: BigInt('120'),
+  });
   const create = (() => {
     return uniffiCreateRecord<ClnConfig, ReturnType<typeof defaults>>(defaults);
   })();
@@ -1638,6 +1560,7 @@ const FfiConverterTypeNodeStatus = (() => {
 export type NwcConfig = {
   nwcUri: string;
   socks5Proxy: string | undefined;
+  acceptInvalidCerts: boolean | undefined;
   httpTimeout: /*i64*/ bigint | undefined;
 };
 
@@ -1645,7 +1568,11 @@ export type NwcConfig = {
  * Generated factory for {@link NwcConfig} record objects.
  */
 export const NwcConfig = (() => {
-  const defaults = () => ({ socks5Proxy: '', httpTimeout: BigInt('120') });
+  const defaults = () => ({
+    socks5Proxy: '',
+    acceptInvalidCerts: true,
+    httpTimeout: BigInt('120'),
+  });
   const create = (() => {
     return uniffiCreateRecord<NwcConfig, ReturnType<typeof defaults>>(defaults);
   })();
@@ -1676,18 +1603,21 @@ const FfiConverterTypeNwcConfig = (() => {
       return {
         nwcUri: FfiConverterString.read(from),
         socks5Proxy: FfiConverterOptionalString.read(from),
+        acceptInvalidCerts: FfiConverterOptionalBool.read(from),
         httpTimeout: FfiConverterOptionalInt64.read(from),
       };
     }
     write(value: TypeName, into: RustBuffer): void {
       FfiConverterString.write(value.nwcUri, into);
       FfiConverterOptionalString.write(value.socks5Proxy, into);
+      FfiConverterOptionalBool.write(value.acceptInvalidCerts, into);
       FfiConverterOptionalInt64.write(value.httpTimeout, into);
     }
     allocationSize(value: TypeName): number {
       return (
         FfiConverterString.allocationSize(value.nwcUri) +
         FfiConverterOptionalString.allocationSize(value.socks5Proxy) +
+        FfiConverterOptionalBool.allocationSize(value.acceptInvalidCerts) +
         FfiConverterOptionalInt64.allocationSize(value.httpTimeout)
       );
     }
@@ -2445,7 +2375,11 @@ export type PhoenixdConfig = {
  * Generated factory for {@link PhoenixdConfig} record objects.
  */
 export const PhoenixdConfig = (() => {
-  const defaults = () => ({});
+  const defaults = () => ({
+    socks5Proxy: '',
+    acceptInvalidCerts: true,
+    httpTimeout: BigInt('120'),
+  });
   const create = (() => {
     return uniffiCreateRecord<PhoenixdConfig, ReturnType<typeof defaults>>(
       defaults
@@ -2506,6 +2440,8 @@ const FfiConverterTypePhoenixdConfig = (() => {
 export type SpeedConfig = {
   baseUrl: string | undefined;
   apiKey: string;
+  socks5Proxy: string | undefined;
+  acceptInvalidCerts: boolean | undefined;
   httpTimeout: /*i64*/ bigint | undefined;
 };
 
@@ -2515,7 +2451,9 @@ export type SpeedConfig = {
 export const SpeedConfig = (() => {
   const defaults = () => ({
     baseUrl: 'https://api.tryspeed.com',
-    httpTimeout: BigInt('30'),
+    socks5Proxy: '',
+    acceptInvalidCerts: true,
+    httpTimeout: BigInt('120'),
   });
   const create = (() => {
     return uniffiCreateRecord<SpeedConfig, ReturnType<typeof defaults>>(
@@ -2549,18 +2487,24 @@ const FfiConverterTypeSpeedConfig = (() => {
       return {
         baseUrl: FfiConverterOptionalString.read(from),
         apiKey: FfiConverterString.read(from),
+        socks5Proxy: FfiConverterOptionalString.read(from),
+        acceptInvalidCerts: FfiConverterOptionalBool.read(from),
         httpTimeout: FfiConverterOptionalInt64.read(from),
       };
     }
     write(value: TypeName, into: RustBuffer): void {
       FfiConverterOptionalString.write(value.baseUrl, into);
       FfiConverterString.write(value.apiKey, into);
+      FfiConverterOptionalString.write(value.socks5Proxy, into);
+      FfiConverterOptionalBool.write(value.acceptInvalidCerts, into);
       FfiConverterOptionalInt64.write(value.httpTimeout, into);
     }
     allocationSize(value: TypeName): number {
       return (
         FfiConverterOptionalString.allocationSize(value.baseUrl) +
         FfiConverterString.allocationSize(value.apiKey) +
+        FfiConverterOptionalString.allocationSize(value.socks5Proxy) +
+        FfiConverterOptionalBool.allocationSize(value.acceptInvalidCerts) +
         FfiConverterOptionalInt64.allocationSize(value.httpTimeout)
       );
     }
@@ -2571,6 +2515,8 @@ const FfiConverterTypeSpeedConfig = (() => {
 export type StrikeConfig = {
   baseUrl: string | undefined;
   apiKey: string;
+  socks5Proxy: string | undefined;
+  acceptInvalidCerts: boolean | undefined;
   httpTimeout: /*i64*/ bigint | undefined;
 };
 
@@ -2580,6 +2526,8 @@ export type StrikeConfig = {
 export const StrikeConfig = (() => {
   const defaults = () => ({
     baseUrl: 'https://api.strike.me/v1',
+    socks5Proxy: '',
+    acceptInvalidCerts: true,
     httpTimeout: BigInt('120'),
   });
   const create = (() => {
@@ -2614,18 +2562,24 @@ const FfiConverterTypeStrikeConfig = (() => {
       return {
         baseUrl: FfiConverterOptionalString.read(from),
         apiKey: FfiConverterString.read(from),
+        socks5Proxy: FfiConverterOptionalString.read(from),
+        acceptInvalidCerts: FfiConverterOptionalBool.read(from),
         httpTimeout: FfiConverterOptionalInt64.read(from),
       };
     }
     write(value: TypeName, into: RustBuffer): void {
       FfiConverterOptionalString.write(value.baseUrl, into);
       FfiConverterString.write(value.apiKey, into);
+      FfiConverterOptionalString.write(value.socks5Proxy, into);
+      FfiConverterOptionalBool.write(value.acceptInvalidCerts, into);
       FfiConverterOptionalInt64.write(value.httpTimeout, into);
     }
     allocationSize(value: TypeName): number {
       return (
         FfiConverterOptionalString.allocationSize(value.baseUrl) +
         FfiConverterString.allocationSize(value.apiKey) +
+        FfiConverterOptionalString.allocationSize(value.socks5Proxy) +
+        FfiConverterOptionalBool.allocationSize(value.acceptInvalidCerts) +
         FfiConverterOptionalInt64.allocationSize(value.httpTimeout)
       );
     }
@@ -3031,25 +2985,46 @@ const FfiConverterTypeApiError__as_error = new FfiConverterObjectAsError(
 );
 
 export interface BlinkNodeInterface {
-  createInvoice(params: CreateInvoiceParams) /*throws*/ : Transaction;
-  decode(str: string) /*throws*/ : string;
-  getInfo() /*throws*/ : NodeInfo;
-  getOffer(search: string | undefined) /*throws*/ : PayCode;
-  listOffers(search: string | undefined) /*throws*/ : Array<PayCode>;
+  createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
+  decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<string>;
+  getInfo(asyncOpts_?: { signal: AbortSignal }) /*throws*/ : Promise<NodeInfo>;
+  getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayCode>;
+  listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<PayCode>>;
   listTransactions(
-    params: ListTransactionsParams
-  ) /*throws*/ : Array<Transaction>;
-  lookupInvoice(params: LookupInvoiceParams) /*throws*/ : Transaction;
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<Transaction>>;
+  lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
   onInvoiceEvents(
     params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void;
-  payInvoice(params: PayInvoiceParams) /*throws*/ : PayInvoiceResponse;
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void>;
+  payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
   payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ) /*throws*/ : PayInvoiceResponse;
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
 }
 
 export class BlinkNode
@@ -3075,190 +3050,369 @@ export class BlinkNode
       uniffiTypeBlinkNodeObjectFactory.bless(pointer);
   }
 
-  public createInvoice(params: CreateInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_create_invoice(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeCreateInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeCreateInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public decode(str: string): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_decode(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(str),
-            callStatus
+            FfiConverterString.lower(str)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getInfo(): NodeInfo /*throws*/ {
-    return FfiConverterTypeNodeInfo.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getInfo(asyncOpts_?: {
+    signal: AbortSignal;
+  }): Promise<NodeInfo> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_get_info(
-            uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            callStatus
+            uniffiTypeBlinkNodeObjectFactory.clonePointer(this)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeNodeInfo.lift.bind(
+          FfiConverterTypeNodeInfo
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getOffer(search: string | undefined): PayCode /*throws*/ {
-    return FfiConverterTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayCode> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_get_offer(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayCode.lift.bind(
+          FfiConverterTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listOffers(search: string | undefined): Array<PayCode> /*throws*/ {
-    return FfiConverterArrayTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<PayCode>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_list_offers(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypePayCode.lift.bind(
+          FfiConverterArrayTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listTransactions(
-    params: ListTransactionsParams
-  ): Array<Transaction> /*throws*/ {
-    return FfiConverterArrayTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listTransactions(
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<Transaction>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_list_transactions(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeListTransactionsParams.lower(params),
-            callStatus
+            FfiConverterTypeListTransactionsParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypeTransaction.lift.bind(
+          FfiConverterArrayTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public lookupInvoice(params: LookupInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_lookup_invoice(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeLookupInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeLookupInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public onInvoiceEvents(
-    params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_blinknode_on_invoice_events(
-          uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public payInvoice(params: PayInvoiceParams): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
         ),
-        /*caller:*/ (callStatus) => {
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async onInvoiceEvents(
+    params: OnInvoiceEventParams,
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_on_invoice_events(
+            uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
+            FfiConverterTypeOnInvoiceEventParams.lower(params),
+            FfiConverterTypeOnInvoiceEventCallback.lower(callback)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_pay_invoice(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
-            FfiConverterTypePayInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypePayInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public payOffer(
+  public async payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_blinknode_pay_offer(
             uniffiTypeBlinkNodeObjectFactory.clonePointer(this),
             FfiConverterString.lower(offer),
             FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote),
-            callStatus
+            FfiConverterOptionalString.lower(payerNote)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -3343,25 +3497,46 @@ const FfiConverterTypeBlinkNode = new FfiConverterObject(
 );
 
 export interface ClnNodeInterface {
-  createInvoice(params: CreateInvoiceParams) /*throws*/ : Transaction;
-  decode(str: string) /*throws*/ : string;
-  getInfo() /*throws*/ : NodeInfo;
-  getOffer(search: string | undefined) /*throws*/ : PayCode;
-  listOffers(search: string | undefined) /*throws*/ : Array<PayCode>;
+  createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
+  decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<string>;
+  getInfo(asyncOpts_?: { signal: AbortSignal }) /*throws*/ : Promise<NodeInfo>;
+  getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayCode>;
+  listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<PayCode>>;
   listTransactions(
-    params: ListTransactionsParams
-  ) /*throws*/ : Array<Transaction>;
-  lookupInvoice(params: LookupInvoiceParams) /*throws*/ : Transaction;
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<Transaction>>;
+  lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
   onInvoiceEvents(
     params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void;
-  payInvoice(params: PayInvoiceParams) /*throws*/ : PayInvoiceResponse;
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void>;
+  payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
   payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ) /*throws*/ : PayInvoiceResponse;
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
 }
 
 export class ClnNode extends UniffiAbstractObject implements ClnNodeInterface {
@@ -3383,190 +3558,369 @@ export class ClnNode extends UniffiAbstractObject implements ClnNodeInterface {
     this[destructorGuardSymbol] = uniffiTypeClnNodeObjectFactory.bless(pointer);
   }
 
-  public createInvoice(params: CreateInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_create_invoice(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeCreateInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeCreateInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public decode(str: string): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_decode(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(str),
-            callStatus
+            FfiConverterString.lower(str)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getInfo(): NodeInfo /*throws*/ {
-    return FfiConverterTypeNodeInfo.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getInfo(asyncOpts_?: {
+    signal: AbortSignal;
+  }): Promise<NodeInfo> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_get_info(
-            uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            callStatus
+            uniffiTypeClnNodeObjectFactory.clonePointer(this)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeNodeInfo.lift.bind(
+          FfiConverterTypeNodeInfo
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getOffer(search: string | undefined): PayCode /*throws*/ {
-    return FfiConverterTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayCode> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_get_offer(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayCode.lift.bind(
+          FfiConverterTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listOffers(search: string | undefined): Array<PayCode> /*throws*/ {
-    return FfiConverterArrayTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<PayCode>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_list_offers(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypePayCode.lift.bind(
+          FfiConverterArrayTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listTransactions(
-    params: ListTransactionsParams
-  ): Array<Transaction> /*throws*/ {
-    return FfiConverterArrayTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listTransactions(
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<Transaction>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_list_transactions(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeListTransactionsParams.lower(params),
-            callStatus
+            FfiConverterTypeListTransactionsParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypeTransaction.lift.bind(
+          FfiConverterArrayTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public lookupInvoice(params: LookupInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_lookup_invoice(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeLookupInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeLookupInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public onInvoiceEvents(
-    params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_clnnode_on_invoice_events(
-          uniffiTypeClnNodeObjectFactory.clonePointer(this),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public payInvoice(params: PayInvoiceParams): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
         ),
-        /*caller:*/ (callStatus) => {
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async onInvoiceEvents(
+    params: OnInvoiceEventParams,
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_on_invoice_events(
+            uniffiTypeClnNodeObjectFactory.clonePointer(this),
+            FfiConverterTypeOnInvoiceEventParams.lower(params),
+            FfiConverterTypeOnInvoiceEventCallback.lower(callback)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_pay_invoice(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
-            FfiConverterTypePayInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypePayInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public payOffer(
+  public async payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_clnnode_pay_offer(
             uniffiTypeClnNodeObjectFactory.clonePointer(this),
             FfiConverterString.lower(offer),
             FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote),
-            callStatus
+            FfiConverterOptionalString.lower(payerNote)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -3646,423 +4000,42 @@ const FfiConverterTypeClnNode = new FfiConverterObject(
   uniffiTypeClnNodeObjectFactory
 );
 
-export interface InvoiceEventsCancellationInterface {
-  cancel(): void;
-  isCancelled(): boolean;
-}
-
-export class InvoiceEventsCancellation
-  extends UniffiAbstractObject
-  implements InvoiceEventsCancellationInterface
-{
-  readonly [uniffiTypeNameSymbol] = 'InvoiceEventsCancellation';
-  readonly [destructorGuardSymbol]: UniffiRustArcPtr;
-  readonly [pointerLiteralSymbol]: UnsafeMutableRawPointer;
-  // No primary constructor declared for this class.
-  private constructor(pointer: UnsafeMutableRawPointer) {
-    super();
-    this[pointerLiteralSymbol] = pointer;
-    this[destructorGuardSymbol] =
-      uniffiTypeInvoiceEventsCancellationObjectFactory.bless(pointer);
-  }
-
-  public cancel(): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_invoiceeventscancellation_cancel(
-          uniffiTypeInvoiceEventsCancellationObjectFactory.clonePointer(this),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public isCancelled(): boolean {
-    return FfiConverterBool.lift(
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_invoiceeventscancellation_is_cancelled(
-            uniffiTypeInvoiceEventsCancellationObjectFactory.clonePointer(this),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
-   */
-  uniffiDestroy(): void {
-    const ptr = (this as any)[destructorGuardSymbol];
-    if (ptr !== undefined) {
-      const pointer =
-        uniffiTypeInvoiceEventsCancellationObjectFactory.pointer(this);
-      uniffiTypeInvoiceEventsCancellationObjectFactory.freePointer(pointer);
-      uniffiTypeInvoiceEventsCancellationObjectFactory.unbless(ptr);
-      delete (this as any)[destructorGuardSymbol];
-    }
-  }
-
-  static instanceOf(obj: any): obj is InvoiceEventsCancellation {
-    return uniffiTypeInvoiceEventsCancellationObjectFactory.isConcreteType(obj);
-  }
-}
-
-const uniffiTypeInvoiceEventsCancellationObjectFactory: UniffiObjectFactory<InvoiceEventsCancellationInterface> =
-  {
-    create(
-      pointer: UnsafeMutableRawPointer
-    ): InvoiceEventsCancellationInterface {
-      const instance = Object.create(InvoiceEventsCancellation.prototype);
-      instance[pointerLiteralSymbol] = pointer;
-      instance[destructorGuardSymbol] = this.bless(pointer);
-      instance[uniffiTypeNameSymbol] = 'InvoiceEventsCancellation';
-      return instance;
-    },
-
-    bless(p: UnsafeMutableRawPointer): UniffiRustArcPtr {
-      return uniffiCaller.rustCall(
-        /*caller:*/ (status) =>
-          nativeModule().ubrn_uniffi_internal_fn_method_invoiceeventscancellation_ffi__bless_pointer(
-            p,
-            status
-          ),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
-
-    unbless(ptr: UniffiRustArcPtr) {
-      ptr.markDestroyed();
-    },
-
-    pointer(obj: InvoiceEventsCancellationInterface): UnsafeMutableRawPointer {
-      if ((obj as any)[destructorGuardSymbol] === undefined) {
-        throw new UniffiInternalError.UnexpectedNullPointer();
-      }
-      return (obj as any)[pointerLiteralSymbol];
-    },
-
-    clonePointer(
-      obj: InvoiceEventsCancellationInterface
-    ): UnsafeMutableRawPointer {
-      const pointer = this.pointer(obj);
-      return uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) =>
-          nativeModule().ubrn_uniffi_lni_fn_clone_invoiceeventscancellation(
-            pointer,
-            callStatus
-          ),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
-
-    freePointer(pointer: UnsafeMutableRawPointer): void {
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) =>
-          nativeModule().ubrn_uniffi_lni_fn_free_invoiceeventscancellation(
-            pointer,
-            callStatus
-          ),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
-
-    isConcreteType(obj: any): obj is InvoiceEventsCancellationInterface {
-      return (
-        obj[destructorGuardSymbol] &&
-        obj[uniffiTypeNameSymbol] === 'InvoiceEventsCancellation'
-      );
-    },
-  };
-// FfiConverter for InvoiceEventsCancellationInterface
-const FfiConverterTypeInvoiceEventsCancellation = new FfiConverterObject(
-  uniffiTypeInvoiceEventsCancellationObjectFactory
-);
-
-export interface InvoicePollingStateInterface {
-  cancel(): void;
-  getLastStatus(): string;
-  getLastTransaction(): Transaction | undefined;
-  getPollCount(): /*u32*/ number;
-  isCancelled(): boolean;
-}
-
-export class InvoicePollingState
-  extends UniffiAbstractObject
-  implements InvoicePollingStateInterface
-{
-  readonly [uniffiTypeNameSymbol] = 'InvoicePollingState';
-  readonly [destructorGuardSymbol]: UniffiRustArcPtr;
-  readonly [pointerLiteralSymbol]: UnsafeMutableRawPointer;
-  // No primary constructor declared for this class.
-  private constructor(pointer: UnsafeMutableRawPointer) {
-    super();
-    this[pointerLiteralSymbol] = pointer;
-    this[destructorGuardSymbol] =
-      uniffiTypeInvoicePollingStateObjectFactory.bless(pointer);
-  }
-
-  public cancel(): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_invoicepollingstate_cancel(
-          uniffiTypeInvoicePollingStateObjectFactory.clonePointer(this),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public getLastStatus(): string {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_invoicepollingstate_get_last_status(
-            uniffiTypeInvoicePollingStateObjectFactory.clonePointer(this),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public getLastTransaction(): Transaction | undefined {
-    return FfiConverterOptionalTypeTransaction.lift(
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_invoicepollingstate_get_last_transaction(
-            uniffiTypeInvoicePollingStateObjectFactory.clonePointer(this),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public getPollCount(): /*u32*/ number {
-    return FfiConverterUInt32.lift(
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_invoicepollingstate_get_poll_count(
-            uniffiTypeInvoicePollingStateObjectFactory.clonePointer(this),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public isCancelled(): boolean {
-    return FfiConverterBool.lift(
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_invoicepollingstate_is_cancelled(
-            uniffiTypeInvoicePollingStateObjectFactory.clonePointer(this),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
-   */
-  uniffiDestroy(): void {
-    const ptr = (this as any)[destructorGuardSymbol];
-    if (ptr !== undefined) {
-      const pointer = uniffiTypeInvoicePollingStateObjectFactory.pointer(this);
-      uniffiTypeInvoicePollingStateObjectFactory.freePointer(pointer);
-      uniffiTypeInvoicePollingStateObjectFactory.unbless(ptr);
-      delete (this as any)[destructorGuardSymbol];
-    }
-  }
-
-  static instanceOf(obj: any): obj is InvoicePollingState {
-    return uniffiTypeInvoicePollingStateObjectFactory.isConcreteType(obj);
-  }
-}
-
-const uniffiTypeInvoicePollingStateObjectFactory: UniffiObjectFactory<InvoicePollingStateInterface> =
-  {
-    create(pointer: UnsafeMutableRawPointer): InvoicePollingStateInterface {
-      const instance = Object.create(InvoicePollingState.prototype);
-      instance[pointerLiteralSymbol] = pointer;
-      instance[destructorGuardSymbol] = this.bless(pointer);
-      instance[uniffiTypeNameSymbol] = 'InvoicePollingState';
-      return instance;
-    },
-
-    bless(p: UnsafeMutableRawPointer): UniffiRustArcPtr {
-      return uniffiCaller.rustCall(
-        /*caller:*/ (status) =>
-          nativeModule().ubrn_uniffi_internal_fn_method_invoicepollingstate_ffi__bless_pointer(
-            p,
-            status
-          ),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
-
-    unbless(ptr: UniffiRustArcPtr) {
-      ptr.markDestroyed();
-    },
-
-    pointer(obj: InvoicePollingStateInterface): UnsafeMutableRawPointer {
-      if ((obj as any)[destructorGuardSymbol] === undefined) {
-        throw new UniffiInternalError.UnexpectedNullPointer();
-      }
-      return (obj as any)[pointerLiteralSymbol];
-    },
-
-    clonePointer(obj: InvoicePollingStateInterface): UnsafeMutableRawPointer {
-      const pointer = this.pointer(obj);
-      return uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) =>
-          nativeModule().ubrn_uniffi_lni_fn_clone_invoicepollingstate(
-            pointer,
-            callStatus
-          ),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
-
-    freePointer(pointer: UnsafeMutableRawPointer): void {
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) =>
-          nativeModule().ubrn_uniffi_lni_fn_free_invoicepollingstate(
-            pointer,
-            callStatus
-          ),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
-
-    isConcreteType(obj: any): obj is InvoicePollingStateInterface {
-      return (
-        obj[destructorGuardSymbol] &&
-        obj[uniffiTypeNameSymbol] === 'InvoicePollingState'
-      );
-    },
-  };
-// FfiConverter for InvoicePollingStateInterface
-const FfiConverterTypeInvoicePollingState = new FfiConverterObject(
-  uniffiTypeInvoicePollingStateObjectFactory
-);
-
 export interface LndNodeInterface {
-  createInvoice(params: CreateInvoiceParams) /*throws*/ : Transaction;
-  /**
-   * Async version of create_invoice that returns a Promise (non-blocking)
-   */
-  createInvoiceAsync(
+  createInvoice(
     params: CreateInvoiceParams,
     asyncOpts_?: { signal: AbortSignal }
   ) /*throws*/ : Promise<Transaction>;
-  /**
-   * Async version of create_offer that returns a Promise (non-blocking)
-   */
-  createOfferAsync(
-    amountMsats: /*i64*/ bigint | undefined,
-    description: string | undefined,
-    expiry: /*i64*/ bigint | undefined,
-    asyncOpts_?: { signal: AbortSignal }
-  ) /*throws*/ : Promise<Transaction>;
-  decode(str: string) /*throws*/ : string;
-  /**
-   * Async version of decode that returns a Promise (non-blocking)
-   */
-  decodeAsync(
-    invoiceStr: string,
+  decode(
+    str: string,
     asyncOpts_?: { signal: AbortSignal }
   ) /*throws*/ : Promise<string>;
-  /**
-   * Async version of fetch_invoice_from_offer that returns a Promise (non-blocking)
-   */
-  fetchInvoiceFromOfferAsync(
-    offer: string,
-    amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined,
-    asyncOpts_?: { signal: AbortSignal }
-  ) /*throws*/ : Promise<string>;
-  getInfo() /*throws*/ : NodeInfo;
-  /**
-   * Async version of get_info that returns a Promise (non-blocking)
-   */
-  getInfoAsync(asyncOpts_?: {
-    signal: AbortSignal;
-  }) /*throws*/ : Promise<NodeInfo>;
-  getOffer(search: string | undefined) /*throws*/ : PayCode;
-  /**
-   * Async version of get_offer that returns a Promise (non-blocking)
-   */
-  getOfferAsync(
+  getInfo(asyncOpts_?: { signal: AbortSignal }) /*throws*/ : Promise<NodeInfo>;
+  getOffer(
     search: string | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ) /*throws*/ : Promise<PayCode>;
-  listOffers(search: string | undefined) /*throws*/ : Array<PayCode>;
-  /**
-   * Async version of list_offers that returns a Promise (non-blocking)
-   */
-  listOffersAsync(
+  listOffers(
     search: string | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ) /*throws*/ : Promise<Array<PayCode>>;
   listTransactions(
-    params: ListTransactionsParams
-  ) /*throws*/ : Array<Transaction>;
-  /**
-   * Async version of list_transactions that returns a Promise (non-blocking)
-   */
-  listTransactionsAsync(
     params: ListTransactionsParams,
     asyncOpts_?: { signal: AbortSignal }
   ) /*throws*/ : Promise<Array<Transaction>>;
-  lookupInvoice(params: LookupInvoiceParams) /*throws*/ : Transaction;
-  /**
-   * Async version of lookup_invoice that returns a Promise (non-blocking)
-   */
-  lookupInvoiceAsync(
+  lookupInvoice(
     params: LookupInvoiceParams,
     asyncOpts_?: { signal: AbortSignal }
   ) /*throws*/ : Promise<Transaction>;
   onInvoiceEvents(
     params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void;
-  /**
-   * Async version of on_invoice_events that returns a Promise (non-blocking)
-   */
-  onInvoiceEventsAsync(
-    params: OnInvoiceEventParams,
     callback: OnInvoiceEventCallback,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void>;
-  payInvoice(params: PayInvoiceParams) /*throws*/ : PayInvoiceResponse;
-  /**
-   * Async version of pay_invoice that returns a Promise (non-blocking)
-   */
-  payInvoiceAsync(
+  payInvoice(
     params: PayInvoiceParams,
     asyncOpts_?: { signal: AbortSignal }
   ) /*throws*/ : Promise<PayInvoiceResponse>;
   payOffer(
-    offer: string,
-    amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ) /*throws*/ : PayInvoiceResponse;
-  /**
-   * Async version of pay_offer that returns a Promise (non-blocking)
-   */
-  payOfferAsync(
     offer: string,
     amountMsats: /*i64*/ bigint,
     payerNote: string | undefined,
@@ -4089,28 +4062,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     this[destructorGuardSymbol] = uniffiTypeLndNodeObjectFactory.bless(pointer);
   }
 
-  public createInvoice(params: CreateInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_create_invoice(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeCreateInvoiceParams.lower(params),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of create_invoice that returns a Promise (non-blocking)
-   */
-  public async createInvoiceAsync(
+  public async createInvoice(
     params: CreateInvoiceParams,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<Transaction> /*throws*/ {
@@ -4119,7 +4071,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_create_invoice_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_create_invoice(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterTypeCreateInvoiceParams.lower(params)
           );
@@ -4147,83 +4099,18 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  /**
-   * Async version of create_offer that returns a Promise (non-blocking)
-   */
-  public async createOfferAsync(
-    amountMsats: /*i64*/ bigint | undefined,
-    description: string | undefined,
-    expiry: /*i64*/ bigint | undefined,
+  public async decode(
+    str: string,
     asyncOpts_?: { signal: AbortSignal }
-  ): Promise<Transaction> /*throws*/ {
+  ): Promise<string> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
     try {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_create_offer_async(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(description),
-            FfiConverterOptionalInt64.lower(expiry)
-          );
-        },
-        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
-        /*cancelFunc:*/ nativeModule()
-          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
-        /*completeFunc:*/ nativeModule()
-          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
-        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
-        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
-          FfiConverterTypeTransaction
-        ),
-        /*liftString:*/ FfiConverterString.lift,
-        /*asyncOpts:*/ asyncOpts_,
-        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        )
-      );
-    } catch (__error: any) {
-      if (uniffiIsDebug && __error instanceof Error) {
-        __error.stack = __stack;
-      }
-      throw __error;
-    }
-  }
-
-  public decode(str: string): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
           return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_decode(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(str),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of decode that returns a Promise (non-blocking)
-   */
-  public async decodeAsync(
-    invoiceStr: string,
-    asyncOpts_?: { signal: AbortSignal }
-  ): Promise<string> /*throws*/ {
-    const __stack = uniffiIsDebug ? new Error().stack : undefined;
-    try {
-      return await uniffiRustCallAsync(
-        /*rustCaller:*/ uniffiCaller,
-        /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_decode_async(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(invoiceStr)
+            FfiConverterString.lower(str)
           );
         },
         /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
@@ -4247,69 +4134,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  /**
-   * Async version of fetch_invoice_from_offer that returns a Promise (non-blocking)
-   */
-  public async fetchInvoiceFromOfferAsync(
-    offer: string,
-    amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined,
-    asyncOpts_?: { signal: AbortSignal }
-  ): Promise<string> /*throws*/ {
-    const __stack = uniffiIsDebug ? new Error().stack : undefined;
-    try {
-      return await uniffiRustCallAsync(
-        /*rustCaller:*/ uniffiCaller,
-        /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_fetch_invoice_from_offer_async(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(offer),
-            FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote)
-          );
-        },
-        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
-        /*cancelFunc:*/ nativeModule()
-          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
-        /*completeFunc:*/ nativeModule()
-          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
-        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
-        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
-        /*liftString:*/ FfiConverterString.lift,
-        /*asyncOpts:*/ asyncOpts_,
-        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        )
-      );
-    } catch (__error: any) {
-      if (uniffiIsDebug && __error instanceof Error) {
-        __error.stack = __stack;
-      }
-      throw __error;
-    }
-  }
-
-  public getInfo(): NodeInfo /*throws*/ {
-    return FfiConverterTypeNodeInfo.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_get_info(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of get_info that returns a Promise (non-blocking)
-   */
-  public async getInfoAsync(asyncOpts_?: {
+  public async getInfo(asyncOpts_?: {
     signal: AbortSignal;
   }): Promise<NodeInfo> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -4317,7 +4142,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_get_info_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_get_info(
             uniffiTypeLndNodeObjectFactory.clonePointer(this)
           );
         },
@@ -4344,28 +4169,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  public getOffer(search: string | undefined): PayCode /*throws*/ {
-    return FfiConverterTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_get_offer(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of get_offer that returns a Promise (non-blocking)
-   */
-  public async getOfferAsync(
+  public async getOffer(
     search: string | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<PayCode> /*throws*/ {
@@ -4374,7 +4178,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_get_offer_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_get_offer(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterOptionalString.lower(search)
           );
@@ -4402,28 +4206,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  public listOffers(search: string | undefined): Array<PayCode> /*throws*/ {
-    return FfiConverterArrayTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_list_offers(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of list_offers that returns a Promise (non-blocking)
-   */
-  public async listOffersAsync(
+  public async listOffers(
     search: string | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<Array<PayCode>> /*throws*/ {
@@ -4432,7 +4215,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_list_offers_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_list_offers(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterOptionalString.lower(search)
           );
@@ -4460,30 +4243,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  public listTransactions(
-    params: ListTransactionsParams
-  ): Array<Transaction> /*throws*/ {
-    return FfiConverterArrayTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_list_transactions(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeListTransactionsParams.lower(params),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of list_transactions that returns a Promise (non-blocking)
-   */
-  public async listTransactionsAsync(
+  public async listTransactions(
     params: ListTransactionsParams,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<Array<Transaction>> /*throws*/ {
@@ -4492,7 +4252,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_list_transactions_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_list_transactions(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterTypeListTransactionsParams.lower(params)
           );
@@ -4520,28 +4280,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  public lookupInvoice(params: LookupInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_lookup_invoice(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeLookupInvoiceParams.lower(params),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of lookup_invoice that returns a Promise (non-blocking)
-   */
-  public async lookupInvoiceAsync(
+  public async lookupInvoice(
     params: LookupInvoiceParams,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<Transaction> /*throws*/ {
@@ -4550,7 +4289,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_lookup_invoice_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_lookup_invoice(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterTypeLookupInvoiceParams.lower(params)
           );
@@ -4578,27 +4317,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  public onInvoiceEvents(
-    params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_lndnode_on_invoice_events(
-          uniffiTypeLndNodeObjectFactory.clonePointer(this),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  /**
-   * Async version of on_invoice_events that returns a Promise (non-blocking)
-   */
-  public async onInvoiceEventsAsync(
+  public async onInvoiceEvents(
     params: OnInvoiceEventParams,
     callback: OnInvoiceEventCallback,
     asyncOpts_?: { signal: AbortSignal }
@@ -4608,7 +4327,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_on_invoice_events_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_on_invoice_events(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterTypeOnInvoiceEventParams.lower(params),
             FfiConverterTypeOnInvoiceEventCallback.lower(callback)
@@ -4630,28 +4349,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  public payInvoice(params: PayInvoiceParams): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_pay_invoice(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterTypePayInvoiceParams.lower(params),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of pay_invoice that returns a Promise (non-blocking)
-   */
-  public async payInvoiceAsync(
+  public async payInvoice(
     params: PayInvoiceParams,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<PayInvoiceResponse> /*throws*/ {
@@ -4660,7 +4358,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_pay_invoice_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_pay_invoice(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterTypePayInvoiceParams.lower(params)
           );
@@ -4688,34 +4386,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
     }
   }
 
-  public payOffer(
-    offer: string,
-    amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_pay_offer(
-            uniffiTypeLndNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(offer),
-            FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote),
-            callStatus
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  /**
-   * Async version of pay_offer that returns a Promise (non-blocking)
-   */
-  public async payOfferAsync(
+  public async payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
     payerNote: string | undefined,
@@ -4726,7 +4397,7 @@ export class LndNode extends UniffiAbstractObject implements LndNodeInterface {
       return await uniffiRustCallAsync(
         /*rustCaller:*/ uniffiCaller,
         /*rustFutureFunc:*/ () => {
-          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_pay_offer_async(
+          return nativeModule().ubrn_uniffi_lni_fn_method_lndnode_pay_offer(
             uniffiTypeLndNodeObjectFactory.clonePointer(this),
             FfiConverterString.lower(offer),
             FfiConverterInt64.lower(amountMsats),
@@ -4834,25 +4505,46 @@ const FfiConverterTypeLndNode = new FfiConverterObject(
 );
 
 export interface NwcNodeInterface {
-  createInvoice(params: CreateInvoiceParams) /*throws*/ : Transaction;
-  decode(str: string) /*throws*/ : string;
-  getInfo() /*throws*/ : NodeInfo;
-  getOffer(search: string | undefined) /*throws*/ : PayCode;
-  listOffers(search: string | undefined) /*throws*/ : Array<PayCode>;
+  createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
+  decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<string>;
+  getInfo(asyncOpts_?: { signal: AbortSignal }) /*throws*/ : Promise<NodeInfo>;
+  getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayCode>;
+  listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<PayCode>>;
   listTransactions(
-    params: ListTransactionsParams
-  ) /*throws*/ : Array<Transaction>;
-  lookupInvoice(params: LookupInvoiceParams) /*throws*/ : Transaction;
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<Transaction>>;
+  lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
   onInvoiceEvents(
     params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void;
-  payInvoice(params: PayInvoiceParams) /*throws*/ : PayInvoiceResponse;
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void>;
+  payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
   payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ) /*throws*/ : PayInvoiceResponse;
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
 }
 
 export class NwcNode extends UniffiAbstractObject implements NwcNodeInterface {
@@ -4874,190 +4566,369 @@ export class NwcNode extends UniffiAbstractObject implements NwcNodeInterface {
     this[destructorGuardSymbol] = uniffiTypeNwcNodeObjectFactory.bless(pointer);
   }
 
-  public createInvoice(params: CreateInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_create_invoice(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeCreateInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeCreateInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public decode(str: string): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_decode(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(str),
-            callStatus
+            FfiConverterString.lower(str)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getInfo(): NodeInfo /*throws*/ {
-    return FfiConverterTypeNodeInfo.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getInfo(asyncOpts_?: {
+    signal: AbortSignal;
+  }): Promise<NodeInfo> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_get_info(
-            uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            callStatus
+            uniffiTypeNwcNodeObjectFactory.clonePointer(this)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeNodeInfo.lift.bind(
+          FfiConverterTypeNodeInfo
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getOffer(search: string | undefined): PayCode /*throws*/ {
-    return FfiConverterTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayCode> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_get_offer(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayCode.lift.bind(
+          FfiConverterTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listOffers(search: string | undefined): Array<PayCode> /*throws*/ {
-    return FfiConverterArrayTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<PayCode>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_list_offers(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypePayCode.lift.bind(
+          FfiConverterArrayTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listTransactions(
-    params: ListTransactionsParams
-  ): Array<Transaction> /*throws*/ {
-    return FfiConverterArrayTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listTransactions(
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<Transaction>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_list_transactions(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeListTransactionsParams.lower(params),
-            callStatus
+            FfiConverterTypeListTransactionsParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypeTransaction.lift.bind(
+          FfiConverterArrayTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public lookupInvoice(params: LookupInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_lookup_invoice(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeLookupInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeLookupInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public onInvoiceEvents(
-    params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_on_invoice_events(
-          uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public payInvoice(params: PayInvoiceParams): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
         ),
-        /*caller:*/ (callStatus) => {
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async onInvoiceEvents(
+    params: OnInvoiceEventParams,
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_on_invoice_events(
+            uniffiTypeNwcNodeObjectFactory.clonePointer(this),
+            FfiConverterTypeOnInvoiceEventParams.lower(params),
+            FfiConverterTypeOnInvoiceEventCallback.lower(callback)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_pay_invoice(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
-            FfiConverterTypePayInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypePayInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public payOffer(
+  public async payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_nwcnode_pay_offer(
             uniffiTypeNwcNodeObjectFactory.clonePointer(this),
             FfiConverterString.lower(offer),
             FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote),
-            callStatus
+            FfiConverterOptionalString.lower(payerNote)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -5138,25 +5009,46 @@ const FfiConverterTypeNwcNode = new FfiConverterObject(
 );
 
 export interface PhoenixdNodeInterface {
-  createInvoice(params: CreateInvoiceParams) /*throws*/ : Transaction;
-  decode(str: string) /*throws*/ : string;
-  getInfo() /*throws*/ : NodeInfo;
-  getOffer(search: string | undefined) /*throws*/ : PayCode;
-  listOffers(search: string | undefined) /*throws*/ : Array<PayCode>;
+  createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
+  decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<string>;
+  getInfo(asyncOpts_?: { signal: AbortSignal }) /*throws*/ : Promise<NodeInfo>;
+  getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayCode>;
+  listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<PayCode>>;
   listTransactions(
-    params: ListTransactionsParams
-  ) /*throws*/ : Array<Transaction>;
-  lookupInvoice(params: LookupInvoiceParams) /*throws*/ : Transaction;
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<Transaction>>;
+  lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
   onInvoiceEvents(
     params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void;
-  payInvoice(params: PayInvoiceParams) /*throws*/ : PayInvoiceResponse;
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void>;
+  payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
   payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ) /*throws*/ : PayInvoiceResponse;
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
 }
 
 export class PhoenixdNode
@@ -5182,190 +5074,369 @@ export class PhoenixdNode
       uniffiTypePhoenixdNodeObjectFactory.bless(pointer);
   }
 
-  public createInvoice(params: CreateInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_create_invoice(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeCreateInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeCreateInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public decode(str: string): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_decode(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(str),
-            callStatus
+            FfiConverterString.lower(str)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getInfo(): NodeInfo /*throws*/ {
-    return FfiConverterTypeNodeInfo.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getInfo(asyncOpts_?: {
+    signal: AbortSignal;
+  }): Promise<NodeInfo> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_get_info(
-            uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            callStatus
+            uniffiTypePhoenixdNodeObjectFactory.clonePointer(this)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeNodeInfo.lift.bind(
+          FfiConverterTypeNodeInfo
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getOffer(search: string | undefined): PayCode /*throws*/ {
-    return FfiConverterTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayCode> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_get_offer(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayCode.lift.bind(
+          FfiConverterTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listOffers(search: string | undefined): Array<PayCode> /*throws*/ {
-    return FfiConverterArrayTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<PayCode>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_list_offers(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypePayCode.lift.bind(
+          FfiConverterArrayTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listTransactions(
-    params: ListTransactionsParams
-  ): Array<Transaction> /*throws*/ {
-    return FfiConverterArrayTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listTransactions(
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<Transaction>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_list_transactions(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeListTransactionsParams.lower(params),
-            callStatus
+            FfiConverterTypeListTransactionsParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypeTransaction.lift.bind(
+          FfiConverterArrayTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public lookupInvoice(params: LookupInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_lookup_invoice(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeLookupInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeLookupInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public onInvoiceEvents(
-    params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_on_invoice_events(
-          uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public payInvoice(params: PayInvoiceParams): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
         ),
-        /*caller:*/ (callStatus) => {
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async onInvoiceEvents(
+    params: OnInvoiceEventParams,
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_on_invoice_events(
+            uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
+            FfiConverterTypeOnInvoiceEventParams.lower(params),
+            FfiConverterTypeOnInvoiceEventCallback.lower(callback)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_pay_invoice(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
-            FfiConverterTypePayInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypePayInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public payOffer(
+  public async payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_phoenixdnode_pay_offer(
             uniffiTypePhoenixdNodeObjectFactory.clonePointer(this),
             FfiConverterString.lower(offer),
             FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote),
-            callStatus
+            FfiConverterOptionalString.lower(payerNote)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -5454,25 +5525,46 @@ const FfiConverterTypePhoenixdNode = new FfiConverterObject(
 );
 
 export interface SpeedNodeInterface {
-  createInvoice(invoiceParams: CreateInvoiceParams) /*throws*/ : Transaction;
-  decode(str: string) /*throws*/ : string;
-  getInfo() /*throws*/ : NodeInfo;
-  getOffer(search: string | undefined) /*throws*/ : PayCode;
-  listOffers(search: string | undefined) /*throws*/ : Array<PayCode>;
+  createInvoice(
+    invoiceParams: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
+  decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<string>;
+  getInfo(asyncOpts_?: { signal: AbortSignal }) /*throws*/ : Promise<NodeInfo>;
+  getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayCode>;
+  listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<PayCode>>;
   listTransactions(
-    params: ListTransactionsParams
-  ) /*throws*/ : Array<Transaction>;
-  lookupInvoice(params: LookupInvoiceParams) /*throws*/ : Transaction;
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<Transaction>>;
+  lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
   onInvoiceEvents(
     params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void;
-  payInvoice(invoiceParams: PayInvoiceParams) /*throws*/ : PayInvoiceResponse;
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void>;
+  payInvoice(
+    invoiceParams: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
   payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ) /*throws*/ : PayInvoiceResponse;
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
 }
 
 export class SpeedNode
@@ -5498,194 +5590,369 @@ export class SpeedNode
       uniffiTypeSpeedNodeObjectFactory.bless(pointer);
   }
 
-  public createInvoice(
-    invoiceParams: CreateInvoiceParams
-  ): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async createInvoice(
+    invoiceParams: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_create_invoice(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeCreateInvoiceParams.lower(invoiceParams),
-            callStatus
+            FfiConverterTypeCreateInvoiceParams.lower(invoiceParams)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public decode(str: string): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_decode(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(str),
-            callStatus
+            FfiConverterString.lower(str)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getInfo(): NodeInfo /*throws*/ {
-    return FfiConverterTypeNodeInfo.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getInfo(asyncOpts_?: {
+    signal: AbortSignal;
+  }): Promise<NodeInfo> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_get_info(
-            uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            callStatus
+            uniffiTypeSpeedNodeObjectFactory.clonePointer(this)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeNodeInfo.lift.bind(
+          FfiConverterTypeNodeInfo
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getOffer(search: string | undefined): PayCode /*throws*/ {
-    return FfiConverterTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayCode> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_get_offer(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayCode.lift.bind(
+          FfiConverterTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listOffers(search: string | undefined): Array<PayCode> /*throws*/ {
-    return FfiConverterArrayTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<PayCode>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_list_offers(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypePayCode.lift.bind(
+          FfiConverterArrayTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listTransactions(
-    params: ListTransactionsParams
-  ): Array<Transaction> /*throws*/ {
-    return FfiConverterArrayTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listTransactions(
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<Transaction>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_list_transactions(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeListTransactionsParams.lower(params),
-            callStatus
+            FfiConverterTypeListTransactionsParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypeTransaction.lift.bind(
+          FfiConverterArrayTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public lookupInvoice(params: LookupInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_lookup_invoice(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeLookupInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeLookupInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public onInvoiceEvents(
-    params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_speednode_on_invoice_events(
-          uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public payInvoice(
-    invoiceParams: PayInvoiceParams
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
         ),
-        /*caller:*/ (callStatus) => {
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async onInvoiceEvents(
+    params: OnInvoiceEventParams,
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_lni_fn_method_speednode_on_invoice_events(
+            uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
+            FfiConverterTypeOnInvoiceEventParams.lower(params),
+            FfiConverterTypeOnInvoiceEventCallback.lower(callback)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async payInvoice(
+    invoiceParams: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_pay_invoice(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
-            FfiConverterTypePayInvoiceParams.lower(invoiceParams),
-            callStatus
+            FfiConverterTypePayInvoiceParams.lower(invoiceParams)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public payOffer(
+  public async payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_speednode_pay_offer(
             uniffiTypeSpeedNodeObjectFactory.clonePointer(this),
             FfiConverterString.lower(offer),
             FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote),
-            callStatus
+            FfiConverterOptionalString.lower(payerNote)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -5770,25 +6037,46 @@ const FfiConverterTypeSpeedNode = new FfiConverterObject(
 );
 
 export interface StrikeNodeInterface {
-  createInvoice(params: CreateInvoiceParams) /*throws*/ : Transaction;
-  decode(str: string) /*throws*/ : string;
-  getInfo() /*throws*/ : NodeInfo;
-  getOffer(search: string | undefined) /*throws*/ : PayCode;
-  listOffers(search: string | undefined) /*throws*/ : Array<PayCode>;
+  createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
+  decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<string>;
+  getInfo(asyncOpts_?: { signal: AbortSignal }) /*throws*/ : Promise<NodeInfo>;
+  getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayCode>;
+  listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<PayCode>>;
   listTransactions(
-    params: ListTransactionsParams
-  ) /*throws*/ : Array<Transaction>;
-  lookupInvoice(params: LookupInvoiceParams) /*throws*/ : Transaction;
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Array<Transaction>>;
+  lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<Transaction>;
   onInvoiceEvents(
     params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void;
-  payInvoice(params: PayInvoiceParams) /*throws*/ : PayInvoiceResponse;
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void>;
+  payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
   payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ) /*throws*/ : PayInvoiceResponse;
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<PayInvoiceResponse>;
 }
 
 export class StrikeNode
@@ -5814,190 +6102,369 @@ export class StrikeNode
       uniffiTypeStrikeNodeObjectFactory.bless(pointer);
   }
 
-  public createInvoice(params: CreateInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async createInvoice(
+    params: CreateInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_create_invoice(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeCreateInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeCreateInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public decode(str: string): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async decode(
+    str: string,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_decode(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            FfiConverterString.lower(str),
-            callStatus
+            FfiConverterString.lower(str)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getInfo(): NodeInfo /*throws*/ {
-    return FfiConverterTypeNodeInfo.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getInfo(asyncOpts_?: {
+    signal: AbortSignal;
+  }): Promise<NodeInfo> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_get_info(
-            uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            callStatus
+            uniffiTypeStrikeNodeObjectFactory.clonePointer(this)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeNodeInfo.lift.bind(
+          FfiConverterTypeNodeInfo
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public getOffer(search: string | undefined): PayCode /*throws*/ {
-    return FfiConverterTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async getOffer(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayCode> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_get_offer(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayCode.lift.bind(
+          FfiConverterTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listOffers(search: string | undefined): Array<PayCode> /*throws*/ {
-    return FfiConverterArrayTypePayCode.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listOffers(
+    search: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<PayCode>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_list_offers(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            FfiConverterOptionalString.lower(search),
-            callStatus
+            FfiConverterOptionalString.lower(search)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypePayCode.lift.bind(
+          FfiConverterArrayTypePayCode
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public listTransactions(
-    params: ListTransactionsParams
-  ): Array<Transaction> /*throws*/ {
-    return FfiConverterArrayTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async listTransactions(
+    params: ListTransactionsParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Array<Transaction>> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_list_transactions(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeListTransactionsParams.lower(params),
-            callStatus
+            FfiConverterTypeListTransactionsParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterArrayTypeTransaction.lift.bind(
+          FfiConverterArrayTypeTransaction
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public lookupInvoice(params: LookupInvoiceParams): Transaction /*throws*/ {
-    return FfiConverterTypeTransaction.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+  public async lookupInvoice(
+    params: LookupInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<Transaction> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_lookup_invoice(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            FfiConverterTypeLookupInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypeLookupInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
-  }
-
-  public onInvoiceEvents(
-    params: OnInvoiceEventParams,
-    callback: OnInvoiceEventCallback
-  ): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_lni_fn_method_strikenode_on_invoice_events(
-          uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-          FfiConverterTypeOnInvoiceEventParams.lower(params),
-          FfiConverterTypeOnInvoiceEventCallback.lower(callback),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
-  }
-
-  public payInvoice(params: PayInvoiceParams): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypeTransaction.lift.bind(
+          FfiConverterTypeTransaction
         ),
-        /*caller:*/ (callStatus) => {
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async onInvoiceEvents(
+    params: OnInvoiceEventParams,
+    callback: OnInvoiceEventCallback,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_on_invoice_events(
+            uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
+            FfiConverterTypeOnInvoiceEventParams.lower(params),
+            FfiConverterTypeOnInvoiceEventCallback.lower(callback)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  public async payInvoice(
+    params: PayInvoiceParams,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_pay_invoice(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
-            FfiConverterTypePayInvoiceParams.lower(params),
-            callStatus
+            FfiConverterTypePayInvoiceParams.lower(params)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  public payOffer(
+  public async payOffer(
     offer: string,
     amountMsats: /*i64*/ bigint,
-    payerNote: string | undefined
-  ): PayInvoiceResponse /*throws*/ {
-    return FfiConverterTypePayInvoiceResponse.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeApiError__as_error.lift.bind(
-          FfiConverterTypeApiError__as_error
-        ),
-        /*caller:*/ (callStatus) => {
+    payerNote: string | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PayInvoiceResponse> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_lni_fn_method_strikenode_pay_offer(
             uniffiTypeStrikeNodeObjectFactory.clonePointer(this),
             FfiConverterString.lower(offer),
             FfiConverterInt64.lower(amountMsats),
-            FfiConverterOptionalString.lower(payerNote),
-            callStatus
+            FfiConverterOptionalString.lower(payerNote)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_lni_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_lni_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterTypePayInvoiceResponse.lift.bind(
+          FfiConverterTypePayInvoiceResponse
+        ),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeApiError__as_error.lift.bind(
+          FfiConverterTypeApiError__as_error
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -6140,77 +6607,43 @@ function uniffiEnsureInitialized() {
       bindingsContractVersion
     );
   }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_create_invoice_async() !==
-    37699
-  ) {
+  if (nativeModule().ubrn_uniffi_lni_checksum_func_create_invoice() !== 59459) {
     throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_create_invoice_async'
+      'uniffi_lni_checksum_func_create_invoice'
     );
   }
-  if (nativeModule().ubrn_uniffi_lni_checksum_func_decode_async() !== 50250) {
+  if (nativeModule().ubrn_uniffi_lni_checksum_func_decode() !== 18744) {
     throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_decode_async'
+      'uniffi_lni_checksum_func_decode'
     );
   }
-  if (nativeModule().ubrn_uniffi_lni_checksum_func_get_info_async() !== 33649) {
+  if (nativeModule().ubrn_uniffi_lni_checksum_func_get_info() !== 4165) {
     throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_get_info_async'
+      'uniffi_lni_checksum_func_get_info'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_list_transactions_async() !==
-    43897
+    nativeModule().ubrn_uniffi_lni_checksum_func_list_transactions() !== 25996
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_list_transactions_async'
+      'uniffi_lni_checksum_func_list_transactions'
+    );
+  }
+  if (nativeModule().ubrn_uniffi_lni_checksum_func_lookup_invoice() !== 4690) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      'uniffi_lni_checksum_func_lookup_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_lookup_invoice_async() !==
-    18104
+    nativeModule().ubrn_uniffi_lni_checksum_func_on_invoice_events() !== 21022
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_lookup_invoice_async'
+      'uniffi_lni_checksum_func_on_invoice_events'
     );
   }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_nwc_lookup_invoice_async() !==
-    1192
-  ) {
+  if (nativeModule().ubrn_uniffi_lni_checksum_func_pay_invoice() !== 56853) {
     throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_nwc_lookup_invoice_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_nwc_on_invoice_events_with_cancellation() !==
-    41956
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_nwc_on_invoice_events_with_cancellation'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_nwc_start_invoice_polling() !==
-    11806
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_nwc_start_invoice_polling'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_on_invoice_events_async() !==
-    34650
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_on_invoice_events_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_func_pay_invoice_async() !== 16362
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_pay_invoice_async'
+      'uniffi_lni_checksum_func_pay_invoice'
     );
   }
   if (
@@ -6221,21 +6654,16 @@ function uniffiEnsureInitialized() {
       'uniffi_lni_checksum_func_say_after_with_tokio'
     );
   }
-  if (nativeModule().ubrn_uniffi_lni_checksum_func_test_sync() !== 30137) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_func_test_sync'
-    );
-  }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_create_invoice() !==
-    6203
+    31518
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_create_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_decode() !== 57694
+    nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_decode() !== 7684
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_decode'
@@ -6243,7 +6671,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_get_info() !==
-    60612
+    39442
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_get_info'
@@ -6251,7 +6679,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_get_offer() !==
-    56640
+    24717
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_get_offer'
@@ -6259,7 +6687,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_list_offers() !==
-    58211
+    12337
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_list_offers'
@@ -6267,7 +6695,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_list_transactions() !==
-    47004
+    20946
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_list_transactions'
@@ -6275,7 +6703,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_lookup_invoice() !==
-    8212
+    35887
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_lookup_invoice'
@@ -6283,7 +6711,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_on_invoice_events() !==
-    34724
+    20377
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_on_invoice_events'
@@ -6291,7 +6719,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_pay_invoice() !==
-    29917
+    64500
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_pay_invoice'
@@ -6299,7 +6727,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_blinknode_pay_offer() !==
-    27207
+    32133
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_blinknode_pay_offer'
@@ -6307,28 +6735,28 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_create_invoice() !==
-    33116
+    36818
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_create_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_decode() !== 8974
+    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_decode() !== 3572
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_decode'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_get_info() !== 34853
+    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_get_info() !== 61317
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_get_info'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_get_offer() !== 60119
+    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_get_offer() !== 28637
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_get_offer'
@@ -6336,7 +6764,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_list_offers() !==
-    49923
+    13602
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_list_offers'
@@ -6344,7 +6772,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_list_transactions() !==
-    9848
+    4544
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_list_transactions'
@@ -6352,7 +6780,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_lookup_invoice() !==
-    15175
+    56412
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_lookup_invoice'
@@ -6360,7 +6788,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_on_invoice_events() !==
-    45225
+    21155
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_on_invoice_events'
@@ -6368,271 +6796,119 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_pay_invoice() !==
-    62278
+    31517
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_pay_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_pay_offer() !== 17679
+    nativeModule().ubrn_uniffi_lni_checksum_method_clnnode_pay_offer() !== 24078
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_clnnode_pay_offer'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_invoiceeventscancellation_cancel() !==
-    50155
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_invoiceeventscancellation_cancel'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_invoiceeventscancellation_is_cancelled() !==
-    9819
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_invoiceeventscancellation_is_cancelled'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_invoicepollingstate_cancel() !==
-    24976
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_invoicepollingstate_cancel'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_invoicepollingstate_get_last_status() !==
-    9961
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_invoicepollingstate_get_last_status'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_invoicepollingstate_get_last_transaction() !==
-    38695
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_invoicepollingstate_get_last_transaction'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_invoicepollingstate_get_poll_count() !==
-    47200
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_invoicepollingstate_get_poll_count'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_invoicepollingstate_is_cancelled() !==
-    64768
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_invoicepollingstate_is_cancelled'
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_create_invoice() !==
-    31509
+    7159
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_create_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_create_invoice_async() !==
-    54589
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_create_invoice_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_create_offer_async() !==
-    33272
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_create_offer_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_decode() !== 58113
+    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_decode() !== 48920
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_decode'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_decode_async() !==
-    33913
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_decode_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_fetch_invoice_from_offer_async() !==
-    56743
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_fetch_invoice_from_offer_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_get_info() !== 10280
+    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_get_info() !== 6746
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_get_info'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_get_info_async() !==
-    28708
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_get_info_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_get_offer() !== 21739
+    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_get_offer() !== 60710
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_get_offer'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_get_offer_async() !==
-    6931
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_get_offer_async'
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_list_offers() !==
-    15496
+    28067
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_list_offers'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_list_offers_async() !==
-    53637
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_list_offers_async'
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_list_transactions() !==
-    24563
+    40313
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_list_transactions'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_list_transactions_async() !==
-    7716
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_list_transactions_async'
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_lookup_invoice() !==
-    56175
+    4930
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_lookup_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_lookup_invoice_async() !==
-    6664
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_lookup_invoice_async'
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_on_invoice_events() !==
-    10344
+    1478
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_on_invoice_events'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_on_invoice_events_async() !==
-    50985
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_on_invoice_events_async'
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_pay_invoice() !==
-    32026
+    19323
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_pay_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_pay_invoice_async() !==
-    30176
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_pay_invoice_async'
-    );
-  }
-  if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_pay_offer() !== 18220
+    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_pay_offer() !== 21712
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_lndnode_pay_offer'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_lndnode_pay_offer_async() !==
-    5955
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      'uniffi_lni_checksum_method_lndnode_pay_offer_async'
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_create_invoice() !==
-    50054
+    19162
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_create_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_decode() !== 44772
+    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_decode() !== 29349
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_decode'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_get_info() !== 40728
+    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_get_info() !== 53657
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_get_info'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_get_offer() !== 11940
+    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_get_offer() !== 28225
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_get_offer'
@@ -6640,7 +6916,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_list_offers() !==
-    35312
+    13687
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_list_offers'
@@ -6648,7 +6924,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_list_transactions() !==
-    27876
+    55800
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_list_transactions'
@@ -6656,7 +6932,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_lookup_invoice() !==
-    64497
+    27705
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_lookup_invoice'
@@ -6664,7 +6940,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_on_invoice_events() !==
-    58551
+    49489
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_on_invoice_events'
@@ -6672,14 +6948,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_pay_invoice() !==
-    40178
+    36912
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_pay_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_pay_offer() !== 15523
+    nativeModule().ubrn_uniffi_lni_checksum_method_nwcnode_pay_offer() !== 2588
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_nwcnode_pay_offer'
@@ -6687,7 +6963,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_create_invoice() !==
-    3101
+    12635
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_create_invoice'
@@ -6695,7 +6971,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_decode() !==
-    21453
+    53221
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_decode'
@@ -6703,7 +6979,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_get_info() !==
-    51474
+    4350
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_get_info'
@@ -6711,7 +6987,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_get_offer() !==
-    2870
+    53660
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_get_offer'
@@ -6719,7 +6995,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_list_offers() !==
-    47047
+    9898
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_list_offers'
@@ -6727,7 +7003,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_list_transactions() !==
-    4765
+    13865
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_list_transactions'
@@ -6735,7 +7011,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_lookup_invoice() !==
-    19916
+    28966
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_lookup_invoice'
@@ -6743,7 +7019,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_on_invoice_events() !==
-    34381
+    48541
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_on_invoice_events'
@@ -6751,7 +7027,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_pay_invoice() !==
-    25284
+    9010
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_pay_invoice'
@@ -6759,7 +7035,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_phoenixdnode_pay_offer() !==
-    11370
+    10981
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_phoenixdnode_pay_offer'
@@ -6767,22 +7043,21 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_create_invoice() !==
-    60778
+    17633
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_create_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_speednode_decode() !== 53397
+    nativeModule().ubrn_uniffi_lni_checksum_method_speednode_decode() !== 60443
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_decode'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_speednode_get_info() !==
-    24212
+    nativeModule().ubrn_uniffi_lni_checksum_method_speednode_get_info() !== 7826
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_get_info'
@@ -6790,7 +7065,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_get_offer() !==
-    52119
+    1699
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_get_offer'
@@ -6798,7 +7073,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_list_offers() !==
-    46990
+    13071
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_list_offers'
@@ -6806,7 +7081,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_list_transactions() !==
-    27004
+    23083
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_list_transactions'
@@ -6814,7 +7089,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_lookup_invoice() !==
-    20437
+    20032
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_lookup_invoice'
@@ -6822,7 +7097,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_on_invoice_events() !==
-    35459
+    16487
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_on_invoice_events'
@@ -6830,7 +7105,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_pay_invoice() !==
-    37654
+    53420
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_pay_invoice'
@@ -6838,7 +7113,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_speednode_pay_offer() !==
-    61197
+    26916
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_speednode_pay_offer'
@@ -6846,14 +7121,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_create_invoice() !==
-    12768
+    387
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_create_invoice'
     );
   }
   if (
-    nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_decode() !== 13848
+    nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_decode() !== 31296
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_decode'
@@ -6861,7 +7136,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_get_info() !==
-    62311
+    11424
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_get_info'
@@ -6869,7 +7144,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_get_offer() !==
-    38826
+    45459
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_get_offer'
@@ -6877,7 +7152,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_list_offers() !==
-    64885
+    3783
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_list_offers'
@@ -6885,7 +7160,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_list_transactions() !==
-    11039
+    46948
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_list_transactions'
@@ -6893,7 +7168,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_lookup_invoice() !==
-    18086
+    12439
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_lookup_invoice'
@@ -6901,7 +7176,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_on_invoice_events() !==
-    63347
+    18788
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_on_invoice_events'
@@ -6909,7 +7184,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_pay_invoice() !==
-    15540
+    12694
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_pay_invoice'
@@ -6917,7 +7192,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_lni_checksum_method_strikenode_pay_offer() !==
-    61233
+    39141
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       'uniffi_lni_checksum_method_strikenode_pay_offer'
@@ -7019,8 +7294,6 @@ export default Object.freeze({
     FfiConverterTypeCloseChannelResponse,
     FfiConverterTypeConnectPeerRequest,
     FfiConverterTypeCreateInvoiceParams,
-    FfiConverterTypeInvoiceEventsCancellation,
-    FfiConverterTypeInvoicePollingState,
     FfiConverterTypeInvoiceType,
     FfiConverterTypeLightningBalanceResponse,
     FfiConverterTypeListTransactionsParams,

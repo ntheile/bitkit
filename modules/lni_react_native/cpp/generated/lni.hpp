@@ -119,39 +119,6 @@ protected:
   jsi::Value cpp_uniffi_lni_fn_method_clnnode_pay_offer(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_clone_invoiceeventscancellation(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_free_invoiceeventscancellation(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_invoiceeventscancellation_cancel(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_invoiceeventscancellation_is_cancelled(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_clone_invoicepollingstate(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_free_invoicepollingstate(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_invoicepollingstate_cancel(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_invoicepollingstate_get_last_status(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_invoicepollingstate_get_last_transaction(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_invoicepollingstate_get_poll_count(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_invoicepollingstate_is_cancelled(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_fn_clone_lndnode(jsi::Runtime &rt,
                                              const jsi::Value &thisVal,
                                              const jsi::Value *args,
@@ -166,68 +133,32 @@ protected:
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_create_invoice(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_create_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_create_offer_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_decode(jsi::Runtime &rt,
                                                      const jsi::Value &thisVal,
                                                      const jsi::Value *args,
                                                      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_decode_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_fetch_invoice_from_offer_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_get_info(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_get_info_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_get_offer(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_get_offer_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_list_offers(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_list_offers_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_list_transactions(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_list_transactions_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_lookup_invoice(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_lookup_invoice_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_on_invoice_events(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_on_invoice_events_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_pay_invoice(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_pay_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_fn_method_lndnode_pay_offer(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_method_lndnode_pay_offer_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_fn_clone_nwcnode(jsi::Runtime &rt,
@@ -395,46 +326,37 @@ protected:
   jsi::Value cpp_uniffi_lni_fn_method_strikenode_pay_offer(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_create_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_decode_async(jsi::Runtime &rt,
-                                                 const jsi::Value &thisVal,
-                                                 const jsi::Value *args,
-                                                 size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_get_info_async(jsi::Runtime &rt,
+  jsi::Value cpp_uniffi_lni_fn_func_create_invoice(jsi::Runtime &rt,
                                                    const jsi::Value &thisVal,
                                                    const jsi::Value *args,
                                                    size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_list_transactions_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_lookup_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_nwc_lookup_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_nwc_on_invoice_events_with_cancellation(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_nwc_start_invoice_polling(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_on_invoice_events_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_pay_invoice_async(jsi::Runtime &rt,
+  jsi::Value cpp_uniffi_lni_fn_func_decode(jsi::Runtime &rt,
+                                           const jsi::Value &thisVal,
+                                           const jsi::Value *args,
+                                           size_t count);
+  jsi::Value cpp_uniffi_lni_fn_func_get_info(jsi::Runtime &rt,
+                                             const jsi::Value &thisVal,
+                                             const jsi::Value *args,
+                                             size_t count);
+  jsi::Value cpp_uniffi_lni_fn_func_list_transactions(jsi::Runtime &rt,
                                                       const jsi::Value &thisVal,
                                                       const jsi::Value *args,
                                                       size_t count);
+  jsi::Value cpp_uniffi_lni_fn_func_lookup_invoice(jsi::Runtime &rt,
+                                                   const jsi::Value &thisVal,
+                                                   const jsi::Value *args,
+                                                   size_t count);
+  jsi::Value cpp_uniffi_lni_fn_func_on_invoice_events(jsi::Runtime &rt,
+                                                      const jsi::Value &thisVal,
+                                                      const jsi::Value *args,
+                                                      size_t count);
+  jsi::Value cpp_uniffi_lni_fn_func_pay_invoice(jsi::Runtime &rt,
+                                                const jsi::Value &thisVal,
+                                                const jsi::Value *args,
+                                                size_t count);
   jsi::Value cpp_uniffi_lni_fn_func_say_after_with_tokio(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_fn_func_test_sync(jsi::Runtime &rt,
-                                              const jsi::Value &thisVal,
-                                              const jsi::Value *args,
-                                              size_t count);
   jsi::Value cpp_ffi_lni_rust_future_poll_u8(jsi::Runtime &rt,
                                              const jsi::Value &thisVal,
                                              const jsi::Value *args,
@@ -641,44 +563,33 @@ protected:
                                                    const jsi::Value &thisVal,
                                                    const jsi::Value *args,
                                                    size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_create_invoice_async(
+  jsi::Value cpp_uniffi_lni_checksum_func_create_invoice(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_decode_async(
+  jsi::Value cpp_uniffi_lni_checksum_func_decode(jsi::Runtime &rt,
+                                                 const jsi::Value &thisVal,
+                                                 const jsi::Value *args,
+                                                 size_t count);
+  jsi::Value cpp_uniffi_lni_checksum_func_get_info(jsi::Runtime &rt,
+                                                   const jsi::Value &thisVal,
+                                                   const jsi::Value *args,
+                                                   size_t count);
+  jsi::Value cpp_uniffi_lni_checksum_func_list_transactions(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_get_info_async(
+  jsi::Value cpp_uniffi_lni_checksum_func_lookup_invoice(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_list_transactions_async(
+  jsi::Value cpp_uniffi_lni_checksum_func_on_invoice_events(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_lookup_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_nwc_lookup_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value
-  cpp_uniffi_lni_checksum_func_nwc_on_invoice_events_with_cancellation(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_nwc_start_invoice_polling(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_on_invoice_events_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_pay_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
+  jsi::Value cpp_uniffi_lni_checksum_func_pay_invoice(jsi::Runtime &rt,
+                                                      const jsi::Value &thisVal,
+                                                      const jsi::Value *args,
+                                                      size_t count);
   jsi::Value cpp_uniffi_lni_checksum_func_say_after_with_tokio(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_func_test_sync(jsi::Runtime &rt,
-                                                    const jsi::Value &thisVal,
-                                                    const jsi::Value *args,
-                                                    size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_blinknode_create_invoice(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
@@ -739,94 +650,34 @@ protected:
   jsi::Value cpp_uniffi_lni_checksum_method_clnnode_pay_offer(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_invoiceeventscancellation_cancel(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value
-  cpp_uniffi_lni_checksum_method_invoiceeventscancellation_is_cancelled(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_invoicepollingstate_cancel(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_invoicepollingstate_get_last_status(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value
-  cpp_uniffi_lni_checksum_method_invoicepollingstate_get_last_transaction(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_invoicepollingstate_get_poll_count(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_invoicepollingstate_is_cancelled(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_create_invoice(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_create_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_create_offer_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_decode(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_decode_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value
-  cpp_uniffi_lni_checksum_method_lndnode_fetch_invoice_from_offer_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_get_info(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_get_info_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_get_offer(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_get_offer_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_list_offers(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_list_offers_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_list_transactions(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_list_transactions_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_lookup_invoice(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_lookup_invoice_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_on_invoice_events(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_on_invoice_events_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_pay_invoice(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_pay_invoice_async(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_lndnode_pay_offer(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value cpp_uniffi_lni_checksum_method_lndnode_pay_offer_async(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_lni_checksum_method_nwcnode_create_invoice(
@@ -993,14 +844,6 @@ protected:
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_internal_fn_method_clnnode_ffi__bless_pointer(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value
-  cpp_uniffi_internal_fn_method_invoiceeventscancellation_ffi__bless_pointer(
-      jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
-      size_t count);
-  jsi::Value
-  cpp_uniffi_internal_fn_method_invoicepollingstate_ffi__bless_pointer(
       jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args,
       size_t count);
   jsi::Value cpp_uniffi_internal_fn_method_lndnode_ffi__bless_pointer(

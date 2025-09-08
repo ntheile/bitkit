@@ -45,56 +45,44 @@ interface NativeModuleInterface {
   ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_create_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_decode(
     ptr: bigint,
-    str: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_blinknode_get_info(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    str: Uint8Array
+  ): bigint;
+  ubrn_uniffi_lni_fn_method_blinknode_get_info(ptr: bigint): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_get_offer(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_list_offers(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_list_transactions(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_lookup_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_on_invoice_events(
     ptr: bigint,
     params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    callback: bigint
+  ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_pay_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_blinknode_pay_offer(
     ptr: bigint,
     offer: Uint8Array,
     amountMsats: bigint,
-    payerNote: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    payerNote: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_clone_clnnode(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -109,100 +97,44 @@ interface NativeModuleInterface {
   ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_create_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_decode(
     ptr: bigint,
-    str: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_clnnode_get_info(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    str: Uint8Array
+  ): bigint;
+  ubrn_uniffi_lni_fn_method_clnnode_get_info(ptr: bigint): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_get_offer(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_list_offers(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_list_transactions(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_lookup_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_on_invoice_events(
     ptr: bigint,
     params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    callback: bigint
+  ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_pay_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_clnnode_pay_offer(
     ptr: bigint,
     offer: Uint8Array,
     amountMsats: bigint,
-    payerNote: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_clone_invoiceeventscancellation(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
+    payerNote: Uint8Array
   ): bigint;
-  ubrn_uniffi_lni_fn_free_invoiceeventscancellation(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_lni_fn_method_invoiceeventscancellation_cancel(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_lni_fn_method_invoiceeventscancellation_is_cancelled(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_lni_fn_clone_invoicepollingstate(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_lni_fn_free_invoicepollingstate(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_lni_fn_method_invoicepollingstate_cancel(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_lni_fn_method_invoicepollingstate_get_last_status(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_invoicepollingstate_get_last_transaction(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_invoicepollingstate_get_poll_count(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_lni_fn_method_invoicepollingstate_is_cancelled(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
   ubrn_uniffi_lni_fn_clone_lndnode(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -217,103 +149,39 @@ interface NativeModuleInterface {
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_create_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_create_invoice_async(
-    ptr: bigint,
     params: Uint8Array
-  ): bigint;
-  ubrn_uniffi_lni_fn_method_lndnode_create_offer_async(
-    ptr: bigint,
-    amountMsats: Uint8Array,
-    description: Uint8Array,
-    expiry: Uint8Array
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_decode(
     ptr: bigint,
-    str: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_decode_async(
-    ptr: bigint,
-    invoiceStr: Uint8Array
+    str: Uint8Array
   ): bigint;
-  ubrn_uniffi_lni_fn_method_lndnode_fetch_invoice_from_offer_async(
-    ptr: bigint,
-    offer: Uint8Array,
-    amountMsats: bigint,
-    payerNote: Uint8Array
-  ): bigint;
-  ubrn_uniffi_lni_fn_method_lndnode_get_info(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_get_info_async(ptr: bigint): bigint;
+  ubrn_uniffi_lni_fn_method_lndnode_get_info(ptr: bigint): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_get_offer(
-    ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_get_offer_async(
     ptr: bigint,
     search: Uint8Array
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_list_offers(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_list_offers_async(
-    ptr: bigint,
     search: Uint8Array
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_list_transactions(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_list_transactions_async(
-    ptr: bigint,
     params: Uint8Array
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_lookup_invoice(
-    ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_lookup_invoice_async(
     ptr: bigint,
     params: Uint8Array
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_on_invoice_events(
     ptr: bigint,
     params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_lni_fn_method_lndnode_on_invoice_events_async(
-    ptr: bigint,
-    params: Uint8Array,
     callback: bigint
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_pay_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_pay_invoice_async(
-    ptr: bigint,
     params: Uint8Array
   ): bigint;
   ubrn_uniffi_lni_fn_method_lndnode_pay_offer(
-    ptr: bigint,
-    offer: Uint8Array,
-    amountMsats: bigint,
-    payerNote: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_lndnode_pay_offer_async(
     ptr: bigint,
     offer: Uint8Array,
     amountMsats: bigint,
@@ -333,56 +201,44 @@ interface NativeModuleInterface {
   ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_create_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_decode(
     ptr: bigint,
-    str: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_nwcnode_get_info(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    str: Uint8Array
+  ): bigint;
+  ubrn_uniffi_lni_fn_method_nwcnode_get_info(ptr: bigint): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_get_offer(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_list_offers(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_list_transactions(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_lookup_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_on_invoice_events(
     ptr: bigint,
     params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    callback: bigint
+  ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_pay_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_nwcnode_pay_offer(
     ptr: bigint,
     offer: Uint8Array,
     amountMsats: bigint,
-    payerNote: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    payerNote: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_clone_phoenixdnode(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -397,56 +253,44 @@ interface NativeModuleInterface {
   ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_create_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_decode(
     ptr: bigint,
-    str: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_phoenixdnode_get_info(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    str: Uint8Array
+  ): bigint;
+  ubrn_uniffi_lni_fn_method_phoenixdnode_get_info(ptr: bigint): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_get_offer(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_list_offers(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_list_transactions(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_lookup_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_on_invoice_events(
     ptr: bigint,
     params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    callback: bigint
+  ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_pay_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_phoenixdnode_pay_offer(
     ptr: bigint,
     offer: Uint8Array,
     amountMsats: bigint,
-    payerNote: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    payerNote: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_clone_speednode(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -461,56 +305,44 @@ interface NativeModuleInterface {
   ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_create_invoice(
     ptr: bigint,
-    invoiceParams: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    invoiceParams: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_decode(
     ptr: bigint,
-    str: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_speednode_get_info(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    str: Uint8Array
+  ): bigint;
+  ubrn_uniffi_lni_fn_method_speednode_get_info(ptr: bigint): bigint;
   ubrn_uniffi_lni_fn_method_speednode_get_offer(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_list_offers(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_list_transactions(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_lookup_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_on_invoice_events(
     ptr: bigint,
     params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    callback: bigint
+  ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_pay_invoice(
     ptr: bigint,
-    invoiceParams: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    invoiceParams: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_speednode_pay_offer(
     ptr: bigint,
     offer: Uint8Array,
     amountMsats: bigint,
-    payerNote: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    payerNote: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_clone_strikenode(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -525,100 +357,72 @@ interface NativeModuleInterface {
   ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_create_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_decode(
     ptr: bigint,
-    str: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_method_strikenode_get_info(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    str: Uint8Array
+  ): bigint;
+  ubrn_uniffi_lni_fn_method_strikenode_get_info(ptr: bigint): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_get_offer(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_list_offers(
     ptr: bigint,
-    search: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    search: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_list_transactions(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_lookup_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_on_invoice_events(
     ptr: bigint,
     params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    callback: bigint
+  ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_pay_invoice(
     ptr: bigint,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    params: Uint8Array
+  ): bigint;
   ubrn_uniffi_lni_fn_method_strikenode_pay_offer(
     ptr: bigint,
     offer: Uint8Array,
     amountMsats: bigint,
-    payerNote: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_lni_fn_func_create_invoice_async(
+    payerNote: Uint8Array
+  ): bigint;
+  ubrn_uniffi_lni_fn_func_create_invoice(
     config: Uint8Array,
     params: Uint8Array
   ): bigint;
-  ubrn_uniffi_lni_fn_func_decode_async(
+  ubrn_uniffi_lni_fn_func_decode(
     config: Uint8Array,
     invoiceStr: Uint8Array
   ): bigint;
-  ubrn_uniffi_lni_fn_func_get_info_async(config: Uint8Array): bigint;
-  ubrn_uniffi_lni_fn_func_list_transactions_async(
+  ubrn_uniffi_lni_fn_func_get_info(config: Uint8Array): bigint;
+  ubrn_uniffi_lni_fn_func_list_transactions(
     config: Uint8Array,
     from: Uint8Array,
     limit: Uint8Array,
     search: Uint8Array
   ): bigint;
-  ubrn_uniffi_lni_fn_func_lookup_invoice_async(
+  ubrn_uniffi_lni_fn_func_lookup_invoice(
     config: Uint8Array,
     paymentHash: Uint8Array,
     from: Uint8Array,
     limit: Uint8Array,
     search: Uint8Array
   ): bigint;
-  ubrn_uniffi_lni_fn_func_nwc_lookup_invoice_async(
-    config: Uint8Array,
-    paymentHash: Uint8Array,
-    invoice: Uint8Array
-  ): bigint;
-  ubrn_uniffi_lni_fn_func_nwc_on_invoice_events_with_cancellation(
-    config: Uint8Array,
-    params: Uint8Array,
-    callback: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_lni_fn_func_nwc_start_invoice_polling(
-    config: Uint8Array,
-    params: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_lni_fn_func_on_invoice_events_async(
+  ubrn_uniffi_lni_fn_func_on_invoice_events(
     config: Uint8Array,
     params: Uint8Array,
     callback: bigint
   ): bigint;
-  ubrn_uniffi_lni_fn_func_pay_invoice_async(
+  ubrn_uniffi_lni_fn_func_pay_invoice(
     config: Uint8Array,
     params: Uint8Array
   ): bigint;
@@ -630,10 +434,6 @@ interface NativeModuleInterface {
     headerKey: Uint8Array,
     headerValue: Uint8Array
   ): bigint;
-  ubrn_uniffi_lni_fn_func_test_sync(
-    config: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
   ubrn_ffi_lni_rust_future_poll_u8(
     handle: bigint,
     callback: UniffiRustFutureContinuationCallback,
@@ -777,18 +577,14 @@ interface NativeModuleInterface {
     handle: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_uniffi_lni_checksum_func_create_invoice_async(): number;
-  ubrn_uniffi_lni_checksum_func_decode_async(): number;
-  ubrn_uniffi_lni_checksum_func_get_info_async(): number;
-  ubrn_uniffi_lni_checksum_func_list_transactions_async(): number;
-  ubrn_uniffi_lni_checksum_func_lookup_invoice_async(): number;
-  ubrn_uniffi_lni_checksum_func_nwc_lookup_invoice_async(): number;
-  ubrn_uniffi_lni_checksum_func_nwc_on_invoice_events_with_cancellation(): number;
-  ubrn_uniffi_lni_checksum_func_nwc_start_invoice_polling(): number;
-  ubrn_uniffi_lni_checksum_func_on_invoice_events_async(): number;
-  ubrn_uniffi_lni_checksum_func_pay_invoice_async(): number;
+  ubrn_uniffi_lni_checksum_func_create_invoice(): number;
+  ubrn_uniffi_lni_checksum_func_decode(): number;
+  ubrn_uniffi_lni_checksum_func_get_info(): number;
+  ubrn_uniffi_lni_checksum_func_list_transactions(): number;
+  ubrn_uniffi_lni_checksum_func_lookup_invoice(): number;
+  ubrn_uniffi_lni_checksum_func_on_invoice_events(): number;
+  ubrn_uniffi_lni_checksum_func_pay_invoice(): number;
   ubrn_uniffi_lni_checksum_func_say_after_with_tokio(): number;
-  ubrn_uniffi_lni_checksum_func_test_sync(): number;
   ubrn_uniffi_lni_checksum_method_blinknode_create_invoice(): number;
   ubrn_uniffi_lni_checksum_method_blinknode_decode(): number;
   ubrn_uniffi_lni_checksum_method_blinknode_get_info(): number;
@@ -809,35 +605,16 @@ interface NativeModuleInterface {
   ubrn_uniffi_lni_checksum_method_clnnode_on_invoice_events(): number;
   ubrn_uniffi_lni_checksum_method_clnnode_pay_invoice(): number;
   ubrn_uniffi_lni_checksum_method_clnnode_pay_offer(): number;
-  ubrn_uniffi_lni_checksum_method_invoiceeventscancellation_cancel(): number;
-  ubrn_uniffi_lni_checksum_method_invoiceeventscancellation_is_cancelled(): number;
-  ubrn_uniffi_lni_checksum_method_invoicepollingstate_cancel(): number;
-  ubrn_uniffi_lni_checksum_method_invoicepollingstate_get_last_status(): number;
-  ubrn_uniffi_lni_checksum_method_invoicepollingstate_get_last_transaction(): number;
-  ubrn_uniffi_lni_checksum_method_invoicepollingstate_get_poll_count(): number;
-  ubrn_uniffi_lni_checksum_method_invoicepollingstate_is_cancelled(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_create_invoice(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_create_invoice_async(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_create_offer_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_decode(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_decode_async(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_fetch_invoice_from_offer_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_get_info(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_get_info_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_get_offer(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_get_offer_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_list_offers(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_list_offers_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_list_transactions(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_list_transactions_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_lookup_invoice(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_lookup_invoice_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_on_invoice_events(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_on_invoice_events_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_pay_invoice(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_pay_invoice_async(): number;
   ubrn_uniffi_lni_checksum_method_lndnode_pay_offer(): number;
-  ubrn_uniffi_lni_checksum_method_lndnode_pay_offer_async(): number;
   ubrn_uniffi_lni_checksum_method_nwcnode_create_invoice(): number;
   ubrn_uniffi_lni_checksum_method_nwcnode_decode(): number;
   ubrn_uniffi_lni_checksum_method_nwcnode_get_info(): number;
@@ -901,14 +678,6 @@ interface NativeModuleInterface {
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiRustArcPtr;
   ubrn_uniffi_internal_fn_method_clnnode_ffi__bless_pointer(
-    pointer: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): UniffiRustArcPtr;
-  ubrn_uniffi_internal_fn_method_invoiceeventscancellation_ffi__bless_pointer(
-    pointer: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): UniffiRustArcPtr;
-  ubrn_uniffi_internal_fn_method_invoicepollingstate_ffi__bless_pointer(
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiRustArcPtr;
