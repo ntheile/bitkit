@@ -117,3 +117,5 @@ src/assets/svgs/optimized/
 **/lib/module/generated/
 **/lib/typescript/commonjs/src/generated/
 **/android/app/build/intermediates/
+
+lni.tgz

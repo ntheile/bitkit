@@ -44,7 +44,7 @@
     "@react-native-community/blur": "4.4.1",
     "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/drawer": "^7.1.1",
-    "@react-navigation/native": "7.0.14",
+    "@react-navigation/native": "7.1.17",
     "@react-navigation/native-stack": "7.2.0",
     "@reduxjs/toolkit": "2.2.6",
     "@shopify/react-native-skia": "next",
@@ -70,7 +70,7 @@
     "i18next-icu": "2.3.0",
     "intl-messageformat": "10.5.11",
     "jdenticon": "3.2.0",
-    "lni_react_native": "link:./modules/lni_react_native",
+    "lni_react_native": "./lni.tgz",
     "lodash": "4.17.21",
     "lottie-react-native": "7.2.2",
     "react": "19.0.0",
@@ -170,7 +170,8 @@
   },
   "resolutions": {
     "tiny-secp256k1": "1.1.7",
-    "elliptic": "6.6.1"
+    "elliptic": "6.6.1",
+    "@react-navigation/native": "7.1.17"
   },
   "react-native": {
     "net": "react-native-tcp-socket",

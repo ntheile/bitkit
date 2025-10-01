@@ -7,7 +7,8 @@ def node_require(script)
     )", __dir__]).strip
 end
 
-# Disable New Architecture
+# Enable New Architecture for TurboModule compatibility
+# Disable New Architecture due to react-native-svg and react-native-reanimated compatibility issues
 ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 
 node_require('react-native/scripts/react_native_pods.rb')
