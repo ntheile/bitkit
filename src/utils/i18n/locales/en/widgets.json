@@ -90,6 +90,23 @@
       "string": "Convert ₿ amounts to {fiatSymbol} or vice versa."
     }
   },
+  "connectwallet": {
+    "name": {
+      "string": "Connect Wallet"
+    },
+    "description": {
+      "string": "Connect your Bitkit wallet to external services and applications."
+    },
+    "title": {
+      "string": "Connect Wallet"
+    },
+    "instructions": {
+      "string": "Scan QR code or enter pairing code to connect your wallet."
+    },
+    "pairing_code": {
+      "string": "Pairing Code"
+    }
+  },
   "weather": {
     "name": {
       "string": "Bitcoin Weather"

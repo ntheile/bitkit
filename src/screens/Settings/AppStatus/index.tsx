@@ -13,6 +13,7 @@ import {
 import { useAppSelector } from '../../../hooks/redux';
 import { SettingsScreenProps } from '../../../navigation/types';
 import { backupSelector } from '../../../store/reselect/backup';
+import { defaultExternalWalletSelector } from '../../../store/reselect/externalWallets';
 import {
 	backupStatusSelector,
 	channelsStatusSelector,
@@ -58,7 +59,8 @@ const Status = ({
 	subtitle,
 	style,
 	onPress,
-}: IStatusItemProps): ReactElement => {
+	customTitle,
+}: IStatusItemProps & { customTitle?: string }): ReactElement => {
 	const { t } = useTranslation('settings');
 	const {
 		backgroundColor,
@@ -76,6 +78,7 @@ const Status = ({
 		}, [state]);
 
 	subtitle = subtitle || t(`status.${id}.${state}`);
+	const title = customTitle || t(`status.${id}.title`);
 
 	return (
 		<Pressable
@@ -88,7 +91,7 @@ const Status = ({
 				</ThemedView>
 			</View>
 			<View style={styles.description}>
-				<BodyMSB>{t(`status.${id}.title`)}</BodyMSB>
+				<BodyMSB>{title}</BodyMSB>
 				<CaptionB color="secondary">{subtitle}</CaptionB>
 			</View>
 		</Pressable>
@@ -107,6 +110,12 @@ const AppStatus = ({
 	const channelsState = useAppSelector(channelsStatusSelector);
 	const backupState = useAppSelector(backupStatusSelector);
 	const backup = useAppSelector(backupSelector);
+	const defaultExternalWallet = useAppSelector(defaultExternalWalletSelector);
+	const externalWallets = useAppSelector((state) => state.externalWallets);
+
+	// Check if we're using external wallets
+	const usingExternalWallet = defaultExternalWallet && 
+		externalWallets[defaultExternalWallet]?.connected;
 
 	const backupSubtitle = useMemo(() => {
 		if (backupState === 'error') {
@@ -130,7 +139,34 @@ const AppStatus = ({
 		});
 	}, [backup, backupState, t, tTime]);
 
-	const items: IStatusItemProps[] = [
+	// Dynamic subtitles based on wallet type
+	const getNodeSubtitle = () => {
+		if (usingExternalWallet) {
+			if (nodeState === 'ready') {
+				return `${defaultExternalWallet?.toUpperCase()} Connected`;
+			}
+			if (nodeState === 'pending') {
+				return `Connecting to ${defaultExternalWallet?.toUpperCase()}...`;
+			}
+			return `Could not connect to ${defaultExternalWallet?.toUpperCase()}`;
+		}
+		return undefined; // Use default translation
+	};
+
+	const getChannelsSubtitle = () => {
+		if (usingExternalWallet) {
+			if (channelsState === 'ready') {
+				return 'Lightning Ready';
+			}
+			if (channelsState === 'pending') {
+				return 'Limited Capacity';
+			}
+			return 'No Lightning Capacity';
+		}
+		return undefined; // Use default translation
+	};
+
+	const items: (IStatusItemProps & { customTitle?: string })[] = [
 		{
 			id: 'internet',
 			Icon: GlobeSimpleIcon,
@@ -154,12 +190,16 @@ const AppStatus = ({
 			id: 'lightning_node',
 			Icon: BroadcastIcon,
 			state: nodeState,
+			customTitle: usingExternalWallet ? 'External Wallet' : undefined,
+			subtitle: getNodeSubtitle(),
 			onPress: () => navigation.navigate('LightningNodeInfo'),
 		},
 		{
 			id: 'lightning_connection',
 			Icon: LightningHollowIcon,
 			state: channelsState,
+			customTitle: usingExternalWallet ? 'Lightning Capacity' : undefined,
+			subtitle: getChannelsSubtitle(),
 			onPress: () => navigation.navigate('Channels'),
 		},
 		{
@@ -175,7 +215,7 @@ const AppStatus = ({
 		<SettingsView title={t('status.title')} fullHeight={true}>
 			<ScrollView style={styles.statusRoot}>
 				{items.map((item, index) => {
-					const { id, Icon, state, subtitle } = item;
+					const { id, Icon, state, subtitle, customTitle } = item;
 					const isLast = index === items.length - 1;
 
 					return (
@@ -186,6 +226,7 @@ const AppStatus = ({
 							Icon={Icon}
 							state={state}
 							subtitle={subtitle}
+							customTitle={customTitle}
 							onPress={item.onPress}
 						/>
 					);

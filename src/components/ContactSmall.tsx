@@ -37,7 +37,6 @@ const ContactSmall = ({
 			testID={testID}>
 			<>
 				<ProfileImage
-					url={url}
 					image={profile.image}
 					size={size === 'large' ? 32 : 24}
 				/>

@@ -301,6 +301,12 @@
 	"toast_payment_failed_description": {
 		"string": "Your instant payment failed. Please try again."
 	},
+	"toast_payment_received_title": {
+		"string": "Payment Received"
+	},
+	"toast_payment_received_description": {
+		"string": "Your lightning payment has been received successfully."
+	},
 	"selection_title": {
 		"string": "Coin Selection"
 	},
@@ -379,7 +385,7 @@
 		"string": "You will receive"
 	},
 	"receive_ldk_init": {
-		"string": "Spending Balance Initializing..."
+		"string": "Lightning Initializing..."
 	},
 	"minimum": {
 		"string": "MINIMUM"

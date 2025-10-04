@@ -1623,6 +1623,36 @@ export const payLightningInvoice = async ({
 	amount?: number;
 }): Promise<Result<string>> => {
 	try {
+		// First, check if there's a default external wallet configured
+		const store = getStore();
+		const externalWallets = store.externalWallets;
+		
+		if (externalWallets?.defaultWallet) {
+			console.log('Attempting payment with external wallet:', externalWallets.defaultWallet);
+			try {
+				// Import the external wallet payment function
+				const externalWalletModule = await import('../../store/utils/externalWallets');
+				
+				if (externalWalletModule?.payExternalWalletInvoice && typeof externalWalletModule.payExternalWalletInvoice === 'function') {
+					const externalPayment = await externalWalletModule.payExternalWalletInvoice(
+						() => getStore(),
+						invoice,
+						amount
+					);
+					
+					if (externalPayment) {
+						console.log('Payment successful with external wallet:', externalPayment.paymentHash);
+						return ok(externalPayment.paymentHash);
+					}
+				} else {
+					console.log('External wallet payment function not available');
+				}
+			} catch (externalWalletError) {
+				console.log('External wallet payment error:', externalWalletError);
+			}
+			console.log('External wallet payment failed, falling back to LDK');
+		}
+		// Fallback to original LDK payment logic
 		await waitForLdkChannels();
 
 		const addPeersResponse = await addPeers();

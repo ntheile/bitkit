@@ -23,6 +23,23 @@ export const isLDKReadySelector = (state: RootState): boolean => {
 	return state.ui.isLDKReady;
 };
 
+export const isLightningReadySelector = (state: RootState): boolean => {
+	// Check if LDK is ready
+	if (state.ui.isLDKReady) {
+		return true;
+	}
+	
+	// Check if external wallet is connected and ready
+	const externalWallets = state.externalWallets;
+	const defaultWallet = externalWallets.defaultWallet;
+	
+	if (defaultWallet && externalWallets[defaultWallet]?.connected) {
+		return true;
+	}
+	
+	return false;
+};
+
 export const isConnectedToElectrumSelector = (state: RootState): boolean => {
 	return state.ui.isConnectedToElectrum;
 };
@@ -69,6 +86,17 @@ export const electrumStatusSelector = (state: RootState): THealthState => {
 
 export const nodeStatusSelector = (state: RootState): THealthState => {
 	const { isOnline, isLDKReady } = state.ui;
+	const externalWallets = state.externalWallets;
+	
+	// Check if we have a connected external wallet
+	const hasConnectedExternalWallet = externalWallets.defaultWallet && 
+		externalWallets[externalWallets.defaultWallet]?.connected;
+	
+	// If we have external wallet, use that status; otherwise use LDK status
+	if (hasConnectedExternalWallet) {
+		return isOnline ? 'ready' : 'error';
+	}
+	
 	return isOnline && isLDKReady ? 'ready' : 'error';
 };
 
@@ -77,10 +105,28 @@ export const channelsStatusSelector = (state: RootState): THealthState => {
 	const openChannels = openChannelsSelector(state);
 	const pendingChannels = pendingChannelsSelector(state);
 	const paidOrders = blocktankPaidOrdersFullSelector(state);
+	const externalWallets = state.externalWallets;
 
 	if (!isOnline) {
 		return 'error';
 	}
+
+	// Check if we have a connected external wallet with balance
+	const defaultWallet = externalWallets.defaultWallet;
+	if (defaultWallet && externalWallets[defaultWallet]?.connected) {
+		const walletConfig = externalWallets[defaultWallet];
+		const nodeInfo = walletConfig?.lastNodeInfo as any;
+		
+		// If external wallet has receiving capacity, consider it ready
+		if (nodeInfo?.receiveBalanceSats > 0 || nodeInfo?.sendBalanceSats > 0) {
+			return 'ready';
+		}
+		
+		// External wallet is connected but has no balance
+		return 'pending';
+	}
+
+	// Fallback to LDK channel logic
 	if (openChannels.length > 0) {
 		return 'ready';
 	}
