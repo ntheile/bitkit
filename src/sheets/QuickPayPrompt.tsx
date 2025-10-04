@@ -11,6 +11,7 @@ import { RootNavigationProp } from '../navigation/types';
 import { quickpayIntroSeenSelector } from '../store/reselect/settings';
 import { updateSettings } from '../store/slices/settings';
 import { BodyMB, Display } from '../styles/text';
+import { isAnySheetOpen } from './isAnySheetOpen';
 import { useAllSheetRefs, useSheetRef } from './SheetRefsProvider';
 
 const imageSrc = require('../assets/illustrations/fast-forward.png');
@@ -35,11 +36,10 @@ const QuickPayPrompt = (): ReactElement => {
 		// and no other bottom-sheets are shown
 		// and user on home screen for CHECK_DELAY
 		const shouldShow = () => {
-			const isAnySheetOpen = sheetRefs.some(({ ref }) => ref.current?.isOpen());
 			const hasSpendingBalance = spendingBalance > 0;
 
 			return (
-				!__E2E__ && !isAnySheetOpen && !quickpayIntroSeen && hasSpendingBalance
+				!__E2E__ && !isAnySheetOpen(sheetRefs) && !quickpayIntroSeen && hasSpendingBalance
 			);
 		};
 

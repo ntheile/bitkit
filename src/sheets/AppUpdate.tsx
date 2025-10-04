@@ -10,6 +10,7 @@ import { ignoreAppUpdateTimestampSelector } from '../store/reselect/user';
 import { ignoreAppUpdate } from '../store/slices/user';
 import { Display } from '../styles/text';
 import { openURL } from '../utils/helpers';
+import { isAnySheetOpen } from './isAnySheetOpen';
 import { useAllSheetRefs, useSheetRef } from './SheetRefsProvider';
 
 const imageSrc = require('../assets/illustrations/wand.png');
@@ -35,11 +36,10 @@ const AppUpdate = (): ReactElement => {
 		// and user on home screen for CHECK_DELAY
 		const shouldShow = () => {
 			const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
-			const isAnySheetOpen = sheetRefs.some(({ ref }) => ref.current?.isOpen());
 
 			return (
 				!__E2E__ &&
-				!isAnySheetOpen &&
+				!isAnySheetOpen(sheetRefs) &&
 				isTimeoutOver &&
 				updateInfo !== null &&
 				!updateInfo.critical

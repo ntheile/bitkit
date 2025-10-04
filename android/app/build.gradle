@@ -87,6 +87,10 @@ android {
         versionName "1.1.3"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        
+        // Explicitly set New Architecture flag
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", (findProperty("newArchEnabled") ?: "false")
+        buildConfigField "boolean", "IS_HERMES_ENABLED", (findProperty("hermesEnabled") ?: "true")
     }
 
     signingConfigs {
