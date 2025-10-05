@@ -481,15 +481,22 @@ export const createExternalWalletInvoice = async (
     }
 
     // Create CreateInvoiceParams following the Rust test pattern
+    console.log('[DEBUG] createExternalWalletInvoice received amountSats:', amountSats, 'type:', typeof amountSats);
+    
+    // Convert satoshis to millisatoshis (sats * 1000 = msats)
+    const amountMsats = amountSats ? BigInt(Math.floor(amountSats) * 1000) : undefined;
+    console.log('[DEBUG] Calculated amountMsats:', amountMsats?.toString(), 'from amountSats:', amountSats);
+    
     const createInvoiceParams: CreateInvoiceParams = {
       invoiceType: InvoiceType.Bolt11,
-      amountMsats: amountSats ? BigInt(amountSats * 1000) : undefined,
+      amountMsats: amountMsats,
       description: description || undefined,
       expiry: expiryDeltaSeconds ? BigInt(expiryDeltaSeconds) : BigInt(3600), // Default 1 hour
     }
 
     console.log('Creating invoice with params:', {
       amountSats,
+      amountMsatsString: amountMsats?.toString(),
       description,
       expiryDeltaSeconds,
     })

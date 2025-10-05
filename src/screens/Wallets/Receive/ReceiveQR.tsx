@@ -161,6 +161,7 @@ const ReceiveQR = ({
 		}
 
 		console.log(`[TIMING] About to call createLightningInvoice at: ${Date.now()}`);
+		console.log('[DEBUG] ReceiveQR calling createLightningInvoice with amount:', amount, 'type:', typeof amount);
 		const response = await createLightningInvoice({
 			amountSats: amount,
 			description: message,
