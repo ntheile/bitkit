@@ -26,6 +26,7 @@
     "clean:ios": "cd ios && npx del-cli Pods build && pod install",
     "bundle": "yarn clean:android && react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.jsbundle --assets-dest android/app/build/intermediates/res/merged/release/ && cd android && ./gradlew assembleRelease --no-daemon",
     "bundle:debug": "yarn clean:android && react-native bundle --platform android --dev true --entry-file index.js --bundle-output android/app/src/main/assets/index.android.jsbundle --assets-dest android/app/build/intermediates/res/merged/debug/ && cd android && ./gradlew assembleDebug --no-daemon",
+    "genIcons": "npx react-native set-icon --path images/zaprite-icon.svg --platform all && node scripts/generate-splash.js 2 ",
     "prepare": "husky",
     "postinstall": "node postinstall.js"
   },
@@ -131,6 +132,7 @@
     "@babel/plugin-proposal-async-generator-functions": "^7.20.7",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
+    "@bam.tech/react-native-make": "^3.0.3",
     "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^19.2.2",
     "@commitlint/config-conventional": "^19.2.2",
