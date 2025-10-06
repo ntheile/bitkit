@@ -20,7 +20,7 @@
     "lint:check": "biome check ./src/**/*.{js,jsx,ts,tsx}",
     "lint:fix": "biome check --write ./src/**/*.{js,jsx,ts,tsx}",
     "tsc:check": "tsc",
-    "clean": "yarn clean:rn && yarn clean:ios && yarn clean:android",
+    "clean": "yarn clean:rn && yarn clean:ios && yarn clean:android && npx react-native start --reset-cache",
     "clean:rn": "watchman watch-del-all && npx del-cli node_modules && yarn",
     "clean:android": "cd android && npx del-cli build app/build app/release",
     "clean:ios": "cd ios && npx del-cli Pods build && pod install",

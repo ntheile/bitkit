@@ -1,6 +1,8 @@
 import {
 	NavigationIndependentTree,
 	createNavigationContainerRef,
+	StackActions,
+	CommonActions,
 } from '@react-navigation/native';
 import {
 	NativeStackNavigationOptions,
@@ -41,6 +43,10 @@ import {
 	selectedWalletSelector,
 	transactionSelector,
 } from '../store/reselect/wallet';
+import {
+	defaultExternalWalletSelector,
+	connectedExternalWalletsSelector,
+} from '../store/reselect/externalWallets';
 import { EActivityType } from '../store/types/activity';
 import { SheetsParamList } from '../store/types/ui';
 import { updateOnchainFeeEstimates } from '../store/utils/fees';
@@ -90,17 +96,59 @@ export const sendNavigation = {
 				: [screen: RouteName, params: SendStackParamList[RouteName]]
 			: never
 	): void {
+		const screenName = args[0];
+		const params = args[1];
+		
+		console.log('[sendNavigation.navigate] Attempting to navigate to:', screenName);
+		
 		if (navigationRef.isReady()) {
+			const state = navigationRef.getState();
 			const currentRoute = navigationRef.getCurrentRoute()?.name;
-			const nextRoute = args[0];
 
-			if (currentRoute === nextRoute) {
-				console.log(`Already on screen ${currentRoute}. Skipping...`);
+			console.log('[sendNavigation.navigate] Current route:', currentRoute, '-> Next route:', screenName);
+			console.log('[sendNavigation.navigate] Navigation state before:', JSON.stringify(state, null, 2));
+
+			if (currentRoute === screenName) {
+				console.log(`[sendNavigation.navigate] Already on screen ${currentRoute}. Skipping...`);
 				return;
 			}
 
-			navigationRef.navigate(...args);
+			console.log('[sendNavigation.navigate] Using CommonActions.navigate to add screen to stack');
+			
+			// Use CommonActions.navigate which should work better with independent navigation trees
+			try {
+				const navigateAction = CommonActions.navigate({
+					name: screenName as string,
+					params: params,
+				});
+				navigationRef.dispatch(navigateAction);
+				console.log('[sendNavigation.navigate] Navigate action dispatched successfully');
+			} catch (error) {
+				console.error('[sendNavigation.navigate] Navigate failed:', error);
+			}
+			
+			// Log state after navigation
+			setTimeout(() => {
+				if (navigationRef.isReady()) {
+					try {
+						const newRoute = navigationRef.getCurrentRoute()?.name;
+						const newState = navigationRef.getState();
+						console.log('[sendNavigation.navigate] After navigation, current route:', newRoute);
+						console.log('[sendNavigation.navigate] Navigation state after:', JSON.stringify(newState, null, 2));
+						
+						// If still not on the right screen, log a warning
+						if (newRoute !== screenName) {
+							console.warn(`[sendNavigation.navigate] WARNING: Navigation to ${screenName} failed. Still on ${newRoute}`);
+						}
+					} catch (e) {
+						console.error('[sendNavigation.navigate] Error getting post-navigation state:', e);
+					}
+				} else {
+					console.log('[sendNavigation.navigate] Navigation ref not ready after navigation');
+				}
+			}, 150);
 		} else {
+			console.log('[sendNavigation.navigate] Navigation not ready, retrying in 200ms...');
 			// sendNavigation not ready, try again after a short wait
 			setTimeout(() => sendNavigation.navigate(...args), 200);
 		}
@@ -123,9 +171,13 @@ const SendNavigation = (): ReactElement => {
 	const selectedWallet = useAppSelector(selectedWalletSelector);
 	const selectedNetwork = useAppSelector(selectedNetworkSelector);
 	const transaction = useAppSelector(transactionSelector);
+	const defaultExternalWallet = useAppSelector(defaultExternalWalletSelector);
+	const connectedWallets = useAppSelector(connectedExternalWalletsSelector);
+	const hasExternalWallet = !!defaultExternalWallet && connectedWallets.includes(defaultExternalWallet);
 
 	const onOpen = async (): Promise<void> => {
-		if (!transaction?.lightningInvoice) {
+		// Skip on-chain transaction setup if using external wallet
+		if (!transaction?.lightningInvoice && !hasExternalWallet) {
 			await updateOnchainFeeEstimates({ forceUpdate: true });
 			if (!transaction?.inputs.length) {
 				await setupOnChainTransaction();

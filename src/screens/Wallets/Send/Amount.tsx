@@ -32,6 +32,10 @@ import {
 	nextUnitSelector,
 	unitSelector,
 } from '../../../store/reselect/settings';
+import {
+	defaultExternalWalletSelector,
+	connectedExternalWalletsSelector,
+} from '../../../store/reselect/externalWallets';
 import { sendTransactionSelector } from '../../../store/reselect/ui';
 import {
 	selectedNetworkSelector,
@@ -76,6 +80,9 @@ const Amount = ({ navigation }: SendScreenProps<'Amount'>): ReactElement => {
 
 	const { paymentMethod } = useAppSelector(sendTransactionSelector);
 	const usesLightning = paymentMethod === 'lightning';
+	const defaultExternalWallet = useAppSelector(defaultExternalWalletSelector);
+	const connectedWallets = useAppSelector(connectedExternalWalletsSelector);
+	const hasExternalWallet = !!defaultExternalWallet && connectedWallets.includes(defaultExternalWallet);
 
 	const outputAmount = useMemo(() => {
 		const amount = getTransactionOutputValue({ outputs: transaction.outputs });
@@ -190,6 +197,19 @@ const Amount = ({ navigation }: SendScreenProps<'Amount'>): ReactElement => {
 			return;
 		}
 
+		// If external wallet is active, skip all on-chain transaction setup
+		// External wallet handles its own transaction logic
+		if (hasExternalWallet && !usesLightning) {
+			// For external wallets, we don't support on-chain sends through Bitkit
+			// Only lightning payments are routed to external wallet
+			showToast({
+				type: 'warning',
+				title: 'On-chain not supported',
+				description: 'On-chain transactions are not supported when using an external wallet. Please use Lightning.',
+			});
+			return;
+		}
+
 		// If coin selection is enabled and the user wants to pay onchain.
 		if (!coinSelectAuto && !usesLightning) {
 			navigation.navigate('CoinSelection');
@@ -207,7 +227,7 @@ const Amount = ({ navigation }: SendScreenProps<'Amount'>): ReactElement => {
 			}
 			navigation.navigate('ReviewAndSend');
 		}
-	}, [amount, coinSelectAuto, transaction, usesLightning, navigation, t]);
+	}, [amount, coinSelectAuto, transaction, usesLightning, navigation, t, hasExternalWallet]);
 
 	const isValid = useMemo(() => {
 		if (amount === 0) {

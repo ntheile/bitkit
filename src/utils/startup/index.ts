@@ -86,7 +86,7 @@ export const restoreRemoteBackups = async (): Promise<Result<string>> => {
 const ENABLE_SERVICES = true;
 export const startWalletServices = async ({
 	onchain = ENABLE_SERVICES,
-	lightning = false, // ENABLE_SERVICES, // this turns off LDK when set to false
+	lightning = false, //ENABLE_SERVICES,
 	restore = false,
 	staleBackupRecoveryMode = false,
 	selectedWallet = getSelectedWallet(),

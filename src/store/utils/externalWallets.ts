@@ -427,17 +427,17 @@ export const fetchDefaultExternalWalletInfo = async (
     console.error('Error fetching default external wallet info:', error)
 
     // Update the external wallet state with error
-    const state = getState()
-    const defaultWallet = state.externalWallets.defaultWallet
-    if (defaultWallet) {
-      dispatch(
-        setExternalWalletStatus({
-          type: defaultWallet,
-          connected: false,
-          error: (error as Error).message,
-        }),
-      )
-    }
+    // const state = getState()
+    // const defaultWallet = state.externalWallets.defaultWallet
+    // if (defaultWallet) {
+    //   dispatch(
+    //     setExternalWalletStatus({
+    //       type: defaultWallet,
+    //       connected: false,
+    //       error: (error as Error).message,
+    //     }),
+    //   )
+    // }
   }
 }
 
@@ -475,22 +475,26 @@ export const createExternalWalletInvoice = async (
     )
 
     const node = createNodeInstance(defaultWallet, walletConfig)
-    if (!node || !node.createInvoice) {
-      console.warn(`createInvoice not available for ${defaultWallet}`)
-      return null
-    }
+    // if (!node || !node.createInvoice) {
+    //   console.warn(`createInvoice not available for ${defaultWallet}`)
+    //   return null
+    // }
 
     // Create CreateInvoiceParams following the Rust test pattern
     console.log('[DEBUG] createExternalWalletInvoice received amountSats:', amountSats, 'type:', typeof amountSats);
-    
+    // dont allow zero amount invoices for now
+    if (amountSats === undefined || amountSats === 0) {
+      amountSats = 1;
+    }
+
     // Convert satoshis to millisatoshis (sats * 1000 = msats)
-    const amountMsats = amountSats ? BigInt(Math.floor(amountSats) * 1000) : undefined;
+    const amountMsats = amountSats ? BigInt(Math.floor(amountSats) * 1000) : 1000;
     console.log('[DEBUG] Calculated amountMsats:', amountMsats?.toString(), 'from amountSats:', amountSats);
     
     const createInvoiceParams: CreateInvoiceParams = {
       invoiceType: InvoiceType.Bolt11,
       amountMsats: amountMsats,
-      description: description || undefined,
+      description: description ?? undefined,
       expiry: expiryDeltaSeconds ? BigInt(expiryDeltaSeconds) : BigInt(3600), // Default 1 hour
     }
 
@@ -502,43 +506,60 @@ export const createExternalWalletInvoice = async (
     })
 
     console.log(`[TIMING] Starting invoice creation at: ${Date.now()}`)
-    const response = await node.createInvoice(createInvoiceParams)
-    console.log(`[TIMING] Invoice creation completed at: ${Date.now()}`)
+    
+    try {
+      const response = await node.createInvoice(createInvoiceParams)
+      console.log(`[TIMING] Invoice creation completed at: ${Date.now()}`)
 
-    console.log(`Invoice created successfully with ${defaultWallet}:`, {
-      invoice: `${response.invoice.substring(0, 20)}...`,
-      paymentHash: response.paymentHash,
-      type: response.type,
-      description: response.description,
-    })
+      console.log(`Invoice created successfully with ${defaultWallet}:`, {
+        invoice: `${response.invoice.substring(0, 20)}...`,
+        paymentHash: response.paymentHash,
+        type: response.type,
+        description: response.description,
+      })
 
-    // Update the external wallet state to maintain connection
-    dispatch(
-      setExternalWalletStatus({
-        type: defaultWallet,
-        connected: true,
-      }),
-    )
-
-    return {
-      paymentRequest: response.invoice, // The Transaction struct uses 'invoice' field
-      paymentHash: response.paymentHash,
-    }
-  } catch (error) {
-    console.error('Error creating invoice with external wallet:', error)
-
-    // Update the external wallet state with error
-    const state = getState()
-    const defaultWallet = state.externalWallets.defaultWallet
-    if (defaultWallet) {
+      // Update the external wallet state to maintain connection
       dispatch(
         setExternalWalletStatus({
           type: defaultWallet,
-          connected: false,
-          error: (error as Error).message,
+          connected: true,
         }),
       )
+
+      return {
+        paymentRequest: response.invoice, // The Transaction struct uses 'invoice' field
+        paymentHash: response.paymentHash,
+      }
+    } catch (invoiceError) {
+      console.error('Error calling node.createInvoice:', invoiceError)
+      console.error('Invoice error details:', {
+        message: invoiceError instanceof Error ? invoiceError.message : String(invoiceError),
+        stack: invoiceError instanceof Error ? invoiceError.stack : undefined,
+        params: createInvoiceParams,
+      })
+      return null
     }
+  } catch (error) {
+    console.error('Error creating invoice with external wallet:', error)
+    console.error('Full error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+    })
+
+    // Update the external wallet state with error
+    // const state = getState()
+    // const defaultWallet = state.externalWallets.defaultWallet
+    // if (defaultWallet) {
+    //   dispatch(
+    //     setExternalWalletStatus({
+    //       type: defaultWallet,
+    //       connected: false,
+    //       error: (error as Error).message,
+    //     }),
+    //   )
+    // }
 
     return null
   }
@@ -554,28 +575,41 @@ export const payExternalWalletInvoice = async (
   feeSats?: number
 } | null> => {
   try {
+    console.log('[payExternalWalletInvoice] Starting payment process...')
     const state = getState()
     const wallets: TExternalWalletsState = state.externalWallets
     const defaultWallet = wallets.defaultWallet
 
     if (!defaultWallet) {
-      console.log('No default external wallet set for payment')
+      console.error('[payExternalWalletInvoice] No default external wallet set for payment')
       return null
     }
 
+    console.log(`[payExternalWalletInvoice] Default wallet: ${defaultWallet}`)
     const walletConfig = wallets[defaultWallet]
-    if (!walletConfig || !walletConfig.connected) {
-      console.log(
-        `Default wallet ${defaultWallet} is not connected for payment`,
+    
+    if (!walletConfig) {
+      console.error(`[payExternalWalletInvoice] Wallet config not found for ${defaultWallet}`)
+      return null
+    }
+    
+    if (!walletConfig.connected) {
+      console.error(
+        `[payExternalWalletInvoice] Default wallet ${defaultWallet} is not connected`,
       )
       return null
     }
 
-    console.log(`Paying invoice with default external wallet: ${defaultWallet}`)
+    console.log(`[payExternalWalletInvoice] Paying invoice with default external wallet: ${defaultWallet}`)
 
     const node = createNodeInstance(defaultWallet, walletConfig)
-    if (!node || !node.payInvoice) {
-      console.warn(`payInvoice not available for ${defaultWallet}`)
+    if (!node) {
+      console.error(`[payExternalWalletInvoice] Failed to create node instance for ${defaultWallet}`)
+      return null
+    }
+    
+    if (!node.payInvoice) {
+      console.error(`[payExternalWalletInvoice] payInvoice method not available for ${defaultWallet}`)
       return null
     }
 
@@ -585,26 +619,27 @@ export const payExternalWalletInvoice = async (
       amountMsats: amountSats ? BigInt(amountSats * 1000) : undefined,
     }
 
-    console.log('Paying invoice with params:', {
+    console.log('[payExternalWalletInvoice] Paying invoice with params:', {
       invoice: `${invoice.substring(0, 20)}...`,
       amountSats,
+      amountMsats: params.amountMsats?.toString(),
     })
 
     const response = await node.payInvoice(params)
 
-    console.log(`Payment successful with ${defaultWallet}:`, {
+    console.log(`[payExternalWalletInvoice] Payment successful with ${defaultWallet}:`, {
       paymentHash: response.paymentHash,
       preimage: response.preimage,
       feeSats: response.feeMsats ? Number(response.feeMsats / BigInt(1000)) : 0,
     })
 
-    // Update the external wallet state to maintain connection
-    dispatch(
-      setExternalWalletStatus({
-        type: defaultWallet,
-        connected: true,
-      }),
-    )
+    // // Update the external wallet state to maintain connection
+    // dispatch(
+    //   setExternalWalletStatus({
+    //     type: defaultWallet,
+    //     connected: true,
+    //   }),
+    // )
 
     return {
       paymentHash: response.paymentHash,
@@ -612,7 +647,11 @@ export const payExternalWalletInvoice = async (
       feeSats: response.feeMsats ? Number(response.feeMsats / BigInt(1000)) : 0,
     }
   } catch (error) {
-    console.error('Error paying invoice with external wallet:', error)
+    console.error('[payExternalWalletInvoice] Error paying invoice with external wallet:', error)
+    console.error('[payExternalWalletInvoice] Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
 
     // Update the external wallet state with error
     const state = getState()

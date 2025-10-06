@@ -108,6 +108,7 @@ import {
 	getTransactionMerkle,
 	transactionExists,
 } from '../wallet/electrum';
+import { payExternalWalletInvoice } from '../../store/utils/externalWallets';
 
 const PAYMENT_TIMEOUT = 8 * 1000; // 8 seconds
 
@@ -1623,60 +1624,51 @@ export const payLightningInvoice = async ({
 	amount?: number;
 }): Promise<Result<string>> => {
 	try {
-		// First, check if there's a default external wallet configured
+		// Check if there's a default external wallet configured
 		const store = getStore();
 		const externalWallets = store.externalWallets;
 		
-		if (externalWallets?.defaultWallet) {
-			console.log('Attempting payment with external wallet:', externalWallets.defaultWallet);
-			try {
-				// Import the external wallet payment function
-				const externalWalletModule = await import('../../store/utils/externalWallets');
-				
-				if (externalWalletModule?.payExternalWalletInvoice && typeof externalWalletModule.payExternalWalletInvoice === 'function') {
-					const externalPayment = await externalWalletModule.payExternalWalletInvoice(
-						() => getStore(),
-						invoice,
-						amount
-					);
-					
-					if (externalPayment) {
-						console.log('Payment successful with external wallet:', externalPayment.paymentHash);
-						return ok(externalPayment.paymentHash);
-					}
-				} else {
-					console.log('External wallet payment function not available');
-				}
-			} catch (externalWalletError) {
-				console.log('External wallet payment error:', externalWalletError);
+		// if (externalWallets?.defaultWallet) {
+			// External wallet is configured - ONLY use external wallet, no LDK
+			
+			const result = await payExternalWalletInvoice(
+				() => getStore(),
+				invoice,
+				amount
+			);
+			
+			if (!result) {
+				return err('Payment failed with external wallet. Please check your wallet connection.');
 			}
-			console.log('External wallet payment failed, falling back to LDK');
-		}
-		// Fallback to original LDK payment logic
-		await waitForLdkChannels();
+			
+			return ok(result.paymentHash);
+		//}
+		
+		// No external wallet - use LDK
+		// await waitForLdkChannels();
 
-		const addPeersResponse = await addPeers();
-		if (addPeersResponse.isErr()) {
-			return err(addPeersResponse.error.message);
-		}
+		// const addPeersResponse = await addPeers();
+		// if (addPeersResponse.isErr()) {
+		// 	return err(addPeersResponse.error.message);
+		// }
 
-		const payPromise = lm.payWithTimeout({
-			paymentRequest: invoice,
-			amountSats: amount,
-			timeout: 60000,
-		});
+		// const payPromise = lm.payWithTimeout({
+		// 	paymentRequest: invoice,
+		// 	amountSats: amount,
+		// 	timeout: 60000,
+		// });
 
-		const payResponse = await promiseTimeout<
-			Result<TChannelManagerPaymentSent>
-		>(PAYMENT_TIMEOUT, payPromise);
+		// const payResponse = await promiseTimeout<
+		// 	Result<TChannelManagerPaymentSent>
+		// >(PAYMENT_TIMEOUT, payPromise);
 
-		refreshLdk().then();
+		// refreshLdk().then();
 
-		if (payResponse.isErr()) {
-			return err(payResponse.error.message);
-		}
+		// if (payResponse.isErr()) {
+		// 	return err(payResponse.error.message);
+		// }
 
-		return ok(payResponse.value.payment_hash);
+		// return ok(payResponse.value.payment_hash);
 	} catch (e) {
 		console.log(e);
 		return err(e);

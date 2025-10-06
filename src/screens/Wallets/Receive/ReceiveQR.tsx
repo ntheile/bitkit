@@ -79,13 +79,15 @@ const defaultTooltips = {
 
 const ReceiveQR = ({
 	navigation,
+	route,
 }: ReceiveScreenProps<'ReceiveQR'>): ReactElement => {
 	const { t } = useTranslation('wallet');
 	const dimensions = useWindowDimensions();
 	const progress = useSharedValue(0);
 	const carouselRef = useRef<ICarouselInstance>(null);
 	const qrRef = useRef<any>('');
-
+	const skipAutoNav = (route?.params as any)?.skipAutoNav || false;
+	const makeInvoice = (route?.params as any)?.makeInvoice || false;
 	const dispatch = useAppDispatch();
 	const selectedWallet = useAppSelector(selectedWalletSelector);
 	const selectedNetwork = useAppSelector(selectedNetworkSelector);
@@ -138,27 +140,27 @@ const ReceiveQR = ({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const getLightningInvoice = useCallback(async (): Promise<void> => {
 		// Check if we have external wallet capacity or LDK capacity
-		const hasExternalWallet = defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet);
+		// const hasExternalWallet = defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet);
 		
-		if (!lightningBalance.remoteBalance && !hasExternalWallet) {
-			return;
-		}
+		// if (!lightningBalance.remoteBalance && !hasExternalWallet) {
+		// 	return;
+		// }
 
 		// If we have external wallet but insufficient LDK capacity, allow external wallet to handle it
-		if (lightningBalance.remoteBalance < amount && !jitInvoice && !hasExternalWallet) {
-			setLightningInvoice('');
-			showToast({
-				type: 'error',
-				title: t('receive_insufficient_title'),
-				description: t('receive_insufficient_text'),
-			});
-			return;
-		}
+		// if (lightningBalance.remoteBalance < amount && !jitInvoice && !hasExternalWallet) {
+		// 	setLightningInvoice('');
+		// 	showToast({
+		// 		type: 'error',
+		// 		title: t('receive_insufficient_title'),
+		// 		description: t('receive_insufficient_text'),
+		// 	});
+		// 	return;
+		// }
 
 		// Only wait for LDK if we're not using an external wallet
-		if (!hasExternalWallet) {
-			await waitForLdk();
-		}
+		// if (!hasExternalWallet) {
+		// 	await waitForLdk();
+		// }
 
 		console.log(`[TIMING] About to call createLightningInvoice at: ${Date.now()}`);
 		console.log('[DEBUG] ReceiveQR calling createLightningInvoice with amount:', amount, 'type:', typeof amount);
@@ -182,7 +184,7 @@ const ReceiveQR = ({
 		console.log(`[TIMING] About to set lightning invoice at: ${Date.now()}`);
 		setLightningInvoice(response.value.to_str);
 		console.log(`[TIMING] Lightning invoice set at: ${Date.now()}`);
-	}, [jitInvoice, amount, message, defaultExternalWallet, connectedExternalWallets, lightningBalance.remoteBalance]);;
+	}, [amount, message]);;
 
 	const getAddress = useCallback(async (): Promise<void> => {
 		if (amount > 0) {
@@ -227,11 +229,14 @@ const ReceiveQR = ({
 			setLoading(true);
 		}
 		// Gives the modal animation time to start.
-		getLightningInvoice().then();
+		// Only create lightning invoice if makeInvoice is true
+		if (makeInvoice) {
+			getLightningInvoice().then();
+		}
 		await Promise.all([getAddress()]);
 		await sleep(200);
 		setLoading(false);
-	}, [getAddress, getLightningInvoice, loading]);
+	}, [getAddress, getLightningInvoice, loading, makeInvoice]);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
@@ -260,6 +265,20 @@ const ReceiveQR = ({
 			});
 		}
 	}, [t, appState, enableInstant]);
+
+	// Auto-navigate to ReceiveDetails (edit invoice page) after address is loaded
+	// Skip auto-navigation if coming back from ReceiveDetails to show QR
+	const hasAutoNavigated = useRef(false);
+	useEffect(() => {
+		if (!loading && receiveAddress && !hasAutoNavigated.current && !skipAutoNav) {
+			hasAutoNavigated.current = true;
+			navigation.navigate('ReceiveDetails', {
+				receiveAddress,
+				lightningInvoice,
+				enableInstant,
+			});
+		}
+	}, [loading, receiveAddress, lightningInvoice, enableInstant, navigation, skipAutoNav]);
 
 	const uri = useMemo((): string => {
 		console.log('URI calculation:', {

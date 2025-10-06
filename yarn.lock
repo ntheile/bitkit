@@ -11822,13 +11822,13 @@ __metadata:
 
 "lni_react_native@file:./lni.tgz::locator=bitkit%40workspace%3A.":
   version: 0.1.1
-  resolution: "lni_react_native@file:./lni.tgz#./lni.tgz::hash=1c0b3b&locator=bitkit%40workspace%3A."
+  resolution: "lni_react_native@file:./lni.tgz#./lni.tgz::hash=853219&locator=bitkit%40workspace%3A."
   dependencies:
     uniffi-bindgen-react-native: "npm:0.29.0-0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/e2c9a5b7a3d998fad25ed075ef0627f5d66b6aeb330d475ffe445674d9d4618d6a77c3af9c49bc0b8702508f93d14542bf7bd72750acc6611daf439e6bbe3af9
+  checksum: 10/116e4713147289fef0b72585a9f8721bd4bd0bde11ca7ce1fbde7f4f136d990407c549a7c8077cd6513dd405df432feaf46d4608d16d84e5f90b4ad4b5866513
   languageName: node
   linkType: hard
 
