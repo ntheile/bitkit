@@ -18,7 +18,7 @@ export const getDefaultOptions = (id: TWidgetId): TWidgetOptions => {
 			};
 		case 'connectwallet':
 			return {
-				showInstructions: true,
+				showInstructions: false,
 				showWalletSelector: true,
 				showConnectionForm: true,
 				showSource: false,

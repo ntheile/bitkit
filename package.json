@@ -28,7 +28,8 @@
     "bundle:debug": "yarn clean:android && react-native bundle --platform android --dev true --entry-file index.js --bundle-output android/app/src/main/assets/index.android.jsbundle --assets-dest android/app/build/intermediates/res/merged/debug/ && cd android && ./gradlew assembleDebug --no-daemon",
     "genIcons": "npx react-native set-icon --path images/zaprite-icon.svg --platform all && node scripts/generate-splash.js 2 ",
     "prepare": "husky",
-    "postinstall": "node postinstall.js"
+    "postinstall": "node postinstall.js",
+    "android:install": "yarn bundle && adb install android/app/build/outputs/apk/release/app-universal-release.apk"
   },
   "dependencies": {
     "@bitcoinerlab/secp256k1": "1.2.0",

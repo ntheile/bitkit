@@ -68,25 +68,26 @@ const Balances = (): ReactElement => {
 	};
 
 	return (
-		<View style={styles.root}>
-			<Balance
-				label={t('details_savings_title')}
-				balance={onchainBalance}
-				icon={<BitcoinCircleIcon width={24} height={24} />}
-				hasPending={balanceInTransferToSavings !== 0}
-				testID="ActivitySavings"
-				onPress={onSavingsPress}
-			/>
-			<ThemedView style={styles.divider} color="white16" />
-			<Balance
-				label={t('details_spending_title')}
-				balance={lightningBalance}
-				icon={<LightningCircleIcon width={24} height={24} />}
-				hasPending={balanceInTransferToSpending !== 0}
-				testID="ActivitySpending"
-				onPress={onSpendingPress}
-			/>
-		</View>
+		<></>
+		// <View style={styles.root}>
+		// 	<Balance
+		// 		label={t('details_savings_title')}
+		// 		balance={onchainBalance}
+		// 		icon={<BitcoinCircleIcon width={24} height={24} />}
+		// 		hasPending={balanceInTransferToSavings !== 0}
+		// 		testID="ActivitySavings"
+		// 		onPress={onSavingsPress}
+		// 	/>
+		// 	<ThemedView style={styles.divider} color="white16" />
+		// 	<Balance
+		// 		label={t('details_spending_title')}
+		// 		balance={lightningBalance}
+		// 		icon={<LightningCircleIcon width={24} height={24} />}
+		// 		hasPending={balanceInTransferToSpending !== 0}
+		// 		testID="ActivitySpending"
+		// 		onPress={onSpendingPress}
+		// 	/>
+		// </View>
 	);
 };
 

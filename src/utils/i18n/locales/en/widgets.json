@@ -101,7 +101,7 @@
       "string": "Connect Wallet"
     },
     "instructions": {
-      "string": "Scan QR code or enter pairing code to connect your wallet."
+      "string": ""
     },
     "pairing_code": {
       "string": "Pairing Code"

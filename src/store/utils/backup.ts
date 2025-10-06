@@ -374,10 +374,22 @@ const performWidgetsRestore = async (): Promise<
 			return ok({ backupExists: false });
 		}
 
+		// Ensure connectwallet widget is always included, even in restored backups
+		const restoredWidgets = {
+			...expectedBackupShape.widgets,
+			...backup.widgets,
+		};
+		
+		const restoredSortOrder = backup.sortOrder.includes('connectwallet')
+			? backup.sortOrder
+			: ['connectwallet', ...backup.sortOrder];
+
 		dispatch(
 			updateWidgets({
 				...expectedBackupShape,
 				...backup,
+				widgets: restoredWidgets,
+				sortOrder: restoredSortOrder,
 				onboardedWidgets: true,
 			}),
 		);

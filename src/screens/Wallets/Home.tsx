@@ -248,7 +248,7 @@ const Home = (): ReactElement => {
 					{hideOnboarding ? (
 						<>
 							<Balances />
-							<Suggestions />
+							{/* <Suggestions /> */}
 							<View style={styles.contentPadding}>
 								{showWidgets && <Widgets />}
 								<ActivityListShort />
