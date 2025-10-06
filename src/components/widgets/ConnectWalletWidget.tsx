@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle, Linking } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import store from '../../store';
@@ -430,6 +430,38 @@ const ConnectWalletWidget = ({
 				return (
 					<View style={styles.formSection}>
 						<BodyM style={styles.formTitle}>Strike API Connection</BodyM>
+						<CaptionB color="secondary" style={styles.permissionsTitle}>
+							Required permissions:
+						</CaptionB>
+						<View style={styles.permissionsPills}>
+							{[
+								'account.profile.read',
+								'balance.read',
+								'invoice.read',
+								'invoice.create',
+								'payment-quote.lightning.create',
+								'payment-quote.execute',
+								'payment.read',
+								'recieve-request.create',
+								'recieve-request.read',
+								'rates.ticker',
+							].map((permission) => (
+								<View key={permission} style={styles.permissionPill}>
+									<CaptionB color="secondary" style={styles.permissionText}>
+										{permission}
+									</CaptionB>
+								</View>
+							))}
+						</View>
+						<View style={styles.permissionsPills}>
+							<CaptionB 
+								color="secondary" 
+								style={styles.linkText}
+								onPress={() => Linking.openURL('https://dashboard.strike.me/api-keys')}
+							>
+								Link to create API Key in Strike
+							</CaptionB>
+						</View>
 						<LabeledInput
 							label="API Key"
 							placeholder="Your Strike API key"
@@ -439,6 +471,7 @@ const ConnectWalletWidget = ({
 							}
 							style={styles.input}
 						/>
+						
 					</View>
 				);
 
@@ -446,6 +479,7 @@ const ConnectWalletWidget = ({
 				return (
 					<View style={styles.formSection}>
 						<BodyM style={styles.formTitle}>Blink Wallet Connection</BodyM>
+
 						<LabeledInput
 							label="API Key"
 							placeholder="Your Blink API key"
@@ -686,6 +720,32 @@ const styles = StyleSheet.create({
 		marginTop: 16,
 		flexDirection: 'row',
 		alignItems: 'center',
+	},
+	linkText: {
+		marginTop: 8,
+		textDecorationLine: 'underline',
+	},
+	permissionsTitle: {
+		marginBottom: 8,
+	},
+	permissionsPills: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		gap: 6,
+		marginBottom: 12,
+	},
+	permissionPill: {
+		backgroundColor: '#000000',
+		borderRadius: 12,
+		paddingHorizontal: 10,
+		paddingVertical: 4,
+	},
+	permissionText: {
+		fontSize: 11,
+	},
+	permissionsLabel: {
+		marginBottom: 12,
+		lineHeight: 18,
 	},
 });
 
