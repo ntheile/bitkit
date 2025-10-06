@@ -75,6 +75,7 @@ const TabBar = (): ReactElement => {
 				icon={sendXml}
 				testID="Send"
 				onPress={onSendPress}
+				borderRadius={{ topLeft: 30, topRight: 0, bottomLeft: 30, bottomRight: 0 }}
 			/>
 			<Pressable
 				style={({ pressed }): StyleProp<ViewStyle> => [
@@ -92,6 +93,7 @@ const TabBar = (): ReactElement => {
 				icon={receiveXml}
 				testID="Receive"
 				onPress={onReceivePress}
+				borderRadius={{ topLeft: 0, topRight: 30, bottomLeft: 0, bottomRight: 30 }}
 			/>
 		</View>
 	);
