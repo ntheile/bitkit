@@ -479,7 +479,27 @@ const ConnectWalletWidget = ({
 				return (
 					<View style={styles.formSection}>
 						<BodyM style={styles.formTitle}>Blink Wallet Connection</BodyM>
-
+						<CaptionB color="secondary" style={styles.permissionsTitle}>
+							Required permissions:
+						</CaptionB>
+						<View style={styles.permissionsPills}>
+							{['read', 'receive', 'write'].map((permission) => (
+								<View key={permission} style={styles.permissionPill}>
+									<CaptionB color="white" style={styles.permissionText}>
+										{permission}
+									</CaptionB>
+								</View>
+							))}
+						</View>
+						<View style={styles.permissionsPills}>
+							<CaptionB 
+								color="secondary" 
+								style={styles.linkText}
+								onPress={() => Linking.openURL('https://dashboard.blink.sv/api-keys')}
+							>
+								Get API Key from Blink Dashboard
+							</CaptionB>
+						</View>
 						<LabeledInput
 							label="API Key"
 							placeholder="Your Blink API key"
@@ -489,6 +509,7 @@ const ConnectWalletWidget = ({
 							}
 							style={styles.input}
 						/>
+						
 					</View>
 				);
 
@@ -496,6 +517,33 @@ const ConnectWalletWidget = ({
 				return (
 					<View style={styles.formSection}>
 						<BodyM style={styles.formTitle}>Speed Wallet Connection</BodyM>
+						<CaptionB color="secondary" style={styles.permissionsTitle}>
+							Required permissions:
+						</CaptionB>
+						<View style={styles.permissionsPills}>
+							{[
+								'utility - read (all)',
+								'receive payment - write (all)',
+								'send payment - write (all)',
+								'core - write (all)',
+								'Allow all IP addresses',
+							].map((permission) => (
+								<View key={permission} style={styles.permissionPill}>
+									<CaptionB color="white" style={styles.permissionText}>
+										{permission}
+									</CaptionB>
+								</View>
+							))}
+						</View>
+						<View style={styles.permissionsPills}>
+							<CaptionB 
+								color="secondary" 
+								style={styles.linkText}
+								onPress={() => Linking.openURL('https://app.tryspeed.com/apikeys/restricted-keys')}
+							>
+								Get API Key from Speed Dashboard
+							</CaptionB>
+						</View>
 						<LabeledInput
 							label="API Key"
 							placeholder="Your Speed API key"
@@ -512,6 +560,26 @@ const ConnectWalletWidget = ({
 				return (
 					<View style={styles.formSection}>
 						<BodyM style={styles.formTitle}>Nostr Wallet Connect</BodyM>
+						<CaptionB color="secondary" style={styles.permissionsTitle}>
+							Required permissions:
+						</CaptionB>
+						<View style={styles.permissionsPills}>
+							{[
+								'Read your balance',
+								'Read your node info',
+								'Create Invoices',
+								'Lookup status of invoices',
+								'Read transaction history',
+								'Receive wallet notification',
+								'Send payment'
+							].map((permission) => (
+								<View key={permission} style={styles.permissionPill}>
+									<CaptionB color="white" style={styles.permissionText}>
+										{permission}
+									</CaptionB>
+								</View>
+							))}
+						</View>
 						<LabeledInput
 							label="NWC URI"
 							placeholder="nostr+walletconnect://..."
