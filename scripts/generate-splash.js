@@ -52,7 +52,8 @@ async function generateSplash() {
   }
   
   const config = splashConfigs[Math.max(0, Math.min(configIndex, splashConfigs.length - 1))];
-  const svgPath = path.join(__dirname, config.svgPath);
+  const projectRoot = path.join(__dirname, '..');
+  const svgPath = path.join(projectRoot, config.svgPath);
   
   console.log(`Using configuration: ${config.name}`);
   console.log(`SVG: ${config.svgPath}`);
@@ -61,7 +62,7 @@ async function generateSplash() {
 
   // Generate iOS splash screens
   console.log('📱 Generating iOS splash screens...');
-  const iosOutputDir = path.join(__dirname, 'ios/bitkit/Images.xcassets/Splash.imageset');
+  const iosOutputDir = path.join(projectRoot, 'ios/bitkit/Images.xcassets/Splash.imageset');
 
   for (const size of iosSizes) {
     try {
@@ -102,7 +103,7 @@ async function generateSplash() {
 
   // Generate Android splash screens
   console.log('\n🤖 Generating Android splash logos...');
-  const androidResDir = path.join(__dirname, 'android/app/src/main/res');
+  const androidResDir = path.join(projectRoot, 'android/app/src/main/res');
 
   for (const size of androidSizes) {
     const outputDir = path.join(androidResDir, size.folder);
