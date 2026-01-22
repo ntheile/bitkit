@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
 		width: 32,
 	},
 	checked: {
-		borderColor: '#FF4400',
+		borderColor: '#20c998',
 	},
 });
 

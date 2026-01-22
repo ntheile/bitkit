@@ -233,7 +233,18 @@ const AddressViewer = (): ReactElement => {
 		currentWalletSelector(state, selectedWallet),
 	);
 	const [sendNavigationHasOpened, setSendNavigationHasOpened] = useState(false);
-	const sendNavigationIsOpen = sendSheetRef.current?.isOpen();
+	// In bottom-sheet v5, use animatedIndex to check if sheet is open
+	const sendNavigationIsOpen = (() => {
+		try {
+			const modal = sendSheetRef.current;
+			if (!modal) return false;
+			// @ts-ignore - animatedIndex exists but may not be in types
+			const index = modal.animatedIndex?.value;
+			return typeof index === 'number' && index >= 0;
+		} catch {
+			return false;
+		}
+	})();
 
 	const flatListRef = useRef<FlatList>(null);
 	const scrollViewRef = useRef<ScrollView>(null);

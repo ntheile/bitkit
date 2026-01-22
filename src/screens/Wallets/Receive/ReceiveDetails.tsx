@@ -45,7 +45,7 @@ const ReceiveDetails = ({
 	const { keyboardShown } = useKeyboard();
 	const { isSmallScreen } = useScreenSize();
 	const switchUnit = useSwitchUnit();
-	const [showNumberPad, setShowNumberPad] = useState(false);
+	const [showNumberPad, setShowNumberPad] = useState(true);
 	const dispatch = useAppDispatch();
 	const invoice = useAppSelector(receiveSelector);
 	const nextUnit = useAppSelector(nextUnitSelector);
@@ -126,7 +126,8 @@ const ReceiveDetails = ({
 
 	const onNavigateBack = async (): Promise<void> => {
 		await Keyboard.dismiss();
-		navigation.navigate('ReceiveQR');
+		// Pass skipAutoNav to prevent ReceiveQR from auto-navigating back to ReceiveDetails
+		navigation.navigate('ReceiveQR', { skipAutoNav: true, makeInvoice: true } as any);
 	};
 
 	const onContinue = (): void => {

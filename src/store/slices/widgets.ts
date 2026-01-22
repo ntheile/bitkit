@@ -10,12 +10,13 @@ export type TWidgetsState = {
 
 export const initialWidgetsState: TWidgetsState = {
 	widgets: {
+		connectwallet: getDefaultOptions('connectwallet'),
 		price: getDefaultOptions('price'),
 		news: getDefaultOptions('news'),
 		blocks: getDefaultOptions('blocks'),
 	},
 	onboardedWidgets: false,
-	sortOrder: ['price', 'news', 'blocks'],
+	sortOrder: ['price', 'connectwallet', 'news', 'blocks'],
 };
 
 export const widgetsSlice = createSlice({

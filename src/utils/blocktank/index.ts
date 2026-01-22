@@ -355,6 +355,7 @@ export const watchOrder = async (
  */
 export const isGeoBlocked = async (fromStorage = false): Promise<boolean> => {
 	try {
+		return true;
 		let geoBlocked: boolean | undefined;
 		if (fromStorage) {
 			geoBlocked = getUserStore().isGeoBlocked;

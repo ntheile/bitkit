@@ -238,9 +238,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-bitkit/Pods-bitkit-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-bitkit/Pods-bitkit-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -277,9 +281,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-bitkit/Pods-bitkit-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-bitkit/Pods-bitkit-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -304,28 +312,31 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 581FDAF07823820A019D5CC7 /* Pods-bitkit.debug.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconOrange;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 158;
-				DEVELOPMENT_TEAM = KYH47R284B;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 162;
+				DEVELOPMENT_TEAM = DL83L5X82U;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = bitkit/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Bitkit;
+				INFOPLIST_KEY_CFBundleDisplayName = ZapriteP2P;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.1.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = to.bitkit;
+				PRODUCT_BUNDLE_IDENTIFIER = to.nicktee.bitkit;
 				PRODUCT_NAME = bitkit;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -336,27 +347,27 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2D66F4DEE1177412ECD1A559 /* Pods-bitkit.release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconOrange;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 158;
-				DEVELOPMENT_TEAM = KYH47R284B;
+				CURRENT_PROJECT_VERSION = 162;
+				DEVELOPMENT_TEAM = DL83L5X82U;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = bitkit/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Bitkit;
+				INFOPLIST_KEY_CFBundleDisplayName = ZapriteP2P;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.1.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = to.bitkit;
+				PRODUCT_BUNDLE_IDENTIFIER = to.nicktee.bitkit;
 				PRODUCT_NAME = bitkit;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

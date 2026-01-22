@@ -5,6 +5,15 @@ const os = require('os');
 const devEnvFile = './.env.development';
 const createDevEnvFile = 'cp .env.development.template .env.development';
 
+// Apply patches first
+exec('npx patch-package', (error, stdout, stderr) => {
+	if (error) {
+		console.error('Error applying patches:', error);
+	}
+	if (stdout) console.log(stdout);
+	if (stderr) console.error(stderr);
+});
+
 // Create development environment file if it doesn't exist
 fs.access(devEnvFile, fs.constants.F_OK, (err) => {
 	if (err && !process.env.CI) {

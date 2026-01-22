@@ -12,7 +12,7 @@ module.exports = {
 				allowUndefined: false,
 			},
 		],
-		'react-native-reanimated/plugin', // NOTE: this plugin MUST be last
+		'react-native-worklets/plugin', // NOTE: this plugin MUST be last (renamed in Reanimated 4)
 	],
 	env: {
 		production: {

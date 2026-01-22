@@ -35,7 +35,7 @@ import { getWalletStore } from '../../../store/helpers';
 import { receiveSelector } from '../../../store/reselect/receive';
 import {
 	appStateSelector,
-	isLDKReadySelector,
+	isLightningReadySelector,
 } from '../../../store/reselect/ui';
 import { isGeoBlockedSelector } from '../../../store/reselect/user';
 import {
@@ -43,6 +43,7 @@ import {
 	selectedNetworkSelector,
 	selectedWalletSelector,
 } from '../../../store/reselect/wallet';
+import { defaultExternalWalletSelector, connectedExternalWalletsSelector } from '../../../store/reselect/externalWallets';
 import { updatePendingInvoice } from '../../../store/slices/metadata';
 import { createLightningInvoice } from '../../../store/utils/lightning';
 import {
@@ -78,21 +79,25 @@ const defaultTooltips = {
 
 const ReceiveQR = ({
 	navigation,
+	route,
 }: ReceiveScreenProps<'ReceiveQR'>): ReactElement => {
 	const { t } = useTranslation('wallet');
 	const dimensions = useWindowDimensions();
 	const progress = useSharedValue(0);
 	const carouselRef = useRef<ICarouselInstance>(null);
 	const qrRef = useRef<any>('');
-
+	const skipAutoNav = (route?.params as any)?.skipAutoNav || false;
+	const makeInvoice = (route?.params as any)?.makeInvoice || false;
 	const dispatch = useAppDispatch();
 	const selectedWallet = useAppSelector(selectedWalletSelector);
 	const selectedNetwork = useAppSelector(selectedNetworkSelector);
 	const selectedAddressType = useAppSelector(addressTypeSelector);
 	const addressType = useAppSelector(addressTypeSelector);
 	const isGeoBlocked = useAppSelector(isGeoBlockedSelector);
-	const isLDKReady = useAppSelector(isLDKReadySelector);
+	const isLightningReady = useAppSelector(isLightningReadySelector);
 	const appState = useAppSelector(appStateSelector);
+	const defaultExternalWallet = useAppSelector(defaultExternalWalletSelector);
+	const connectedExternalWallets = useAppSelector(connectedExternalWalletsSelector);
 	const { id, amount, message, tags, jitOrder } =
 		useAppSelector(receiveSelector);
 	const lightningBalance = useLightningBalance(false);
@@ -105,31 +110,60 @@ const ReceiveQR = ({
 	const [showTooltip, setShowTooltip] = useState(defaultTooltips);
 	const [isSharing, setIsSharing] = useState(false);
 	const [enableInstant, setEnableInstant] = useState(
-		!!jitInvoice || lightningBalance.remoteBalance > 0,
+		!!jitInvoice || lightningBalance.remoteBalance > 0 || !!(defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet)),
 	);
 
+	console.log('ReceiveQR state:', {
+		enableInstant,
+		lightningInvoice: lightningInvoice ? `${lightningInvoice.substring(0, 20)}...` : 'empty',
+		receiveAddress: receiveAddress ? `${receiveAddress.substring(0, 20)}...` : 'empty',
+		defaultExternalWallet,
+		connectedExternalWallets,
+		hasExternalWallet: !!(defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet)),
+		lightningBalance: lightningBalance.remoteBalance,
+		amount,
+	});
+
 	useEffect(() => {
-		setEnableInstant(!!jitInvoice || lightningBalance.remoteBalance > 0);
-	}, [jitInvoice, lightningBalance.remoteBalance]);
+		const hasExternalWallet = !!(defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet));
+		const shouldEnableInstant = !!jitInvoice || lightningBalance.remoteBalance > 0 || hasExternalWallet;
+		
+		// Auto-enable instant payments if external wallet is connected (prioritize external wallet)
+		if (hasExternalWallet && !enableInstant) {
+			console.log('Auto-enabling lightning receive with external wallet:', defaultExternalWallet);
+			setEnableInstant(true);
+		} else {
+			setEnableInstant(shouldEnableInstant);
+		}
+	}, [jitInvoice, lightningBalance.remoteBalance, defaultExternalWallet, connectedExternalWallets, enableInstant]);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const getLightningInvoice = useCallback(async (): Promise<void> => {
-		if (!lightningBalance.remoteBalance) {
-			return;
-		}
+		// Check if we have external wallet capacity or LDK capacity
+		// const hasExternalWallet = defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet);
+		
+		// if (!lightningBalance.remoteBalance && !hasExternalWallet) {
+		// 	return;
+		// }
 
-		if (lightningBalance.remoteBalance < amount && !jitInvoice) {
-			setLightningInvoice('');
-			showToast({
-				type: 'error',
-				title: t('receive_insufficient_title'),
-				description: t('receive_insufficient_text'),
-			});
-			return;
-		}
+		// If we have external wallet but insufficient LDK capacity, allow external wallet to handle it
+		// if (lightningBalance.remoteBalance < amount && !jitInvoice && !hasExternalWallet) {
+		// 	setLightningInvoice('');
+		// 	showToast({
+		// 		type: 'error',
+		// 		title: t('receive_insufficient_title'),
+		// 		description: t('receive_insufficient_text'),
+		// 	});
+		// 	return;
+		// }
 
-		await waitForLdk();
+		// Only wait for LDK if we're not using an external wallet
+		// if (!hasExternalWallet) {
+		// 	await waitForLdk();
+		// }
 
+		console.log(`[TIMING] About to call createLightningInvoice at: ${Date.now()}`);
+		console.log('[DEBUG] ReceiveQR calling createLightningInvoice with amount:', amount, 'type:', typeof amount);
 		const response = await createLightningInvoice({
 			amountSats: amount,
 			description: message,
@@ -137,14 +171,20 @@ const ReceiveQR = ({
 			selectedNetwork,
 			selectedWallet,
 		});
+		console.log(`[TIMING] createLightningInvoice returned at: ${Date.now()}`);
+
+		console.log('createLightningInvoice response:', response);
 
 		if (response.isErr()) {
-			console.log(response.error.message);
+			console.log('createLightningInvoice error:', response.error.message);
 			return;
 		}
 
+		console.log('Setting lightning invoice to:', `${response.value.to_str?.substring(0, 50)}...`);
+		console.log(`[TIMING] About to set lightning invoice at: ${Date.now()}`);
 		setLightningInvoice(response.value.to_str);
-	}, [jitInvoice, amount, message]);
+		console.log(`[TIMING] Lightning invoice set at: ${Date.now()}`);
+	}, [amount, message]);;
 
 	const getAddress = useCallback(async (): Promise<void> => {
 		if (amount > 0) {
@@ -189,11 +229,14 @@ const ReceiveQR = ({
 			setLoading(true);
 		}
 		// Gives the modal animation time to start.
-		getLightningInvoice().then();
+		// Only create lightning invoice if makeInvoice is true
+		if (makeInvoice) {
+			getLightningInvoice().then();
+		}
 		await Promise.all([getAddress()]);
 		await sleep(200);
 		setLoading(false);
-	}, [getAddress, getLightningInvoice, loading]);
+	}, [getAddress, getLightningInvoice, loading, makeInvoice]);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
@@ -223,12 +266,35 @@ const ReceiveQR = ({
 		}
 	}, [t, appState, enableInstant]);
 
+	// Auto-navigate to ReceiveDetails (edit invoice page) after address is loaded
+	// Skip auto-navigation if coming back from ReceiveDetails to show QR
+	const hasAutoNavigated = useRef(false);
+	useEffect(() => {
+		if (!loading && receiveAddress && !hasAutoNavigated.current && !skipAutoNav) {
+			hasAutoNavigated.current = true;
+			navigation.navigate('ReceiveDetails', {
+				receiveAddress,
+				lightningInvoice,
+				enableInstant,
+			});
+		}
+	}, [loading, receiveAddress, lightningInvoice, enableInstant, navigation, skipAutoNav]);
+
 	const uri = useMemo((): string => {
+		console.log('URI calculation:', {
+			enableInstant,
+			jitInvoice: jitInvoice ? `${jitInvoice.substring(0, 20)}...` : 'none',
+			lightningInvoice: lightningInvoice ? `${lightningInvoice.substring(0, 20)}...` : 'empty',
+			receiveAddress: receiveAddress ? `${receiveAddress.substring(0, 20)}...` : 'empty',
+		});
+
 		if (enableInstant && jitInvoice) {
+			console.log('Using JIT invoice');
 			return jitInvoice;
 		}
 
 		if (!enableInstant) {
+			console.log('Instant disabled, using bitcoin-only URI');
 			return getUnifiedUri({
 				address: receiveAddress,
 				amount,
@@ -237,13 +303,16 @@ const ReceiveQR = ({
 			});
 		}
 
-		return getUnifiedUri({
+		const uri = getUnifiedUri({
 			address: receiveAddress,
 			amount,
 			label: message,
 			message,
 			lightning: lightningInvoice,
 		});
+		
+		console.log('Using unified URI with lightning:', `${uri.substring(0, 100)}...`);
+		return uri;
 	}, [
 		jitInvoice,
 		enableInstant,
@@ -254,12 +323,15 @@ const ReceiveQR = ({
 	]);
 
 	const onToggleInstant = useCallback((): void => {
-		if (isGeoBlocked && lightningBalance.remoteBalance === 0) {
+		const hasExternalWallet = defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet);
+		const hasLightningCapacity = lightningBalance.remoteBalance > 0 || hasExternalWallet;
+		
+		if (isGeoBlocked && !hasLightningCapacity) {
 			navigation.navigate('ReceiveGeoBlocked');
 		} else if (
 			!isGeoBlocked &&
 			!jitInvoice &&
-			lightningBalance.remoteBalance === 0
+			!hasLightningCapacity
 		) {
 			navigation.navigate('ReceiveAmount');
 		} else {
@@ -270,6 +342,8 @@ const ReceiveQR = ({
 		isGeoBlocked,
 		jitInvoice,
 		lightningBalance.remoteBalance,
+		defaultExternalWallet,
+		connectedExternalWallets,
 		navigation,
 	]);
 
@@ -497,6 +571,15 @@ const ReceiveQR = ({
 						<>
 							{!jitInvoice && <View style={styles.divider} />}
 							<View>
+								{/* Wallet indicator */}
+								{defaultExternalWallet && connectedExternalWallets.includes(defaultExternalWallet) && (
+									<View style={styles.walletIndicator}>
+										<Caption13Up color="green">
+											{`Receiving via ${defaultExternalWallet.toUpperCase()} wallet`}
+										</Caption13Up>
+									</View>
+								)}
+								
 								<View style={styles.invoiceLabel}>
 									<Caption13Up color="secondary">
 										{t('receive_lightning_invoice')}
@@ -566,7 +649,7 @@ const ReceiveQR = ({
 	const slides = useMemo((): Slide[] => [Slide1, Slide2], [Slide1, Slide2]);
 
 	const ReceiveInstantlySwitch = useCallback((): ReactElement => {
-		if (!isLDKReady) {
+		if (!isLightningReady) {
 			return (
 				<View style={styles.buttonContainer}>
 					<View style={styles.ldkStarting}>
@@ -603,7 +686,7 @@ const ReceiveQR = ({
 				</SwitchRow>
 			</View>
 		);
-	}, [t, isLDKReady, enableInstant, onToggleInstant]);
+	}, [t, isLightningReady, enableInstant, onToggleInstant]);
 
 	return (
 		<>
@@ -710,6 +793,10 @@ const styles = StyleSheet.create({
 		borderRadius: 9,
 		padding: 32,
 		width: '100%',
+	},
+	walletIndicator: {
+		marginBottom: 8,
+		alignItems: 'center',
 	},
 	invoiceLabel: {
 		flexDirection: 'row',

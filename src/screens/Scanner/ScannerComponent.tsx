@@ -6,15 +6,16 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { FadeIn, FadeOut } from 'react-native-reanimated';
 import RNQRGenerator from 'rn-qr-generator';
 
+import { clipboardTextIcon } from '../../assets/icons';
 import BlurView from '../../components/BlurView';
 import Camera from '../../components/Camera';
 import GradientView from '../../components/CameraGradientView';
 import Dialog from '../../components/Dialog';
 import Button from '../../components/buttons/Button';
+import ButtonBlur from '../../components/buttons/ButtonBlur';
 import { __E2E__ } from '../../constants/env';
 import { AnimatedView, TextInput } from '../../styles/components';
 import {
-	ClipboardTextIcon,
 	FlashlightIcon,
 	PictureIcon,
 } from '../../styles/icons';
@@ -145,26 +146,30 @@ const ScannerComponent = ({
 						</View>
 						<Background style={backgroundStyles} />
 					</View>
-					<Background style={[backgroundStyles, styles.bottom]}>
-						<Button
-							style={styles.pasteButton}
-							icon={<ClipboardTextIcon width={16} height={16} />}
-							text={t('qr_paste')}
-							size="large"
-							onPress={async (): Promise<void> => {
-								const url = await Clipboard.getString();
-								onRead(url);
-							}}
-						/>
+					<View style={styles.bottom}>
+						<Background style={[backgroundStyles, styles.blurBackground]} />
+						<View style={styles.pasteContainer}>
+							<ButtonBlur
+								style={styles.pasteButton}
+								icon={clipboardTextIcon('white')}
+								text={t('qr_paste')}
+								onPress={async (): Promise<void> => {
+									const url = await Clipboard.getString();
+									onRead(url);
+								}}
+							/>
+						</View>
 
 						{__E2E__ && (
-							<Button
-								style={styles.pasteButton}
-								text="Enter QRCode string"
-								size="large"
-								testID="ScanPrompt"
-								onPress={onReadDebug}
-							/>
+							<View style={styles.pasteContainer}>
+								<Button
+									style={styles.pasteButton}
+									text="Enter QRCode string"
+									size="large"
+									testID="ScanPrompt"
+									onPress={onReadDebug}
+								/>
+							</View>
 						)}
 
 						{!!error && (
@@ -177,7 +182,7 @@ const ScannerComponent = ({
 								</BodySSB>
 							</AnimatedView>
 						)}
-					</Background>
+					</View>
 				</View>
 				<Dialog
 					visible={showDebug}
@@ -230,12 +235,25 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 13,
 	},
 	bottom: {
+		flex: 1,
 		paddingHorizontal: 16,
+		position: 'relative',
+	},
+	blurBackground: {
+		...StyleSheet.absoluteFillObject,
+		zIndex: 0,
+	},
+	pasteContainer: {
+		position: 'relative',
+		zIndex: 10,
+		alignItems: 'center',
+		marginTop: 16,
 	},
 	pasteButton: {
 		marginHorizontal: 16,
-		marginTop: 16,
-		width: '100%',
+		width: 'auto',
+		flex: 0,
+		minWidth: 180,
 	},
 	error: {
 		marginHorizontal: 16,

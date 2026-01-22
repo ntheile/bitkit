@@ -8,7 +8,13 @@ import { Result, err, ok } from '@synonymdev/result';
 import { EPaymentType } from 'beignet';
 import { LNURLChannelParams } from 'js-lnurl';
 
-import { reduceValue } from '../../utils/helpers';
+import { reduceValue, vibrate } from '../../utils/helpers';
+import { getStore } from '../helpers';
+import { showSheet, closeSheet } from './ui';
+import { showToast } from '../../utils/notifications';
+import i18n from '../../utils/i18n';
+import { createExternalWalletInvoice, createNodeInstance } from './externalWallets';
+import { InteractionManager, AppState } from 'react-native';
 import {
 	addPeers,
 	createPaymentRequest,
@@ -50,6 +56,7 @@ import {
 	TLightningNodeVersion,
 } from '../types/lightning';
 import { ETransferStatus, ETransferType, TWalletName } from '../types/wallet';
+import { Transaction } from "lni_react_native"
 
 /**
  * Attempts to update the node id for the selected wallet and network.
@@ -277,7 +284,93 @@ export const claimChannel = async (
 };
 
 /**
+ * Starts polling for invoice payment status using external wallet's onInvoiceEvents
+ * This runs in a background task to avoid blocking the UI thread
+ * @param {string} paymentHash
+ */
+const startInvoicePolling = async (paymentHash: string): Promise<void> => {
+	console.log(`[POLLING] Starting payment detection for hash: ${paymentHash}`);
+	console.log('[POLLING] Using external wallet onInvoiceEvents with background task');
+	try {
+		const store = getStore();
+		const externalWallets = store.externalWallets;
+		const defaultWallet = externalWallets.defaultWallet;
+		if (!defaultWallet) {
+			console.warn('[POLLING] No default external wallet configured for invoice polling');
+			return;
+		}
+		const walletConfig = externalWallets[defaultWallet];
+		if (!walletConfig || !walletConfig.connected) {
+			console.warn(`[POLLING] Default wallet ${defaultWallet} is not connected`);
+			return;
+		}
+		// Create node instance for the external wallet
+		const node = createNodeInstance(defaultWallet, walletConfig);
+		if (!node || !node.onInvoiceEvents) {
+			console.warn(`[POLLING] onInvoiceEvents not available for ${defaultWallet}`);
+			return;
+		}
+		const invoiceEventParams = {
+			paymentHash,
+			pollingDelaySec: BigInt(2), // poll every 2 seconds
+			maxPollingSec: BigInt(120), // poll for up to 2 minutes
+		}
+		const callbacks = {
+			success(transaction: Transaction | undefined): void {
+				console.log(`[POLLING] SUCCESS! Payment received for hash: ${paymentHash} for wallet ${defaultWallet}`);
+				if (transaction) {
+					console.log('[POLLING] Transaction details:', {
+						hash: transaction.paymentHash,
+						amountMsats: transaction.amountMsats.toString(),
+						amountSats: Math.floor(Number(transaction.amountMsats) / 1000),
+						description: transaction.description,
+						settledAt: transaction.settledAt.toString(),
+					});
+				}
+				
+				// Show success celebration
+				vibrate({ type: 'default' });
+				// Close the receive sheet
+				closeSheet('receive');
+				// Show success sheet
+				const amountSats = Number(transaction.amountMsats) / 1000;
+				showSheet('receivedTx', {
+					id: transaction.paymentHash || paymentHash,
+					activityType: EActivityType.lightning,
+					value: Math.floor(amountSats),
+				});
+				// Show success toast
+				showToast({
+					type: 'lightning',
+					title: i18n.t('wallet:toast_payment_received_title'),
+					description: i18n.t('wallet:toast_payment_received_description'),
+				});
+				console.log(`[POLLING] Success UI displayed for payment: ${paymentHash} for wallet ${defaultWallet}`);
+					
+			},
+			pending(_transaction: Transaction | undefined): void {
+				console.log(`[POLLING] Payment still pending for hash: ${paymentHash} for wallet ${defaultWallet}`);
+			},
+			failure(_transaction: Transaction | undefined): void {
+				console.log(`[POLLING] Payment failed for hash: ${paymentHash} for wallet ${defaultWallet}`);
+			},
+		}
+		
+		// Start the polling - key: run without awaiting to avoid blocking
+		node.onInvoiceEvents(
+			invoiceEventParams,
+			callbacks
+		);
+		console.log(`[POLLING] Background onInvoiceEvents setup complete for hash: ${paymentHash}`);
+		console.log('[POLLING] Background polling initialization complete');
+	} catch (error) {
+		console.error('[POLLING] Error setting up background polling:', error);
+	}
+};
+
+/**
  * Creates and stores a lightning invoice, for the specified amount, and refreshes/re-adds peers.
+ * First attempts to use external wallets if available, then falls back to LDK.
  * @param {number} amountSats
  * @param {string} [description]
  * @param {number} [expiryDeltaSeconds]
@@ -291,18 +384,77 @@ export const createLightningInvoice = async ({
 	selectedWallet = getSelectedWallet(),
 	selectedNetwork = getSelectedNetwork(),
 }: TCreateLightningInvoice): Promise<Result<TInvoice>> => {
-	const invoice = await createPaymentRequest({
-		amountSats,
-		description,
-		expiryDeltaSeconds,
-	});
-	if (invoice.isErr()) {
-		return err(invoice.error.message);
+	try {
+		// First, check if there's a default external wallet configured
+		const store = getStore();
+		const externalWallets = store.externalWallets;
+		
+		if (externalWallets.defaultWallet) {
+			console.log('Attempting invoice creation with external wallet:', externalWallets.defaultWallet);
+			console.log('External wallet config:', externalWallets[externalWallets.defaultWallet]);
+			
+			// Import the external wallet invoice creation function
+			const externalInvoice = await createExternalWalletInvoice(
+				() => getStore(),
+				amountSats || 0,
+				description ?? "LNI payment",
+				expiryDeltaSeconds
+			);
+			
+			console.log('External invoice creation result:', externalInvoice);
+			
+			if (externalInvoice?.paymentRequest) {
+				console.log('Invoice created successfully with external wallet. Payment request:', `${externalInvoice.paymentRequest}...`);
+				console.log('Payment hash:', externalInvoice.paymentHash);
+				console.log(`[TIMING] About to start polling at: ${Date.now()}`);
+				
+				// Start polling for invoice payment (non-blocking)
+				startInvoicePolling(externalInvoice.paymentHash);
+				
+				console.log(`[TIMING] Polling started, about to return invoice at: ${Date.now()}`);
+				
+				// Return in the expected TInvoice format
+				const result = {
+					to_str: externalInvoice.paymentRequest,
+					payment_hash: externalInvoice.paymentHash,
+					description: description || '',
+					amount_satoshis: amountSats,
+					is_expired: false,
+					expiry_time: Date.now() + ((expiryDeltaSeconds || 3600) * 1000),
+				} as TInvoice;
+				
+				console.log('Returning TInvoice result:', {
+					to_str: `${result.to_str.substring(0, 50)}...`,
+					payment_hash: result.payment_hash,
+					amount_satoshis: result.amount_satoshis
+				});
+				console.log(`[TIMING] Returning invoice result at: ${Date.now()}`);
+				
+				return ok(result);
+			}
+			
+			// External wallet invoice creation failed, return error
+			console.error('External wallet invoice creation failed or returned null');
+			return err('External wallet invoice creation failed');
+		}
+
+		// No external wallet configured, use LDK
+		const invoice = await createPaymentRequest({
+			amountSats,
+			description,
+			expiryDeltaSeconds,
+		});
+		if (invoice.isErr()) {
+			return err(invoice.error.message);
+		}
+
+		addPeers({ selectedNetwork, selectedWallet }).then();
+
+		return ok(invoice.value);
+	} catch (e) {
+		console.log('Error in createLightningInvoice:', e);
+		return err(e instanceof Error ? e.message : 'Unknown error creating invoice');
 	}
-
-	addPeers({ selectedNetwork, selectedWallet }).then();
-
-	return ok(invoice.value);
 };
 
 /**

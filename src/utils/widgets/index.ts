@@ -16,6 +16,13 @@ export const getDefaultOptions = (id: TWidgetId): TWidgetOptions => {
 				merkleRoot: false,
 				showSource: false,
 			};
+		case 'connectwallet':
+			return {
+				showInstructions: false,
+				showWalletSelector: true,
+				showConnectionForm: true,
+				showSource: false,
+			};
 		case 'facts':
 			return { showSource: false };
 		case 'news':

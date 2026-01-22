@@ -3,7 +3,7 @@ import { TServer, generateMnemonic } from 'beignet';
 import { InteractionManager } from 'react-native';
 
 import { createWalletThunk } from '../../store/actions/wallet';
-import { getWalletStore } from '../../store/helpers';
+import { getWalletStore, getStore } from '../../store/helpers';
 import { TWalletName } from '../../store/types/wallet';
 import { performFullRestoreFromLatestBackup } from '../../store/utils/backup';
 import { refreshBlocktankInfo } from '../../store/utils/blocktank';
@@ -86,7 +86,7 @@ export const restoreRemoteBackups = async (): Promise<Result<string>> => {
 const ENABLE_SERVICES = true;
 export const startWalletServices = async ({
 	onchain = ENABLE_SERVICES,
-	lightning = ENABLE_SERVICES,
+	lightning = false, //ENABLE_SERVICES,
 	restore = false,
 	staleBackupRecoveryMode = false,
 	selectedWallet = getSelectedWallet(),
@@ -138,6 +138,29 @@ export const startWalletServices = async ({
 			});
 			if (onChainSetupRes.isErr()) {
 				return err(onChainSetupRes.error.message);
+			}
+		}
+
+		// Check if external wallets are connected and disable LDK if they are
+		const store = getStore();
+		const externalWallets = store.externalWallets;
+		const hasConnectedExternalWallet = Object.values(externalWallets).some(
+			(wallet: any) => wallet?.connected
+		);
+		
+		if (hasConnectedExternalWallet) {
+			console.log('External wallet detected, skipping LDK initialization');
+			lightning = false;
+			
+			// Initialize default external wallet if one is configured
+			if (externalWallets.defaultWallet) {
+				console.log('Initializing default external wallet:', externalWallets.defaultWallet);
+				try {
+					const { initializeDefaultExternalWallet } = await import('../../store/utils/externalWalletsStartup');
+					await initializeDefaultExternalWallet(() => getStore());
+				} catch (error) {
+					console.error('Error initializing default external wallet:', error);
+				}
 			}
 		}
 

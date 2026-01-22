@@ -14,7 +14,7 @@ import bip21 from 'bip21';
 import URLParse from 'url-parse';
 
 import { rootNavigation } from '../../navigation/root/RootNavigationContainer';
-import { sendNavigation } from '../../sheets/SendNavigation';
+import { sendNavigation, navigationRef } from '../../sheets/SendNavigation';
 import {
 	resetSendTransaction,
 	setupOnChainTransaction,
@@ -41,7 +41,10 @@ import { findLnUrl, handleLnurlAuth, isLnurlAddress } from '../lnurl';
 import { EAvailableNetwork } from '../networks';
 import { showToast } from '../notifications';
 import { getSlashPayConfig, handleSlashtagURL } from '../slashtags';
-import { getBalance, getSelectedNetwork, getSelectedWallet } from '../wallet';
+import { getSelectedNetwork, getSelectedWallet } from '../wallet';
+import { getStore } from '../../store/helpers';
+import { balanceSelector } from '../../store/reselect/aggregations';
+import { defaultExternalWalletSelector } from '../../store/reselect/externalWallets';
 import {
 	getOnchainTransactionData,
 	getTransactionInputValue,
@@ -78,9 +81,12 @@ export const processUri = async ({
 	showErrors?: boolean;
 	validateOnly?: boolean;
 }): Promise<Result<string>> => {
+	console.log('[processUri] Starting with:', { uri: uri.substring(0, 50), source, validateOnly });
+	
 	// Parse
 	const parseResult = await parseUri(uri, selectedNetwork);
 	if (parseResult.isErr()) {
+		console.error('[processUri] Parse failed:', parseResult.error.message);
 		const errorMessage = parseResult.error.message;
 		if (showErrors) {
 			showToast({
@@ -91,6 +97,8 @@ export const processUri = async ({
 		}
 		return err(errorMessage);
 	}
+
+	console.log('[processUri] Parsed successfully:', parseResult.value.type);
 
 	// Validate & Prcoess
 	let data = parseResult.value;
@@ -103,6 +111,7 @@ export const processUri = async ({
 		data.type === EQRDataType.lightning
 	) {
 		paymentData = data;
+		console.log('[processUri] Is payment data, type:', data.type);
 	}
 
 	if (data.type === EQRDataType.slashtag) {
@@ -131,26 +140,33 @@ export const processUri = async ({
 
 	// Validate and process payment data.
 	if (paymentData) {
+		console.log('[processUri] Processing payment data...');
 		const processResult = await processPaymentData({
 			data: paymentData,
 			skipLightning,
 			showErrors,
 		});
 		if (processResult.isErr()) {
+			console.error('[processUri] processPaymentData failed:', processResult.error.message);
 			return err(processResult.error.message);
 		}
+		console.log('[processUri] Payment data processed successfully');
 		data = processResult.value;
 	}
 
 	if (source === 'send' && !paymentTypes.includes(data.type)) {
+		console.error('[processUri] Invalid payment data for send source');
 		return err('Invalid payment data');
 	}
 
 	// Handle
 	if (data && !validateOnly) {
+		console.log('[processUri] Calling handleData...');
 		await handleData({ data, uri, source });
+		console.log('[processUri] handleData completed');
 	}
 
+	console.log('[processUri] Process complete');
 	return ok('');
 };
 
@@ -324,25 +340,29 @@ export const parseUri = async (
 		}
 	}
 
-	// Check if plain bitcoin address or BIP21 unified URI
-	// Validate address for selected network
-	// TODO: return specific error for network mismatch in beignet
-	const onChainParseResponse = parseOnChainPaymentRequest(
-		uri,
-		EAvailableNetworks[selectedNetwork],
-	);
-	if (onChainParseResponse.isOk()) {
-		const { address, sats, message } = onChainParseResponse.value;
-		bitcoinData = {
-			type: EQRDataType.onchain,
-			address,
-			network: selectedNetwork,
-			amount: sats,
-			message,
-		};
-	} else {
-		error = i18n.t('other:scan.error.generic');
-		console.log(onChainParseResponse.error.message);
+	// Only check for on-chain data if we don't have a plain Lightning invoice
+	// (we still check for BIP21 unified URIs which might have both)
+	if (!isLightningUri(uri)) {
+		// Check if plain bitcoin address or BIP21 unified URI
+		// Validate address for selected network
+		// TODO: return specific error for network mismatch in beignet
+		const onChainParseResponse = parseOnChainPaymentRequest(
+			uri,
+			EAvailableNetworks[selectedNetwork],
+		);
+		if (onChainParseResponse.isOk()) {
+			const { address, sats, message } = onChainParseResponse.value;
+			bitcoinData = {
+				type: EQRDataType.onchain,
+				address,
+				network: selectedNetwork,
+				amount: sats,
+				message,
+			};
+		} else {
+			error = i18n.t('other:scan.error.generic');
+			console.log(onChainParseResponse.error.message);
+		}
 	}
 
 	if (bitcoinData && lightningData) {
@@ -392,7 +412,30 @@ export const processPaymentData = async ({
 	skipLightning?: boolean;
 	showErrors?: boolean;
 }): Promise<Result<TPaymentUri>> => {
-	let { onchainBalance, spendingBalance } = await getBalance();
+	console.log('[processPaymentData] Starting with type:', data.type, 'amount:', data.amount);
+	
+	// Check if external wallet is configured - skip ALL validation if so
+	const state = getStore();
+	const defaultExternalWallet = defaultExternalWalletSelector(state);
+	const hasExternalWallet = defaultExternalWallet && state.externalWallets[defaultExternalWallet]?.connected;
+	
+	console.log('[processPaymentData] External wallet check:', {
+		defaultExternalWallet,
+		hasExternalWallet,
+		connected: defaultExternalWallet ? state.externalWallets[defaultExternalWallet]?.connected : false,
+	});
+	
+	// External wallet handles everything - no validation needed
+	if (hasExternalWallet) {
+		console.log('[processPaymentData] External wallet active - skipping all validation');
+		return ok(data);
+	}
+	
+	console.log('[processPaymentData] No external wallet - running standard validation');
+	
+	// Get balance including external wallet balance from Redux store
+	const balance = balanceSelector(getStore());
+	let { onchainBalance, spendingBalance } = balance;
 	const isUnified = data.type === EQRDataType.unified;
 	const isOnchain = data.type === EQRDataType.onchain;
 	const isLightning = data.type === EQRDataType.lightning;
@@ -590,6 +633,7 @@ const handleData = async ({
 	uri: string;
 	source: 'mainScanner' | 'send';
 }): Promise<Result<string>> => {
+	console.log('[handleData] Starting with type:', data.type, 'source:', source);
 	const selectedWallet = getSelectedWallet();
 	const selectedNetwork = getSelectedNetwork();
 	const { type } = data;
@@ -703,7 +747,14 @@ const handleData = async ({
 				currency: 'USD',
 			});
 
+			console.log('[scanner] Processing Lightning invoice:', {
+				amount,
+				lightningInvoice: `${lightningInvoice.substring(0, 30)}...`,
+				source,
+			});
+
 			if (enableQuickpay && amount && amount < quickpayAmountSats) {
+				console.log('[scanner] Using quickpay for Lightning invoice');
 				const screen = 'Quickpay';
 				const params = { invoice: lightningInvoice, amount };
 
@@ -718,25 +769,46 @@ const handleData = async ({
 				return ok('');
 			}
 
+			console.log('[scanner] Setting payment method to lightning');
 			dispatch(updateSendTransaction({ paymentMethod: 'lightning', uri }));
 
 			const invoiceAmount = amount ?? 0;
-			const screen = invoiceAmount ? 'ReviewAndSend' : 'Amount';
+			const screen = invoiceAmount ? ('ReviewAndSend' as const) : ('Amount' as const);
 
-			if (source === 'mainScanner') {
-				// If BottomSheet is not open yet (MainScanner)
-				showSheet('send', { screen });
-			} else {
-				// If BottomSheet is already open (SendScanner)
-				sendNavigation.navigate(screen);
-			}
+			console.log('[scanner] Navigating to screen:', screen, 'with amount:', invoiceAmount);
 
+			// Update Beignet transaction with invoice BEFORE navigation
+			console.log('[scanner] Updating Beignet transaction with invoice');
 			updateBeignetSendTransaction({
 				outputs: [{ address: '', value: invoiceAmount, index: 0 }],
 				lightningInvoice,
 				slashTagsUrl,
 			});
 
+			if (source === 'mainScanner') {
+				// If BottomSheet is not open yet (MainScanner)
+				console.log('[scanner] Opening send sheet with screen:', screen);
+				showSheet('send', { screen });
+			} else {
+				// If BottomSheet is already open
+				// Due to NavigationIndependentTree in bottom-sheet v5, navigation within
+				// the sheet doesn't work reliably. Close and reopen with correct initial screen.
+				console.log('[scanner] Sheet already open, closing and reopening with:', screen);
+				console.log('[scanner] Calling closeSheet...');
+				
+				// Close the sheet
+				closeSheet('send');
+				
+				// Wait for sheet to close, then reopen
+				// In v5, we need to wait for the close animation to complete
+				setTimeout(() => {
+					console.log('[scanner] Opening send sheet with screen:', screen);
+					showSheet('send', { screen });
+					console.log('[scanner] showSheet called');
+				}, 400); // Increased delay for v5 animation
+			}
+
+			console.log('[scanner] Lightning invoice processing complete');
 			return ok('');
 		}
 		case EQRDataType.lnurlAddress:
@@ -747,20 +819,30 @@ const handleData = async ({
 			pParams.minSendable = Math.floor(pParams.minSendable / 1000);
 			pParams.maxSendable = Math.floor(pParams.maxSendable / 1000);
 
-			// Determine if we have enough sending capacity before proceeding.
-			const lightningBalance = getLightningBalance({ includeReserve: false });
+			// TODO Determine if we have enough sending capacity before proceeding.
+			// const lightningBalance = getLightningBalance({ includeReserve: false });
 
 			dispatch(updateSendTransaction({ paymentMethod: 'lightning' }));
 
-			if (lightningBalance.localBalance < pParams.minSendable) {
-				showToast({
-					type: 'warning',
-					title: i18n.t('other:lnurl_pay_error'),
-					description: i18n.t('other:lnurl_pay_error_no_capacity'),
-				});
-				return err(
-					'Not enough outbound/sending capacity to complete lnurl-pay request.',
-				);
+			// Check if there's a connected external default wallet
+			const state = getStore();
+			const defaultExternalWallet = defaultExternalWalletSelector(state);
+			const hasConnectedExternalWallet = defaultExternalWallet && state.externalWallets[defaultExternalWallet]?.connected;
+
+			// Only check internal LDK balance if no external wallet is available
+			if (!hasConnectedExternalWallet) {
+				const lightningBalance = getLightningBalance({ includeReserve: false });
+
+				if (lightningBalance.localBalance < pParams.minSendable) {
+					showToast({
+						type: 'warning',
+						title: i18n.t('other:lnurl_pay_error'),
+						description: i18n.t('other:lnurl_pay_error_no_capacity'),
+					});
+					return err(
+						'Not enough outbound/sending capacity to complete lnurl-pay request.',
+					);
+				}
 			}
 
 			if (pParams.minSendable === pParams.maxSendable) {

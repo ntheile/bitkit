@@ -51,7 +51,17 @@ export const useBottomSheetBackPress = (): void => {
 	useEffect(() => {
 		const backAction = () => {
 			const openSheets = sheetRefs.filter(({ ref }) => {
-				return ref.current?.isOpen();
+				// In bottom-sheet v5, use animatedIndex to check if sheet is open
+				// Index >= 0 means open, -1 means closed
+				try {
+					const modal = ref.current;
+					if (!modal) return false;
+					// @ts-ignore - animatedIndex exists but may not be in types
+					const index = modal.animatedIndex?.value;
+					return typeof index === 'number' && index >= 0;
+				} catch {
+					return false;
+				}
 			});
 
 			if (openSheets.length !== 0) {

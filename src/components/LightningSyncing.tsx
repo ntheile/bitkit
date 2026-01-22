@@ -62,32 +62,35 @@ const LightningSyncing = ({
 		);
 	}, [isLDKReady, hidden, glowOpacity, rootOpacity]);
 
-	if (hidden) {
-		return <></>;
-	}
+	// TODO fix this if LDK is being used
+	return <></>;
 
-	return (
-		<AnimatedView
-			style={[style, { opacity: rootOpacity }]}
-			testID="LightningSyncing">
-			<GradientView style={styles.root}>
-				<BottomSheetNavigationHeader title={title} />
-				<View style={styles.content}>
-					<BodyM color="secondary">{t('wait_text_top')}</BodyM>
+	// if (hidden) {
+	// 	return <></>;
+	// }
 
-					<View style={styles.imageContainer}>
-						<SyncSpinner />
-						<Image style={styles.image} source={imageSrc} />
-					</View>
+	// return (
+	// 	<AnimatedView
+	// 		style={[style, { opacity: rootOpacity }]}
+	// 		testID="LightningSyncing">
+	// 		<GradientView style={styles.root}>
+	// 			<BottomSheetNavigationHeader title={title} />
+	// 			<View style={styles.content}>
+	// 				<BodyM color="secondary">{t('wait_text_top')}</BodyM>
 
-					<BodySSB style={styles.bottom} color="white32">
-						{t('wait_text_bottom')}
-					</BodySSB>
-				</View>
-				<SafeAreaInset type="bottom" minPadding={16} />
-			</GradientView>
-		</AnimatedView>
-	);
+	// 				<View style={styles.imageContainer}>
+	// 					<SyncSpinner />
+	// 					<Image style={styles.image} source={imageSrc} />
+	// 				</View>
+
+	// 				<BodySSB style={styles.bottom} color="white32">
+	// 					{t('wait_text_bottom')}
+	// 				</BodySSB>
+	// 			</View>
+	// 			<SafeAreaInset type="bottom" minPadding={16} />
+	// 		</GradientView>
+	// 	</AnimatedView>
+	// );
 };
 
 const styles = StyleSheet.create({

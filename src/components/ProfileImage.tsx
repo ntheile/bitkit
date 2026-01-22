@@ -4,15 +4,14 @@ import { SvgXml } from 'react-native-svg';
 
 import useColors from '../hooks/colors';
 import { BasicProfile } from '../store/types/slashtags';
-import Jdenticon from './Jdenticon';
+
+const faviconImage = require('../assets/favicon.png');
 
 const ProfileImage = ({
-	url,
 	image,
 	style,
 	size = 32,
 }: {
-	url?: string;
 	image?: BasicProfile['image'];
 	style?: StyleProp<ViewStyle>;
 	size: number;
@@ -49,10 +48,8 @@ const ProfileImage = ({
 				<SvgXml width={size} height={size} xml={xml} />
 			) : image ? (
 				<Image source={{ uri: image, width: size, height: size }} />
-			) : url ? (
-				<Jdenticon value={url} size={size} />
 			) : (
-				<View style={_style} />
+				<Image source={faviconImage} style={{ width: size, height: size }} />
 			)}
 		</View>
 	);

@@ -74,6 +74,7 @@ const Address = ({ route }: SendScreenProps<'Address'>): ReactElement => {
 						returnKeyType="done"
 						testID="RecipientInput"
 						onChangeText={onChangeText}
+						onSubmitEditing={onContinue}
 					/>
 				</ThemedView>
 

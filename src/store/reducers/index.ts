@@ -6,6 +6,7 @@ import activity from '../slices/activity';
 import backup from '../slices/backup';
 import blocktank from '../slices/blocktank';
 import checks from '../slices/checks';
+import externalWallets from '../slices/externalWallets';
 import fees from '../slices/fees';
 import lightning from '../slices/lightning';
 import metadata from '../slices/metadata';
@@ -34,6 +35,7 @@ const appReducer = combineReducers({
 	user,
 	wallet,
 	widgets,
+	externalWallets,
 });
 
 const rootReducer = (

@@ -10,6 +10,7 @@ import { backupVerifiedSelector } from '../store/reselect/user';
 import { ignoreBackupTimestampSelector } from '../store/reselect/user';
 import { ignoreBackup } from '../store/slices/user';
 import { Display } from '../styles/text';
+import { isAnySheetOpen } from './isAnySheetOpen';
 import { useAllSheetRefs, useSheetRef } from './SheetRefsProvider';
 
 const imageSrc = require('../assets/illustrations/safe.png');
@@ -37,13 +38,12 @@ const BackupPrompt = (): ReactElement => {
 		// and no other bottom-sheets are shown
 		// and user on home screen for CHECK_DELAY
 		const shouldShow = () => {
-			const isAnySheetOpen = sheetRefs.some(({ ref }) => ref.current?.isOpen());
 			const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
 			const hasBalance = totalBalance > 0;
 
 			return (
 				!__E2E__ &&
-				!isAnySheetOpen &&
+				!isAnySheetOpen(sheetRefs) &&
 				isTimeoutOver &&
 				!backupVerified &&
 				hasBalance

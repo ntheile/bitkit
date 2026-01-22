@@ -21,6 +21,7 @@ const WidgetsSuggestions = (): ReactElement => {
 					<WidgetListItem id="blocks" />
 					<WidgetListItem id="facts" />
 					<WidgetListItem id="calculator" />
+					<WidgetListItem id="connectwallet" />
 					<WidgetListItem id="weather" />
 				</ScrollView>
 			</View>

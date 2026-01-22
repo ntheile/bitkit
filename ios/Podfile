@@ -7,8 +7,8 @@ def node_require(script)
     )", __dir__]).strip
 end
 
-# Disable New Architecture
-ENV['RCT_NEW_ARCH_ENABLED'] = '0'
+# Enable New Architecture
+ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
@@ -39,6 +39,9 @@ end
 target 'bitkit' do
   config = use_native_modules!
 
+  # Manually link lni_react_native module
+  pod 'lni-react-native', :path => '../node_modules/lni_react_native'
+
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
@@ -54,15 +57,18 @@ target 'bitkit' do
       # :ccache_enabled => true
     )
 
-    # buildcache begin
+    # Fix for New Architecture - remove compiler overrides that conflict with -index-store-path
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings["CC"] = "clang"
-        config.build_settings["LD"] = "clang"
-        config.build_settings["CXX"] = "clang++"
-        config.build_settings["LDPLUSPLUS"] = "clang++"
+        # Remove custom compiler settings that interfere with New Architecture
+        config.build_settings.delete("CC")
+        config.build_settings.delete("LD")
+        config.build_settings.delete("CXX")
+        config.build_settings.delete("LDPLUSPLUS")
+        
+        # Disable index store path for New Architecture compatibility
+        config.build_settings["COMPILER_INDEX_STORE_ENABLE"] = "NO"
       end
     end
-    # buildcache end
   end
 end

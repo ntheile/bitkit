@@ -25,7 +25,7 @@ index 80f4e75..30ba0b4 100644
          this.currentSwipingDirection = null;
          this.panResponder = null;
          this.didUpdateDimensionsEmitter = null;
-+        this.backHandlerEventSubscription
++        this.backHandlerEventSubscription = null;
          this.interactionHandle = null;
          this.getDeviceHeight = () => this.props.deviceHeight || this.state.deviceHeight;
          this.getDeviceWidth = () => this.props.deviceWidth || this.state.deviceWidth;

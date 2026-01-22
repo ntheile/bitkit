@@ -32,6 +32,10 @@ import type { SendScreenProps } from '../../../navigation/types';
 import { removeTxTag } from '../../../store/actions/wallet';
 import { onChainFeesSelector } from '../../../store/reselect/fees';
 import {
+	defaultExternalWalletSelector,
+	connectedExternalWalletsSelector,
+} from '../../../store/reselect/externalWallets';
+import {
 	enableSendAmountWarningSelector,
 	pinForPaymentsSelector,
 	pinSelector,
@@ -109,6 +113,8 @@ const Section = memo(
 const ReviewAndSend = ({
 	navigation,
 }: SendScreenProps<'ReviewAndSend'>): ReactElement => {
+	console.log('[ReviewAndSend] Component rendering/re-rendering');
+	
 	const { t, i18n } = useTranslation('wallet');
 	const { t: tTime } = useTranslation('intl', { i18n: i18nTime });
 	const selectedWallet = useAppSelector(selectedWalletSelector);
@@ -127,6 +133,16 @@ const ReviewAndSend = ({
 	const biometrics = useAppSelector((state) => state.settings.biometrics);
 	const { paymentMethod, uri } = useAppSelector(sendTransactionSelector);
 	const usesLightning = paymentMethod === 'lightning';
+	const defaultExternalWallet = useAppSelector(defaultExternalWalletSelector);
+	const connectedWallets = useAppSelector(connectedExternalWalletsSelector);
+	const hasExternalWallet = !!defaultExternalWallet && connectedWallets.includes(defaultExternalWallet);
+
+	console.log('[ReviewAndSend] State:', {
+		usesLightning,
+		hasExternalWallet,
+		paymentMethod,
+		hasInvoice: !!transaction.lightningInvoice,
+	});
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [showBiotmetrics, setShowBiometrics] = useState(false);
@@ -139,24 +155,56 @@ const ReviewAndSend = ({
 	const [rawTx, setRawTx] = useState<{ hex: string; id: string }>();
 	const [decodedInvoice, setDecodedInvoice] = useState<TInvoice>();
 
+	console.log('[ReviewAndSend] decodedInvoice state:', decodedInvoice ? 'SET' : 'NOT SET');
+
+	// Safety check: if external wallet is active and trying to send on-chain, go back
+	useEffect(() => {
+		console.log('[ReviewAndSend] Safety check:', {
+			hasExternalWallet,
+			usesLightning,
+			paymentMethod,
+			shouldGoBack: hasExternalWallet && !usesLightning,
+		});
+		
+		if (hasExternalWallet && !usesLightning) {
+			console.log('[ReviewAndSend] External wallet with on-chain detected - going back');
+			showToast({
+				type: 'warning',
+				title: t('send_error_title'),
+				description: 'On-chain transactions are not supported when using an external wallet.',
+			});
+			navigation.goBack();
+		} else {
+			console.log('[ReviewAndSend] Safety check passed - will render screen');
+		}
+	}, [hasExternalWallet, usesLightning, paymentMethod, navigation, t]);
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
+		console.log('[ReviewAndSend] Decoding invoice, usesLightning:', usesLightning, 'invoice:', transaction.lightningInvoice?.substring(0, 30));
+		
 		const decodeAndSetLightningInvoice = async (): Promise<void> => {
 			if (!usesLightning || !transaction.lightningInvoice) {
+				console.log('[ReviewAndSend] Not decoding - usesLightning:', usesLightning, 'hasInvoice:', !!transaction.lightningInvoice);
 				setDecodedInvoice(undefined);
 				return;
 			}
+			console.log('[ReviewAndSend] Decoding invoice...');
 			const result = await decodeLightningInvoice(transaction.lightningInvoice);
 			if (result.isErr()) {
+				console.error('[ReviewAndSend] Invoice decode error:', result.error.message);
 				setDecodedInvoice(undefined);
 				console.log(result.error.message);
 				return;
 			}
+			console.log('[ReviewAndSend] Invoice decoded successfully:', result.value.payment_hash);
+			console.log('[ReviewAndSend] Setting decoded invoice state - this should trigger re-render');
 			setDecodedInvoice(result.value);
+			console.log('[ReviewAndSend] Decoded invoice state set');
 		};
 
 		decodeAndSetLightningInvoice();
-	}, [transaction.lightningInvoice]);
+	}, [transaction.lightningInvoice, usesLightning]);
 
 	/*
 	 * Total value of all outputs. Excludes change address.
@@ -178,13 +226,17 @@ const ReviewAndSend = ({
 	);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	const createLightningTransaction = useCallback(async () => {
+	const createLightningTransaction = useCallback(async (): Promise<void> => {
+		console.log('[ReviewAndSend] Creating lightning transaction...');
+
 		if (!transaction.lightningInvoice || !decodedInvoice) {
+			console.error('[ReviewAndSend] Missing invoice or decodedInvoice');
 			setIsLoading(false);
 			onError(t('send_error_create_tx'));
 			return;
 		}
 
+		console.log('[ReviewAndSend] Saving metadata...');
 		// save tags metadata
 		dispatch(
 			updateMetaTxTags({
@@ -207,6 +259,8 @@ const ReviewAndSend = ({
 		// Determine if we should override the invoice amount
 		const paymentAmount = decodedInvoice.amount_satoshis ?? amount;
 
+		console.log('[ReviewAndSend] Paying invoice with amount:', paymentAmount);
+
 		const payInvoiceResponse = await payLightningInvoice({
 			invoice: transaction.lightningInvoice,
 			// If the invoice has an amount, leave undefined
@@ -217,6 +271,8 @@ const ReviewAndSend = ({
 
 		if (payInvoiceResponse.isErr()) {
 			const errorMessage = payInvoiceResponse.error.message;
+			console.error('[ReviewAndSend] Payment failed:', errorMessage);
+			
 			if (errorMessage === 'Timed Out.') {
 				dispatch(
 					addPendingPayment({
@@ -228,24 +284,25 @@ const ReviewAndSend = ({
 				return;
 			}
 
-			console.error(errorMessage);
 			onError(t('send_error_create_tx'));
 			return;
 		}
 
+		console.log('[ReviewAndSend] Payment successful, navigating to Success');
 		navigation.navigate('Success', {
 			type: EActivityType.lightning,
 			amount,
 			txId: decodedInvoice.payment_hash,
 		});
 	}, [
-		onError,
-		amount,
-		decodedInvoice?.amount_satoshis,
 		transaction.lightningInvoice,
-		transaction.outputs,
 		transaction.tags,
+		transaction.slashTagsUrl,
+		decodedInvoice,
+		amount,
 		dispatch,
+		navigation,
+		onError,
 		t,
 	]);
 
@@ -324,16 +381,36 @@ const ReviewAndSend = ({
 	}, [rawTx, _broadcast]);
 
 	const feeSats = useMemo(() => {
+		// Skip fee calculation for lightning transactions
+		if (usesLightning) {
+			return 0;
+		}
+		
+		// Skip fee calculation if using external wallet for on-chain
+		// External wallet handles its own fees
+		if (hasExternalWallet) {
+			return 0;
+		}
+		
+		// Skip fee calculation if there are no inputs (prevents error)
+		if (!transaction.inputs || transaction.inputs.length === 0) {
+			console.warn('No inputs available for fee calculation');
+			return 0;
+		}
+		
 		return getTotalFee({
 			satsPerByte: transaction.satsPerByte,
 			message: transaction.message,
 		});
-	}, [transaction.satsPerByte, transaction.message]);
+	}, [transaction.satsPerByte, transaction.message, transaction.inputs, hasExternalWallet, usesLightning]);
 
 	const runCreateTxMethods = useCallback((): void => {
+		console.log('[ReviewAndSend] runCreateTxMethods called, usesLightning:', usesLightning);
 		if (usesLightning) {
+			console.log('[ReviewAndSend] Calling createLightningTransaction');
 			createLightningTransaction().then();
 		} else {
+			console.log('[ReviewAndSend] Calling createOnChainTransaction');
 			createOnChainTransaction().then();
 		}
 	}, [usesLightning, createLightningTransaction, createOnChainTransaction]);
@@ -370,7 +447,10 @@ const ReviewAndSend = ({
 
 	const confirmPayment = useCallback(
 		(warnings: string[] = []) => {
+			console.log('[ReviewAndSend] confirmPayment called with warnings:', warnings);
+			
 			if (warnings.length > 0) {
+				console.log('[ReviewAndSend] Showing warning dialog:', warnings[0]);
 				// Timeout needed to fix bug with multiple modals
 				setTimeout(() => {
 					showDialogWarning(warnings[0]);
@@ -379,14 +459,23 @@ const ReviewAndSend = ({
 				return;
 			}
 
+			console.log('[ReviewAndSend] No warnings, checking pin/biometrics...', {
+				pin,
+				pinForPayments,
+				biometrics,
+			});
+
 			if (pin && pinForPayments) {
 				if (biometrics) {
+					console.log('[ReviewAndSend] Showing biometrics');
 					setShowBiometrics(true);
 				} else {
+					console.log('[ReviewAndSend] Navigating to PIN');
 					setIsLoading(false);
 					navigateToPin();
 				}
 			} else {
+				console.log('[ReviewAndSend] No PIN required, running create tx methods');
 				runCreateTxMethods();
 			}
 		},
@@ -416,9 +505,11 @@ const ReviewAndSend = ({
 	);
 
 	const onSwipeToPay = useCallback(async () => {
+		console.log('[ReviewAndSend] onSwipeToPay called');
 		const warnings: string[] = [];
 		setIsLoading(true);
 
+		console.log('[ReviewAndSend] Calculating fiat values...');
 		const { fiatValue: amountFiat } = getFiatDisplayValues({
 			satoshis: amount,
 			currency: 'USD',
@@ -431,16 +522,28 @@ const ReviewAndSend = ({
 			exchangeRates,
 		});
 
-		// amount > 50% of total balance
-		if (usesLightning) {
-			// If lightning tx use lightning balance.
-			if (amount > lightningBalance.localBalance / 2) {
-				warnings.push('dialog2');
-			}
-		} else {
-			// If on-chain tx use on-chain balance.
-			if (amount > onChainBalance / 2) {
-				warnings.push('dialog2');
+		console.log('[ReviewAndSend] Checking warnings...', {
+			usesLightning,
+			amount,
+			amountFiat,
+			feeFiat,
+			hasExternalWallet,
+		});
+
+		// Skip balance warnings when using external wallet
+		// External wallet manages its own balance
+		if (!hasExternalWallet) {
+			// amount > 50% of total balance
+			if (usesLightning) {
+				// If lightning tx use lightning balance.
+				if (amount > lightningBalance.localBalance / 2) {
+					warnings.push('dialog2');
+				}
+			} else {
+				// If on-chain tx use on-chain balance.
+				if (amount > onChainBalance / 2) {
+					warnings.push('dialog2');
+				}
 			}
 		}
 
@@ -469,6 +572,9 @@ const ReviewAndSend = ({
 		if (!usesLightning && feeSats > amount / 2) {
 			warnings.push('dialog3');
 		}
+		
+		console.log('[ReviewAndSend] Warnings collected:', warnings);
+		console.log('[ReviewAndSend] Calling confirmPayment with warnings');
 		confirmPayment(warnings);
 	}, [
 		amount,

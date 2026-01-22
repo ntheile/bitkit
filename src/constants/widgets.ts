@@ -1,6 +1,7 @@
 import {
 	blocksIcon,
 	calculatorIcon,
+	connectWalletIcon,
 	factsIcon,
 	newsIcon,
 	priceIcon,
@@ -10,6 +11,7 @@ import {
 export const widgets = {
 	blocks: { id: 'blocks', icon: blocksIcon() },
 	calculator: { id: 'calculator', icon: calculatorIcon() },
+	connectwallet: { id: 'connectwallet', icon: connectWalletIcon() },
 	facts: { id: 'facts', icon: factsIcon() },
 	news: { id: 'news', icon: newsIcon() },
 	price: { id: 'price', icon: priceIcon() },

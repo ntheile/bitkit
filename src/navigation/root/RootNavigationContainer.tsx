@@ -7,6 +7,7 @@ import {
 import React, { ReactElement, useEffect } from 'react';
 import { Linking } from 'react-native';
 
+import { getOpenSheets } from '../../sheets/isAnySheetOpen';
 import { useAllSheetRefs } from '../../sheets/SheetRefsProvider';
 import { processUri } from '../../utils/scanner/scanner';
 import { RootStackParamList } from '../types';
@@ -71,7 +72,7 @@ const RootNavigationContainer = ({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: sheetRefs don't change
 	useEffect(() => {
 		const unsubscribe = navigationRef.addListener('state', () => {
-			const openSheets = sheetRefs.filter(({ ref }) => ref.current?.isOpen());
+			const openSheets = getOpenSheets(sheetRefs);
 			openSheets.forEach(({ ref }) => ref.current?.close());
 		});
 

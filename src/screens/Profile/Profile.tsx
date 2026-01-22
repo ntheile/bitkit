@@ -217,7 +217,7 @@ const QRView = ({
 				/>
 				<View style={styles.qrImageContainer}>
 					<ThemedView style={styles.qrImageOuter} color="white">
-						<ProfileImage url={url} image={profile?.image} size={68} />
+						<ProfileImage image={profile?.image} size={68} />
 					</ThemedView>
 				</View>
 			</TouchableOpacity>

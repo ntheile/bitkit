@@ -48,7 +48,7 @@ export const __ENABLE_REDUX_IMMUTABLE_CHECK__ =
 
 export const __ENABLE_I18NEXT_DEBUGGER__ = ENABLE_I18NEXT_DEBUGGER === 'true';
 
-export const __ENABLE_LDK_LOGS__ = ENABLE_LDK_LOGS === 'true';
+export const __ENABLE_LDK_LOGS__ = ENABLE_LDK_LOGS === 'false';
 
 export const __BACKEND_HOST__ = BACKEND_HOST;
 export const __BACKUPS_SERVER_HOST__ = BACKUPS_SERVER_HOST;

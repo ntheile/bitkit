@@ -15,6 +15,7 @@ import { MAX_WARNINGS, ignoreHighBalance } from '../store/slices/user';
 import { BodyMB, Display } from '../styles/text';
 import { getFiatDisplayValues } from '../utils/displayValues';
 import { openURL } from '../utils/helpers';
+import { isAnySheetOpen } from './isAnySheetOpen';
 import { useAllSheetRefs, useSheetRef } from './SheetRefsProvider';
 
 const imageSrc = require('../assets/illustrations/exclamation-mark.png');
@@ -51,7 +52,6 @@ const HighBalanceWarning = (): ReactElement => {
 		// and user on home screen for CHECK_DELAY
 		const shouldShow = () => {
 			const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
-			const isAnySheetOpen = sheetRefs.some(({ ref }) => ref.current?.isOpen());
 			const belowMaxWarnings = count < MAX_WARNINGS;
 			const thresholdReached =
 				// fallback in case exchange rates are not available
@@ -61,7 +61,7 @@ const HighBalanceWarning = (): ReactElement => {
 
 			return (
 				!__E2E__ &&
-				!isAnySheetOpen &&
+				!isAnySheetOpen(sheetRefs) &&
 				isTimeoutOver &&
 				thresholdReached &&
 				belowMaxWarnings

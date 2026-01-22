@@ -5,6 +5,7 @@ import NavigationHeader from '../../components/NavigationHeader';
 import SafeAreaInset from '../../components/SafeAreaInset';
 import Button from '../../components/buttons/Button';
 import { getBlocksItems } from '../../components/widgets/edit/BlocksItems';
+import { getConnectWalletItems } from '../../components/widgets/edit/ConnectWalletItems';
 import { getFactsItems } from '../../components/widgets/edit/FactsItems';
 import Item from '../../components/widgets/edit/Item';
 import { getNewsItems } from '../../components/widgets/edit/NewsItems';
@@ -16,6 +17,7 @@ import { RootStackScreenProps } from '../../navigation/types';
 import { deleteWidget } from '../../store/slices/widgets';
 import {
 	TBlocksWidgetOptions,
+	TConnectWalletWidgetOptions,
 	TFactsWidgetOptions,
 	TNewsWidgetOptions,
 	TPriceWidgetOptions,
@@ -39,6 +41,8 @@ const WidgetEdit = ({
 		switch (id) {
 			case 'blocks':
 				return getBlocksItems(options as TBlocksWidgetOptions);
+			case 'connectwallet':
+				return getConnectWalletItems(options as TConnectWalletWidgetOptions);
 			case 'facts':
 				return getFactsItems(options as TFactsWidgetOptions);
 			case 'news':

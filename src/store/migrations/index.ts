@@ -189,6 +189,30 @@ const migrations = {
 			},
 		};
 	},
+	56: (state): PersistedState => {
+		// External wallet slice added; no transformation needed.
+		return state;
+	},
+	57: (state): PersistedState => {
+		// Add connectwallet widget as first widget for all users
+		const hasConnectWallet = state.widgets?.widgets?.connectwallet !== undefined;
+		
+		if (!hasConnectWallet) {
+			return {
+				...state,
+				widgets: {
+					...state.widgets,
+					widgets: {
+						connectwallet: getDefaultOptions('connectwallet'),
+						...state.widgets.widgets,
+					},
+					sortOrder: ['connectwallet', ...state.widgets.sortOrder],
+				},
+			};
+		}
+		
+		return state;
+	},
 };
 
 export default migrations;

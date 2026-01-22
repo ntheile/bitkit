@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
 	progressText: {
 		fontFamily: 'InterTight-Bold',
 		fontSize: 48,
-		color: '#FF4400',
+		color: '#20c998',
 		letterSpacing: -1,
 		flex: 1,
 		textAlign: 'center',
