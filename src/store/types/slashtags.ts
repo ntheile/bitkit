@@ -8,8 +8,17 @@ export type BasicProfile = Partial<{
 	links: Array<Link>;
 }>;
 
+/** Signal identity information for a contact */
+export type SignalIdentity = {
+	aci?: string; // Account Identity (UUID)
+	pni?: string; // Phone Number Identity (UUID)
+	phoneNumber?: string;
+};
+
 /** Contact Record saved in the "contacts" SlashDrive */
-export type IContactRecord = { url: string; name: string } & BasicProfile;
+export type IContactRecord = { url: string; name: string } & BasicProfile & {
+	signal?: SignalIdentity;
+};
 
 export type TContacts = {
 	[id: string]: IContactRecord;

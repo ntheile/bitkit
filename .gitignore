@@ -119,3 +119,7 @@ src/assets/svgs/optimized/
 **/android/app/build/intermediates/
 
 lni.tgz
+# Expo
+.expo
+dist/
+web-build/

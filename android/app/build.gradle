@@ -52,6 +52,11 @@ react {
 
     /* Autolinking */
     autolinkLibrariesWithApp()
+    //
+    // Added by install-expo-modules
+    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", rootDir.getAbsoluteFile().getParentFile().getAbsolutePath(), "android", "absolute"].execute(null, rootDir).text.trim())
+    cliFile = new File(["node", "--print", "require.resolve('@expo/cli')"].execute(null, rootDir).text.trim())
+    bundleCommand = "export:embed"
 }
 
 /**
@@ -79,6 +84,14 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.bitkit"
+    
+    compileOptions {
+        // Enable core library desugaring (required for libsignal)
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    
     defaultConfig {
         applicationId "to.bitkit"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -160,6 +173,9 @@ android {
 }
 
 dependencies {
+    // Core library desugaring (required for libsignal)
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    
     androidTestImplementation('com.wix:detox:+')
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")

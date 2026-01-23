@@ -87,6 +87,12 @@ const AdvancedSettings = ({
 				testID: 'WebRelay',
 			},
 			{
+				title: 'Signal Integration',
+				type: EItemType.button,
+				onPress: (): void => navigation.navigate('SignalLink'),
+				testID: 'SignalLink',
+			},
+			{
 				title: t('adv.bitcoin_network'),
 				value: networkLabels[selectedNetwork].shortLabel,
 				type: EItemType.button,

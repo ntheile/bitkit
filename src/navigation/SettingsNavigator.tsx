@@ -48,6 +48,7 @@ import CustomFee from '../screens/Settings/TransactionSpeed/CustomFee';
 import UnitSettings from '../screens/Settings/Unit';
 import WebRelay from '../screens/Settings/WebRelay';
 import WidgetSettings from '../screens/Settings/Widgets';
+import SignalLink from '../screens/Settings/SignalLink';
 import { TChannel } from '../store/types/lightning';
 
 export type SettingsNavigationProp =
@@ -100,6 +101,7 @@ export type SettingsStackParamList = {
 	AddressViewer: undefined;
 	FeeSettings: undefined;
 	WebRelay: undefined;
+	SignalLink: undefined;
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -168,6 +170,7 @@ const SettingsNavigator = (): ReactElement => {
 			<Stack.Screen name="TagsSettings" component={TagsSettings} />
 			<Stack.Screen name="FeeSettings" component={FeeSettings} />
 			<Stack.Screen name="WebRelay" component={WebRelay} />
+			<Stack.Screen name="SignalLink" component={SignalLink} />
 		</Stack.Navigator>
 	);
 };

@@ -22,6 +22,7 @@ export enum EQRDataType {
 	treasureHunt = 'treasureHunt',
 	pubkyAuth = 'pubkyAuth',
 	gift = 'gift',
+	signalLink = 'signalLink',
 }
 
 export type TLnUrlData =
@@ -42,7 +43,8 @@ export type QRData =
 	| TSlashAuthUrl
 	| TTreasureChestUrl
 	| TPubkyAuthUrl
-	| TGift;
+	| TGift
+	| TSignalLink;
 
 export type TPaymentUri = TUnified | TBitcoinData | TLightningData;
 
@@ -130,6 +132,13 @@ export type TGift = {
 	type: EQRDataType.gift;
 	amount: number;
 	code: string;
+};
+
+export type TSignalLink = {
+	type: EQRDataType.signalLink;
+	deviceUuid: string;
+	publicKey: Uint8Array;
+	capabilities: string[];
 };
 
 export const paymentTypes = [

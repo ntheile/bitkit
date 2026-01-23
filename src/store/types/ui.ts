@@ -26,6 +26,7 @@ export const sheetIds: SheetId[] = [
 	'receive',
 	'receivedTx',
 	'send',
+	'signalInvoice',
 	'tags',
 	'transferFailed',
 	'treasureHunt',
@@ -63,6 +64,7 @@ export type SheetsParamList = {
 				amount?: number;
 		  }
 		| undefined;
+	signalInvoice: { invoice: string; amount?: number; description?: string };
 	tags: undefined;
 	transferFailed: undefined;
 	treasureHunt: { chestId: string };
