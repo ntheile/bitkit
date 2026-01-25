@@ -213,3 +213,213 @@ describe('Contact Types', () => {
 		expect(contact.signal?.phoneNumber).toBe('+1234567890');
 	});
 });
+
+describe('CDSI (Contact Discovery Service)', () => {
+	describe('E.164 Phone Number Formatting', () => {
+		it('should format US phone number without country code', () => {
+			const { formatE164 } = require('../src/utils/signal/cdsi');
+
+			expect(formatE164('4155551234')).toBe('+14155551234');
+		});
+
+		it('should format US phone number with country code', () => {
+			const { formatE164 } = require('../src/utils/signal/cdsi');
+
+			expect(formatE164('14155551234')).toBe('+14155551234');
+		});
+
+		it('should preserve leading + in E.164 format', () => {
+			const { formatE164 } = require('../src/utils/signal/cdsi');
+
+			expect(formatE164('+14155551234')).toBe('+14155551234');
+		});
+
+		it('should strip non-digit characters', () => {
+			const { formatE164 } = require('../src/utils/signal/cdsi');
+
+			expect(formatE164('(415) 555-1234')).toBe('+14155551234');
+			expect(formatE164('+1 (415) 555-1234')).toBe('+14155551234');
+		});
+
+		it('should handle international numbers', () => {
+			const { formatE164 } = require('../src/utils/signal/cdsi');
+
+			expect(formatE164('+442071234567')).toBe('+442071234567');
+			expect(formatE164('+81312345678')).toBe('+81312345678');
+		});
+	});
+
+	describe('libsignal CDSI Integration', () => {
+		beforeEach(() => {
+			jest.clearAllMocks();
+		});
+
+		it('should have CdsiEnvironment enum', () => {
+			const { CdsiEnvironment } = require('react-native-libsignal-client');
+
+			expect(CdsiEnvironment.Production).toBe('production');
+			expect(CdsiEnvironment.Staging).toBe('staging');
+		});
+
+		it('should report CDSI as available when native module exists', () => {
+			const { isCdsiAvailable } = require('react-native-libsignal-client');
+
+			expect(isCdsiAvailable()).toBe(true);
+		});
+
+		it('should perform CDSI lookup with phone numbers', async () => {
+			const { cdsiLookup, CdsiEnvironment } = require('react-native-libsignal-client');
+
+			const result = await cdsiLookup({
+				username: 'test-username',
+				password: 'test-password',
+				environment: CdsiEnvironment.Production,
+				phoneNumbers: ['+14155551234', '+14155551235'],
+				appName: 'Bitkit/1.0',
+			});
+
+			expect(result).toBeDefined();
+			expect(result.entries).toHaveLength(2);
+			expect(result.token).toBe('mock-cdsi-token-base64');
+			expect(result.debugPermitsUsed).toBe(2);
+		});
+
+		it('should return ACI/PNI for registered users', async () => {
+			const { cdsiLookup, CdsiEnvironment } = require('react-native-libsignal-client');
+
+			const result = await cdsiLookup({
+				username: 'test-username',
+				password: 'test-password',
+				environment: CdsiEnvironment.Production,
+				phoneNumbers: ['+14155551234'], // Ends in 4 (even), should have ACI
+				appName: 'Bitkit/1.0',
+			});
+
+			const entry = result.entries[0];
+			expect(entry.e164).toBe('+14155551234');
+			expect(entry.aci).toBe('aci-14155551234');
+			expect(entry.pni).toBe('pni-14155551234');
+		});
+
+		it('should return null ACI/PNI for unregistered users', async () => {
+			const { cdsiLookup, CdsiEnvironment } = require('react-native-libsignal-client');
+
+			const result = await cdsiLookup({
+				username: 'test-username',
+				password: 'test-password',
+				environment: CdsiEnvironment.Production,
+				phoneNumbers: ['+14155551235'], // Ends in 5 (odd), mock returns null
+				appName: 'Bitkit/1.0',
+			});
+
+			const entry = result.entries[0];
+			expect(entry.e164).toBe('+14155551235');
+			expect(entry.aci).toBeNull();
+			expect(entry.pni).toBeNull();
+		});
+
+		it('should support incremental lookups with token', async () => {
+			const { cdsiLookup, CdsiEnvironment } = require('react-native-libsignal-client');
+
+			// First lookup
+			const firstResult = await cdsiLookup({
+				username: 'test-username',
+				password: 'test-password',
+				environment: CdsiEnvironment.Production,
+				phoneNumbers: ['+14155551234'],
+				appName: 'Bitkit/1.0',
+			});
+
+			// Incremental lookup using token from first lookup
+			const incrementalResult = await cdsiLookup({
+				username: 'test-username',
+				password: 'test-password',
+				environment: CdsiEnvironment.Production,
+				phoneNumbers: ['+14155551236'],
+				prevPhoneNumbers: ['+14155551234'],
+				token: firstResult.token,
+				appName: 'Bitkit/1.0',
+			});
+
+			expect(incrementalResult).toBeDefined();
+			expect(incrementalResult.entries).toHaveLength(1);
+		});
+
+		it('should support service IDs with profile keys for existing contacts', async () => {
+			const { cdsiLookup, CdsiEnvironment } = require('react-native-libsignal-client');
+
+			const result = await cdsiLookup({
+				username: 'test-username',
+				password: 'test-password',
+				environment: CdsiEnvironment.Production,
+				phoneNumbers: ['+14155551234'],
+				serviceIdsAndProfileKeys: [
+					{
+						aci: 'existing-contact-aci',
+						profileKey: 'base64-profile-key-32-bytes',
+					},
+				],
+				appName: 'Bitkit/1.0',
+			});
+
+			expect(result).toBeDefined();
+			expect(cdsiLookup).toHaveBeenCalledWith(
+				expect.objectContaining({
+					serviceIdsAndProfileKeys: [
+						expect.objectContaining({ aci: 'existing-contact-aci' }),
+					],
+				})
+			);
+		});
+	});
+
+	describe('CDSI Auth Credentials', () => {
+		it('should throw error when not linked', async () => {
+			const { getCdsiAuthCredentials } = require('../src/utils/signal/cdsi');
+
+			await expect(getCdsiAuthCredentials()).rejects.toThrow(
+				'Not linked to Signal'
+			);
+		});
+	});
+
+	describe('CDSI Availability Check', () => {
+		it('should check if CDSI is available via app util', () => {
+			const { isCdsiAvailable } = require('../src/utils/signal/cdsi');
+
+			// isCdsiAvailable delegates to libsignal's isCdsiAvailable
+			expect(isCdsiAvailable()).toBe(true); // Mock returns true
+		});
+	});
+
+	describe('App lookupPhoneNumbers function', () => {
+		it('should throw when not linked to Signal', async () => {
+			const { lookupPhoneNumbers } = require('../src/utils/signal/cdsi');
+
+			await expect(lookupPhoneNumbers(['+14155551234'])).rejects.toThrow(
+				'Not linked to Signal'
+			);
+		});
+	});
+
+	describe('Re-exported types', () => {
+		it('should export CdsiLookupResult interface shape', () => {
+			const { formatE164 } = require('../src/utils/signal/cdsi');
+
+			// Test that formatting works (used for lookup input)
+			const formatted = formatE164('+14155551234');
+			expect(formatted).toBe('+14155551234');
+
+			// The result shape should match CdsiLookupResult
+			const mockResult: import('../src/utils/signal/cdsi').CdsiLookupResult = {
+				e164: '+14155551234',
+				aci: 'test-aci',
+				pni: 'test-pni',
+			};
+
+			expect(mockResult.e164).toBe('+14155551234');
+			expect(mockResult.aci).toBe('test-aci');
+			expect(mockResult.pni).toBe('test-pni');
+		});
+	});
+});

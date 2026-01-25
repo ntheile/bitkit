@@ -58,3 +58,13 @@ export {
 	type SendMessageResult,
 	type InvoiceMessage,
 } from './message-sender';
+
+// Username lookup
+export {
+	lookupByUsername,
+	hashUsername,
+	lookupMultipleUsernames,
+	isUsernameLookupAvailable,
+	type UsernameLookupResult,
+	type UsernameEnvironment,
+} from './username';

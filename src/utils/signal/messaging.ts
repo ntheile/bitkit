@@ -415,18 +415,25 @@ export async function sendMessage(
 		};
 	}
 
-	if (!recipient.aci) {
+	// Use ACI if available, otherwise fall back to PNI
+	const recipientId = recipient.aci || recipient.pni;
+	if (!recipientId) {
 		return {
 			success: false,
-			error: 'Recipient ACI not available. Need to discover contact first.',
+			error: 'Recipient ACI or PNI not available. Need to discover contact first.',
 		};
+	}
+
+	const usingPni = !recipient.aci && !!recipient.pni;
+	if (usingPni) {
+		console.log('Signal DM: Using PNI for messaging (no ACI available)');
 	}
 
 	// Check if sending to self
 	const isSendingToSelf = recipient.aci === accountInfo.aci;
 	const ourDeviceId = accountInfo.deviceId;
-	
-	console.log('Signal DM: Sending message to', recipient.aci);
+
+	console.log('Signal DM: Sending message to', recipientId);
 	console.log('Signal DM: Content:', content.slice(0, 50) + '...');
 	if (isSendingToSelf) {
 		console.log('Signal DM: Sending to SELF - will exclude device', ourDeviceId);
@@ -459,7 +466,7 @@ export async function sendMessage(
 		
 		if (useExistingSessions) {
 			// Get all device IDs we have sessions for
-			const sessionDeviceIds = getSessionDeviceIds(recipient.aci);
+			const sessionDeviceIds = getSessionDeviceIds(recipientId);
 			
 			// Filter out our own device if sending to self
 			const targetDeviceIds = isSendingToSelf 
@@ -472,14 +479,14 @@ export async function sendMessage(
 				for (const deviceId of targetDeviceIds) {
 					try {
 						// Need registrationId for sending - if we don't have it cached, skip this device
-						const regId = getRegistrationId(recipient.aci, deviceId);
+						const regId = getRegistrationId(recipientId, deviceId);
 						if (!regId) {
 							console.log('Signal DM: No cached registrationId for device', deviceId, '- need fresh PreKey');
-							clearSession(recipient.aci, deviceId);
+							clearSession(recipientId, deviceId);
 							continue;
 						}
 
-						const address = new ProtocolAddress(recipient.aci, deviceId);
+						const address = new ProtocolAddress(recipientId, deviceId);
 						const contentMessage = createContentMessage(content, timestamp, profileKey || undefined);
 						const ciphertext = await signalEncrypt(
 							contentMessage,
@@ -500,7 +507,7 @@ export async function sendMessage(
 						console.log('Signal DM: Encrypted with existing session for device', deviceId, 'libsignal type:', libsignalType, '-> API type:', apiType);
 					} catch (sessionError) {
 						console.log('Signal DM: Session failed for device', deviceId, '- will need fresh PreKey');
-						clearSession(recipient.aci, deviceId);
+						clearSession(recipientId, deviceId);
 					}
 				}
 			}
@@ -512,7 +519,7 @@ export async function sendMessage(
 			
 			// Step 1: Fetch PreKey bundle
 			// When sending to self, pass our device ID to exclude from rate-limited fallback
-			const preKeyBundle = await fetchPreKeyBundle(recipient.aci, isSendingToSelf ? ourDeviceId : undefined);
+			const preKeyBundle = await fetchPreKeyBundle(recipientId, isSendingToSelf ? ourDeviceId : undefined);
 			if (!preKeyBundle) {
 				// Check if we're rate limited
 				if (rateLimitedUntil > Date.now()) {
@@ -555,7 +562,7 @@ export async function sendMessage(
 		for (const device of devices) {
 			try {
 				const deviceId = device.deviceId || 1;
-				const address = new ProtocolAddress(recipient.aci, deviceId);
+				const address = new ProtocolAddress(recipientId, deviceId);
 
 				console.log(`Signal DM: Processing device ${deviceId}`, {
 					hasPreKey: !!device.preKey,
@@ -628,7 +635,7 @@ export async function sendMessage(
 				);
 
 				// Cache the registrationId for future use
-				setRegistrationId(recipient.aci, deviceId, registrationId);
+				setRegistrationId(recipientId, deviceId, registrationId);
 
 				console.log('Signal DM: Session established with device', deviceId);
 
@@ -670,7 +677,7 @@ export async function sendMessage(
 		}
 
 		// Step 4: Send to Signal server
-		const sendResult = await sendToServer(recipient.aci, messages, timestamp);
+		const sendResult = await sendToServer(recipientId, messages, timestamp);
 		
 		// Handle 410 stale devices - remove stale devices and retry with remaining
 		if (sendResult.staleDevices && sendResult.staleDevices.length > 0) {
@@ -694,8 +701,8 @@ export async function sendMessage(
 				}
 				
 				// Clear sessions and PreKey cache to force a fresh fetch
-				clearAllSessions(recipient.aci);
-				clearPreKeyCache(recipient.aci);
+				clearAllSessions(recipientId);
+				clearPreKeyCache(recipientId);
 				
 				console.log('Signal DM: All devices stale. Cleared cache, retrying...');
 				return sendMessage(recipient, content, _retryCount + 1);
@@ -703,12 +710,12 @@ export async function sendMessage(
 			
 			// Clear sessions for stale devices
 			for (const deviceId of sendResult.staleDevices) {
-				clearSession(recipient.aci, deviceId);
+				clearSession(recipientId, deviceId);
 			}
 			
 			// Retry sending with only non-stale messages
 			console.log('Signal DM: Retrying with non-stale devices:', nonStaleMessages.map(m => m.destinationDeviceId));
-			const retryResult = await sendToServer(recipient.aci, nonStaleMessages, timestamp);
+			const retryResult = await sendToServer(recipientId, nonStaleMessages, timestamp);
 			
 			if (retryResult.success) {
 				return {

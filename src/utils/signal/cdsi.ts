@@ -19,8 +19,18 @@
  */
 
 import { getAccountInfo, getAuthPassword } from '../../storage/signal-store';
+import {
+	cdsiLookup as libsignalCdsiLookup,
+	CdsiEnvironment,
+	isCdsiAvailable as libsignalIsCdsiAvailable,
+	type CdsiLookupOptions,
+	type CdsiLookupResponse,
+} from 'react-native-libsignal-client';
 
 const SIGNAL_SERVER = 'https://chat.signal.org';
+// Use a Signal-compatible user agent - third-party clients may be rejected
+// Match Signal Android user-agent format
+const APP_NAME = 'Signal-Android/7.71.2 Android/34';
 
 interface CdsiAuthCredentials {
 	username: string;
@@ -37,6 +47,10 @@ export interface CdsiLookupResult {
  * Get CDSI authentication credentials from Signal server.
  * These are separate from the main account credentials and are used
  * to authenticate with the CDSI enclave.
+ *
+ * This endpoint (GET /v2/directory/auth) returns CDSI-specific credentials
+ * that are different from the account credentials. Signal Android uses these
+ * via the authenticated WebSocket, but we use HTTP.
  */
 export async function getCdsiAuthCredentials(): Promise<CdsiAuthCredentials> {
 	const accountInfo = await getAccountInfo();
@@ -50,23 +64,37 @@ export async function getCdsiAuthCredentials(): Promise<CdsiAuthCredentials> {
 	const authString = `${aci}.${deviceId}:${password}`;
 	const authHeader = `Basic ${Buffer.from(authString).toString('base64')}`;
 
-	console.log('CDSI: Fetching auth credentials...');
+	console.log('CDSI: Fetching auth credentials from /v2/directory/auth');
+	console.log('CDSI: Using account ACI:', aci?.substring(0, 8) + '...');
+	console.log('CDSI: Using device ID:', deviceId);
 
 	const response = await fetch(`${SIGNAL_SERVER}/v2/directory/auth`, {
 		method: 'GET',
 		headers: {
 			Authorization: authHeader,
 			'Content-Type': 'application/json',
+			'User-Agent': APP_NAME,
+			'X-Signal-Agent': APP_NAME,
 		},
 	});
 
+	console.log('CDSI: /v2/directory/auth response status:', response.status);
+
 	if (!response.ok) {
 		const text = await response.text();
+		console.error('CDSI: Auth failed with status', response.status);
+		console.error('CDSI: Auth error response:', text);
 		throw new Error(`Failed to get CDSI auth: ${response.status} ${text}`);
 	}
 
 	const data = await response.json();
-	console.log('CDSI: Got auth credentials, username:', data.username?.substring(0, 8) + '...');
+	console.log('CDSI: Successfully got CDSI auth credentials');
+	console.log('CDSI: CDSI username:', data.username);
+	console.log('CDSI: CDSI password length:', data.password?.length || 0);
+
+	if (!data.username || !data.password) {
+		throw new Error('CDSI auth response missing username or password');
+	}
 
 	return {
 		username: data.username,
@@ -170,45 +198,97 @@ function uuidFromBytes(bytes: Uint8Array): string | null {
 /**
  * Look up phone numbers through CDSI.
  *
- * Note: This is a simplified implementation. The full CDSI protocol involves:
- * - SGX remote attestation
- * - Encrypted WebSocket communication
- * - Rate limiting tokens
- *
- * For a complete implementation, you would need to use libsignal's native
- * CDSI client which handles all the SGX attestation complexity.
+ * Uses the native libsignal CDSI client for privacy-preserving contact discovery.
+ * The CDSI protocol involves SGX remote attestation and encrypted communication.
  *
  * @param phoneNumbers Array of phone numbers in E.164 format
+ * @param options Optional lookup options (token for incremental lookups, etc.)
  * @returns Array of lookup results with ACI/PNI for each number
  */
-export async function lookupPhoneNumbers(phoneNumbers: string[]): Promise<CdsiLookupResult[]> {
+export async function lookupPhoneNumbers(
+	phoneNumbers: string[],
+	options?: {
+		prevPhoneNumbers?: string[];
+		token?: string;
+	}
+): Promise<CdsiLookupResult[]> {
+	console.log('CDSI: ==========================================');
+	console.log('CDSI: Starting phone number lookup');
 	console.log('CDSI: Looking up', phoneNumbers.length, 'phone numbers');
+
+	// Check if native CDSI is available
+	if (!libsignalIsCdsiAvailable()) {
+		throw new Error(
+			'CDSI lookup requires native libsignal support. ' +
+			'The react-native-libsignal-client CDSI module is not available.'
+		);
+	}
+	console.log('CDSI: Native libsignal CDSI is available');
 
 	// Format all numbers to E.164
 	const e164Numbers = phoneNumbers.map(formatE164);
 	console.log('CDSI: Formatted numbers:', e164Numbers);
 
-	// Get CDSI auth credentials
-	const auth = await getCdsiAuthCredentials();
-	console.log('CDSI: Got auth, username:', auth.username.substring(0, 8) + '...');
+	// Step 1: Get CDSI auth credentials (this is a separate credential from account auth)
+	console.log('CDSI: Step 1 - Getting CDSI auth credentials...');
+	let auth: CdsiAuthCredentials;
+	try {
+		auth = await getCdsiAuthCredentials();
+	} catch (error) {
+		console.error('CDSI: Failed to get CDSI auth credentials:', error);
+		throw error;
+	}
 
-	// Note: The actual CDSI lookup requires:
-	// 1. WebSocket connection to cdsi.signal.org
-	// 2. SGX attestation handshake
-	// 3. Encrypted request/response
-	//
-	// This requires the libsignal CDSI client which handles:
-	// - MRENCLAVE verification
-	// - Noise protocol encryption
-	// - Rate limiting token management
-	//
-	// For now, we'll return a placeholder indicating the feature needs
-	// native libsignal CDSI support.
+	// Step 2: Perform the CDSI lookup using libsignal native module
+	console.log('CDSI: Step 2 - Performing native CDSI lookup...');
+	console.log('CDSI: Using CDSI username:', auth.username);
+	console.log('CDSI: Using CDSI password (length):', auth.password?.length);
+	console.log('CDSI: Environment: Production');
 
-	throw new Error(
-		'CDSI lookup requires native libsignal support. ' +
-		'The react-native-libsignal-client package needs ConnectionManager and CdsiLookup bindings.'
-	);
+	const lookupOptions: CdsiLookupOptions = {
+		username: auth.username,
+		password: auth.password,
+		environment: CdsiEnvironment.Production,
+		phoneNumbers: e164Numbers,
+		appName: APP_NAME,
+		prevPhoneNumbers: options?.prevPhoneNumbers?.map(formatE164),
+		token: options?.token,
+	};
+
+	let response: CdsiLookupResponse;
+	try {
+		console.log('CDSI: Calling libsignalCdsiLookup...');
+		response = await libsignalCdsiLookup(lookupOptions);
+		console.log('CDSI: Native lookup successful!');
+	} catch (error) {
+		console.error('CDSI: Native lookup failed:', error);
+		console.error('CDSI: Error details:', JSON.stringify(error, null, 2));
+		throw error;
+	}
+
+	console.log('CDSI: Lookup complete, found', response.entries.length, 'entries');
+	console.log('CDSI: Rate limit permits used:', response.debugPermitsUsed);
+
+	// Convert response to our format
+	const results: CdsiLookupResult[] = response.entries.map((entry) => ({
+		e164: entry.e164,
+		aci: entry.aci,
+		pni: entry.pni,
+	}));
+
+	// Log each result
+	for (const result of results) {
+		console.log('CDSI: Result for', result.e164, '- ACI:', result.aci || 'null', '- PNI:', result.pni || 'null');
+	}
+
+	// Store the token for future incremental lookups
+	if (response.token) {
+		console.log('CDSI: Got token for incremental lookups');
+		// TODO: Store token in signal-store for future incremental lookups
+	}
+
+	console.log('CDSI: ==========================================');
+	return results;
 }
 
 /**
@@ -256,15 +336,8 @@ export async function lookupPhoneNumbersLegacy(phoneNumbers: string[]): Promise<
  * Check if CDSI is available (requires native libsignal bindings).
  */
 export function isCdsiAvailable(): boolean {
-	// Check if the required libsignal bindings are available
 	try {
-		// The react-native-libsignal-client needs to expose:
-		// - ConnectionManager
-		// - CdsiLookup
-		// - LookupRequest
-
-		// For now, return false as these aren't available in the current package
-		return false;
+		return libsignalIsCdsiAvailable();
 	} catch {
 		return false;
 	}

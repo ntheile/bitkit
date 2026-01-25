@@ -164,6 +164,43 @@ const sealedSenderDecryptMessage = jest.fn(async (): Promise<Uint8Array> => {
 	return new Uint8Array(50).fill(0x4c);
 });
 
+// CDSI (Contact Discovery Service) mocks
+const CdsiEnvironment = {
+	Staging: 'staging',
+	Production: 'production',
+};
+
+const cdsiLookup = jest.fn(async (options: {
+	username: string;
+	password: string;
+	environment: string;
+	phoneNumbers: string[];
+	appName: string;
+	prevPhoneNumbers?: string[];
+	serviceIdsAndProfileKeys?: Array<{ aci: string; profileKey: string }>;
+	token?: string;
+}) => {
+	// Return mock CDSI response
+	const entries = options.phoneNumbers.map((e164) => ({
+		e164,
+		// Return mock ACI/PNI for numbers ending in even digit
+		aci: parseInt(e164.slice(-1)) % 2 === 0
+			? `aci-${e164.replace('+', '')}`
+			: null,
+		pni: parseInt(e164.slice(-1)) % 2 === 0
+			? `pni-${e164.replace('+', '')}`
+			: null,
+	}));
+
+	return {
+		entries,
+		token: 'mock-cdsi-token-base64',
+		debugPermitsUsed: options.phoneNumbers.length,
+	};
+});
+
+const isCdsiAvailable = jest.fn(() => true);
+
 module.exports = {
 	PrivateKey: MockPrivateKey,
 	PublicKey: MockPublicKey,
@@ -177,4 +214,8 @@ module.exports = {
 	signalDecrypt,
 	sealedSenderEncryptMessage,
 	sealedSenderDecryptMessage,
+	// CDSI exports
+	CdsiEnvironment,
+	cdsiLookup,
+	isCdsiAvailable,
 };

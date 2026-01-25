@@ -1,634 +1,384 @@
-# Adding CDSI Support to react-native-libsignal-client
+# CDSI Implementation Specification for react-native-libsignal-client
 
-## Overview
-
-This specification describes how to add Contact Discovery Service (CDSI) support to the `react-native-libsignal-client` package. CDSI enables privacy-preserving phone number to ACI/PNI lookups using Intel SGX secure enclaves.
+This document specifies the required changes to implement CDSI (Contact Discovery Service) phone number lookup in the `react-native-libsignal-client` library.
 
 ## Background
 
-### What is CDSI?
+CDSI allows privacy-preserving contact discovery by using Intel SGX secure enclaves. Signal rotated their CDSI enclaves on April 18, 2025, which requires libsignal-client 0.76.1+ with updated attestation data.
 
-CDSI (Contact Discovery Service) is Signal's privacy-preserving contact discovery system. It allows clients to look up which of their contacts are registered Signal users without revealing their entire contact list to Signal's servers.
+## Current State
 
-Key properties:
-- Uses Intel SGX secure enclaves
-- Server cannot see plaintext phone numbers
-- Rate-limited to prevent enumeration attacks
-- Returns ACI (Account Identity) and PNI (Phone Number Identity) for matches
+- The `CdsiModule` exists but throws `CDSI_NOT_IMPLEMENTED`
+- Username lookup works via the `usernames` module
+- The library uses `libsignal-android:0.76.1` and `libsignal-client:0.76.1`
 
-### Current State
+## Required Implementation
 
-The `react-native-libsignal-client` package wraps `libsignal` but does **not** expose CDSI functionality. The upstream `libsignal` library (Rust) has full CDSI support with bindings for:
-- Node.js (`@signalapp/libsignal-client`)
-- Swift (iOS native)
-- Java/Kotlin (Android native)
+### 1. Android CdsiModule.kt
 
-### Goal
+**File:** `android/src/main/java/expo/modules/libsignalclient/CdsiModule.kt`
 
-Add React Native bindings for CDSI that work on both iOS and Android by leveraging the existing native libsignal implementations.
+The module needs to use the correct libsignal 0.76.1 API. Key differences from earlier versions:
 
----
-
-## Architecture
-
-### Upstream libsignal CDSI Classes
-
-From `libsignal` (Rust with language bindings):
-
-```
-// Core types needed
-- Net (network layer)
-- CdsiLookup
-- LookupRequest
-- LookupResponse
-- AciAndAccessKey
-- Environment (Production/Staging)
-```
-
-### React Native Bridge Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    JavaScript Layer                          │
-│  CdsiLookup.lookup(phoneNumbers, auth) → Promise<Results>   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Native Module Bridge                       │
-│         NativeModules.SignalClientCdsi.lookup()             │
-└─────────────────────────────────────────────────────────────┘
-           │                                    │
-           ▼                                    ▼
-┌─────────────────────┐            ┌─────────────────────────┐
-│    iOS (Swift)      │            │   Android (Kotlin)      │
-│  LibSignalClient    │            │   org.signal.libsignal  │
-│  - Net              │            │   - Net                 │
-│  - CdsiLookup       │            │   - CdsiLookup          │
-└─────────────────────┘            └─────────────────────────┘
-```
-
----
-
-## Implementation Steps
-
-### Step 1: Update libsignal Dependencies
-
-#### iOS (Podspec)
-
-File: `react-native-libsignal-client.podspec`
-
-```ruby
-Pod::Spec.new do |s|
-  s.name         = "react-native-libsignal-client"
-  # ... existing config ...
-  
-  # Ensure LibSignalClient pod includes net/cdsi modules
-  s.dependency "LibSignalClient", "~> 0.58.0"  # or latest version with CDSI
-end
-```
-
-#### Android (build.gradle)
-
-File: `android/build.gradle`
-
-```gradle
-dependencies {
-    implementation "org.signal:libsignal-client:0.58.0"  // or latest
-    // Ensure the full library with net module is included
-}
-```
-
-### Step 2: Create JavaScript API
-
-File: `src/Cdsi.ts`
-
-```typescript
-import { NativeModules } from 'react-native';
-
-const { SignalClientCdsi } = NativeModules;
-
-export interface CdsiAuthCredentials {
-  username: string;
-  password: string;
-}
-
-export interface AciAndAccessKey {
-  aci: string;           // UUID string
-  accessKey: Uint8Array; // 16 bytes
-}
-
-export interface CdsiLookupRequest {
-  /** E.164 phone numbers to look up */
-  e164s: string[];
-  /** Previously returned token for rate limiting (optional for first request) */
-  token?: Uint8Array;
-  /** ACIs with access keys for existing contacts */
-  acisAndAccessKeys?: AciAndAccessKey[];
-  /** Whether to return ACI+PNI or just indicate registered */
-  returnAcisWithoutUaks?: boolean;
-}
-
-export interface CdsiLookupResult {
-  e164: string;
-  aci: string | null;
-  pni: string | null;
-}
-
-export interface CdsiLookupResponse {
-  results: CdsiLookupResult[];
-  /** Token to use for subsequent requests (for rate limiting) */
-  token: Uint8Array;
-  /** Debug info about rate limit quota used */
-  debugPermitsUsed: number;
-}
-
-export enum CdsiEnvironment {
-  Production = 'production',
-  Staging = 'staging',
-}
-
-/**
- * Perform a CDSI lookup to find ACIs for phone numbers.
- * 
- * @param auth - CDSI auth credentials from /v2/directory/auth
- * @param request - The lookup request with phone numbers
- * @param environment - Production or Staging (default: Production)
- * @returns Promise resolving to lookup results
- */
-export async function lookup(
-  auth: CdsiAuthCredentials,
-  request: CdsiLookupRequest,
-  environment: CdsiEnvironment = CdsiEnvironment.Production
-): Promise<CdsiLookupResponse> {
-  // Convert Uint8Arrays to base64 for native bridge
-  const serializedRequest = {
-    e164s: request.e164s,
-    token: request.token ? Buffer.from(request.token).toString('base64') : null,
-    acisAndAccessKeys: request.acisAndAccessKeys?.map(a => ({
-      aci: a.aci,
-      accessKey: Buffer.from(a.accessKey).toString('base64'),
-    })),
-    returnAcisWithoutUaks: request.returnAcisWithoutUaks ?? false,
-  };
-
-  const response = await SignalClientCdsi.lookup(
-    auth.username,
-    auth.password,
-    serializedRequest,
-    environment
-  );
-
-  return {
-    results: response.results,
-    token: Buffer.from(response.token, 'base64'),
-    debugPermitsUsed: response.debugPermitsUsed,
-  };
-}
-
-/**
- * Check if CDSI is available on this platform.
- */
-export function isAvailable(): boolean {
-  return SignalClientCdsi != null && typeof SignalClientCdsi.lookup === 'function';
-}
-```
-
-### Step 3: iOS Native Module
-
-File: `ios/SignalClientCdsi.swift`
-
-```swift
-import Foundation
-import LibSignalClient
-
-@objc(SignalClientCdsi)
-class SignalClientCdsi: NSObject {
-    
-    @objc
-    static func requiresMainQueueSetup() -> Bool {
-        return false
-    }
-    
-    @objc
-    func lookup(
-        _ username: String,
-        password: String,
-        request: NSDictionary,
-        environment: String,
-        resolver resolve: @escaping RCTPromiseResolveBlock,
-        rejecter reject: @escaping RCTPromiseRejectBlock
-    ) {
-        Task {
-            do {
-                let result = try await performLookup(
-                    username: username,
-                    password: password,
-                    request: request,
-                    environment: environment
-                )
-                resolve(result)
-            } catch {
-                reject("CDSI_ERROR", error.localizedDescription, error)
-            }
-        }
-    }
-    
-    private func performLookup(
-        username: String,
-        password: String,
-        request: NSDictionary,
-        environment: String
-    ) async throws -> NSDictionary {
-        // Parse environment
-        let env: Net.Environment = environment == "staging" ? .staging : .production
-        
-        // Create network instance
-        let net = Net(env: env)
-        
-        // Parse request
-        guard let e164s = request["e164s"] as? [String] else {
-            throw NSError(domain: "CDSI", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "Missing e164s in request"
-            ])
-        }
-        
-        // Parse optional token
-        var token: Data? = nil
-        if let tokenBase64 = request["token"] as? String {
-            token = Data(base64Encoded: tokenBase64)
-        }
-        
-        // Parse ACIs and access keys
-        var acisAndAccessKeys: [AciAndAccessKey] = []
-        if let aciList = request["acisAndAccessKeys"] as? [[String: Any]] {
-            for item in aciList {
-                if let aciStr = item["aci"] as? String,
-                   let accessKeyBase64 = item["accessKey"] as? String,
-                   let accessKeyData = Data(base64Encoded: accessKeyBase64) {
-                    let aci = try Aci.parseFrom(serviceIdString: aciStr)
-                    acisAndAccessKeys.append(AciAndAccessKey(
-                        aci: aci,
-                        accessKey: [UInt8](accessKeyData)
-                    ))
-                }
-            }
-        }
-        
-        let returnAcisWithoutUaks = request["returnAcisWithoutUaks"] as? Bool ?? false
-        
-        // Build lookup request
-        let lookupRequest = try CdsiLookupRequest(
-            e164s: e164s,
-            acisAndAccessKeys: acisAndAccessKeys,
-            prevE164s: [],
-            token: token.map { [UInt8]($0) },
-            returnAcisWithoutUaks: returnAcisWithoutUaks
-        )
-        
-        // Perform CDSI lookup
-        let auth = Auth(username: username, password: password)
-        let cdsiLookup = try await net.cdsiLookup(
-            auth: auth,
-            request: lookupRequest,
-            timeout: 30.0
-        )
-        
-        // Get response
-        let response = try await cdsiLookup.complete()
-        
-        // Convert results to dictionary
-        var results: [[String: Any?]] = []
-        for entry in response.entries {
-            results.append([
-                "e164": entry.e164,
-                "aci": entry.aci?.serviceIdString,
-                "pni": entry.pni?.serviceIdString,
-            ])
-        }
-        
-        return [
-            "results": results,
-            "token": Data(response.token).base64EncodedString(),
-            "debugPermitsUsed": response.debugPermitsUsed,
-        ]
-    }
-}
-```
-
-File: `ios/SignalClientCdsi.m` (Objective-C bridge)
-
-```objc
-#import <React/RCTBridgeModule.h>
-
-@interface RCT_EXTERN_MODULE(SignalClientCdsi, NSObject)
-
-RCT_EXTERN_METHOD(lookup:(NSString *)username
-                  password:(NSString *)password
-                  request:(NSDictionary *)request
-                  environment:(NSString *)environment
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-
-@end
-```
-
-### Step 4: Android Native Module
-
-File: `android/src/main/java/com/signalclient/SignalClientCdsiModule.kt`
+#### API Signature for Network.cdsiLookup
 
 ```kotlin
-package com.signalclient
+// libsignal 0.76.1 signature:
+fun cdsiLookup(
+    username: String,
+    password: String,
+    request: CdsiLookupRequest,
+    tokenConsumer: Consumer<ByteArray>
+): CompletableFuture<CdsiLookupResponse>
+```
 
-import com.facebook.react.bridge.*
-import kotlinx.coroutines.*
-import org.signal.libsignal.net.CdsiLookupRequest
-import org.signal.libsignal.net.CdsiLookupResponse
+Note: It takes `Consumer<ByteArray>` for the token callback, NOT `Function2<Long, Long, Unit>`.
+
+#### CdsiLookupRequest Construction
+
+There is **NO Builder class**. Use the constructor directly:
+
+```kotlin
+// Constructor signature:
+CdsiLookupRequest(
+    previousE164s: Set<String>,    // Previously looked up numbers
+    newE164s: Set<String>,          // New numbers to look up
+    serviceIds: Map<ServiceId, ProfileKey>,  // Known contacts with profile keys
+    token: Optional<ByteArray>      // Previous lookup token for incremental
+)
+```
+
+#### CdsiLookupResponse Structure
+
+```kotlin
+// Response methods:
+response.entries()  // Returns Map<String, CdsiLookupResponse.Entry>
+response.debugPermitsUsed  // Returns int (field, not method)
+
+// Entry structure - fields are PUBLIC, not getters:
+entry.aci  // ServiceId.Aci? (nullable)
+entry.pni  // ServiceId.Pni? (nullable)
+```
+
+#### Complete Implementation
+
+```kotlin
+package expo.modules.libsignalclient
+
+import expo.modules.kotlin.modules.Module
+import expo.modules.kotlin.modules.ModuleDefinition
+import expo.modules.kotlin.Promise
 import org.signal.libsignal.net.Network
-import org.signal.libsignal.protocol.ServiceId
-import java.util.Base64
+import org.signal.libsignal.net.CdsiLookupRequest
+import org.signal.libsignal.protocol.ServiceId.Aci
+import org.signal.libsignal.zkgroup.profiles.ProfileKey
+import java.util.Optional
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class SignalClientCdsiModule(reactContext: ReactApplicationContext) : 
-    ReactContextBaseJavaModule(reactContext) {
+class CdsiModule : Module() {
+    private val executor: ExecutorService = Executors.newCachedThreadPool()
     
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
-    override fun getName() = "SignalClientCdsi"
-    
-    @ReactMethod
-    fun lookup(
-        username: String,
-        password: String,
-        request: ReadableMap,
-        environment: String,
-        promise: Promise
-    ) {
-        scope.launch {
-            try {
-                val result = performLookup(username, password, request, environment)
-                promise.resolve(result)
-            } catch (e: Exception) {
-                promise.reject("CDSI_ERROR", e.message, e)
+    override fun definition() = ModuleDefinition {
+        Name("Cdsi")
+
+        AsyncFunction("cdsiLookup") { 
+            username: String,
+            password: String,
+            request: Map<String, Any?>,
+            environment: String,
+            userAgent: String,
+            promise: Promise ->
+            
+            executor.execute {
+                try {
+                    val result = performCdsiLookup(username, password, request, environment, userAgent)
+                    promise.resolve(result)
+                } catch (e: Exception) {
+                    promise.reject("CDSI_ERROR", e.message ?: "CDSI lookup failed", e)
+                }
             }
         }
     }
     
-    private suspend fun performLookup(
+    private fun performCdsiLookup(
         username: String,
         password: String,
-        request: ReadableMap,
-        environment: String
-    ): WritableMap {
-        // Parse environment
-        val env = if (environment == "staging") {
-            Network.Environment.STAGING
-        } else {
-            Network.Environment.PRODUCTION
+        request: Map<String, Any?>,
+        environment: String,
+        userAgent: String
+    ): Map<String, Any> {
+        // Determine environment
+        val networkEnv = when (environment.lowercase()) {
+            "staging" -> Network.Environment.STAGING
+            else -> Network.Environment.PRODUCTION
         }
         
         // Create network instance
-        val network = Network(env)
+        val network = Network(networkEnv, userAgent)
         
-        // Parse e164s
-        val e164sArray = request.getArray("e164s") 
-            ?: throw IllegalArgumentException("Missing e164s")
-        val e164s = mutableListOf<String>()
-        for (i in 0 until e164sArray.size()) {
-            e164s.add(e164sArray.getString(i))
-        }
+        // Parse request parameters
+        @Suppress("UNCHECKED_CAST")
+        val e164s = (request["e164s"] as? List<String>) ?: emptyList()
+        @Suppress("UNCHECKED_CAST")
+        val prevE164s = (request["prevE164s"] as? List<String>) ?: emptyList()
+        val tokenString = request["token"] as? String
+        @Suppress("UNCHECKED_CAST")
+        val serviceIdsAndProfileKeys = request["serviceIdsAndProfileKeys"] as? List<Map<String, String>> ?: emptyList()
         
-        // Parse optional token
-        val tokenBase64 = request.getString("token")
-        val token = tokenBase64?.let { Base64.getDecoder().decode(it) }
+        // Build sets for the request
+        val newE164Set = e164s.toMutableSet()
+        val prevE164Set = prevE164s.toMutableSet()
         
-        // Parse ACIs and access keys
-        val acisAndAccessKeys = mutableListOf<CdsiLookupRequest.AciAndAccessKey>()
-        request.getArray("acisAndAccessKeys")?.let { array ->
-            for (i in 0 until array.size()) {
-                val item = array.getMap(i)
-                val aciStr = item?.getString("aci")
-                val accessKeyBase64 = item?.getString("accessKey")
-                if (aciStr != null && accessKeyBase64 != null) {
-                    val aci = ServiceId.Aci.parseFromString(aciStr)
-                    val accessKey = Base64.getDecoder().decode(accessKeyBase64)
-                    acisAndAccessKeys.add(
-                        CdsiLookupRequest.AciAndAccessKey(aci, accessKey)
-                    )
+        // Build service IDs map
+        val serviceIdsMap = mutableMapOf<org.signal.libsignal.protocol.ServiceId, ProfileKey>()
+        for (entry in serviceIdsAndProfileKeys) {
+            val aciString = entry["aci"]
+            val profileKeyString = entry["profileKey"]
+            if (aciString != null && profileKeyString != null) {
+                try {
+                    val aci = Aci.parseFromString(aciString)
+                    val profileKeyBytes = android.util.Base64.decode(profileKeyString, android.util.Base64.DEFAULT)
+                    val profileKey = ProfileKey(profileKeyBytes)
+                    serviceIdsMap[aci] = profileKey
+                } catch (e: Exception) {
+                    // Skip invalid entries
                 }
             }
         }
         
-        val returnAcisWithoutUaks = request.getBoolean("returnAcisWithoutUaks")
-        
-        // Build request
-        val lookupRequest = CdsiLookupRequest.Builder()
-            .e164s(e164s)
-            .acisAndAccessKeys(acisAndAccessKeys)
-            .token(token)
-            .returnAcisWithoutUaks(returnAcisWithoutUaks)
-            .build()
-        
-        // Perform lookup
-        val cdsiLookup = network.cdsiLookup(username, password, lookupRequest)
-        val response = cdsiLookup.complete()
-        
-        // Convert to WritableMap
-        val resultsArray = Arguments.createArray()
-        for (entry in response.entries) {
-            val resultMap = Arguments.createMap()
-            resultMap.putString("e164", entry.e164)
-            resultMap.putString("aci", entry.aci?.toString())
-            resultMap.putString("pni", entry.pni?.toString())
-            resultsArray.pushMap(resultMap)
+        // Parse token
+        val tokenOptional: Optional<ByteArray> = if (tokenString != null && tokenString.isNotEmpty()) {
+            Optional.of(android.util.Base64.decode(tokenString, android.util.Base64.DEFAULT))
+        } else {
+            Optional.empty()
         }
         
-        val result = Arguments.createMap()
-        result.putArray("results", resultsArray)
-        result.putString("token", Base64.getEncoder().encodeToString(response.token))
-        result.putInt("debugPermitsUsed", response.debugPermitsUsed)
+        // Build the CDSI lookup request - NO BUILDER, use constructor
+        val cdsiRequest = CdsiLookupRequest(
+            prevE164Set,
+            newE164Set,
+            serviceIdsMap,
+            tokenOptional
+        )
+        
+        // Store token from callback
+        var responseToken: ByteArray? = null
+        val tokenConsumer: java.util.function.Consumer<ByteArray> = java.util.function.Consumer { token ->
+            responseToken = token
+        }
+        
+        // Perform the lookup - returns CompletableFuture
+        val responseFuture = network.cdsiLookup(username, password, cdsiRequest, tokenConsumer)
+        val response = responseFuture.get()  // Blocking call
+        
+        // Convert response to map format
+        val entries = mutableListOf<Map<String, Any?>>()
+        for ((e164, lookupEntry) in response.entries()) {  // entries() is a method
+            val entryMap = mutableMapOf<String, Any?>()
+            entryMap["e164"] = e164
+            entryMap["aci"] = lookupEntry.aci?.toServiceIdString()  // Direct field access
+            entryMap["pni"] = lookupEntry.pni?.toServiceIdString()  // Direct field access
+            entries.add(entryMap)
+        }
+        
+        // Return result
+        val result = mutableMapOf<String, Any>()
+        result["entries"] = entries
+        result["token"] = if (responseToken != null) {
+            android.util.Base64.encodeToString(responseToken, android.util.Base64.NO_WRAP)
+        } else {
+            ""
+        }
+        result["debugPermitsUsed"] = response.debugPermitsUsed  // Field, not method
         
         return result
     }
+}
+```
+
+### 2. iOS CdsiModule.swift
+
+**File:** `ios/CdsiModule.swift`
+
+The iOS implementation needs to use the Swift libsignal-client 0.76.1 API. Key points:
+
+```swift
+import ExpoModulesCore
+import LibSignalClient
+
+public class CdsiModule: Module {
+    public func definition() -> ModuleDefinition {
+        Name("Cdsi")
+
+        AsyncFunction("cdsiLookup") { (
+            username: String,
+            password: String,
+            request: [String: Any],
+            environment: String,
+            userAgent: String,
+            promise: Promise
+        ) in
+            Task {
+                do {
+                    let result = try await self.performCdsiLookup(
+                        username: username,
+                        password: password,
+                        request: request,
+                        environment: environment,
+                        userAgent: userAgent
+                    )
+                    promise.resolve(result)
+                } catch {
+                    promise.reject("CDSI_ERROR", error.localizedDescription)
+                }
+            }
+        }
+    }
     
-    override fun onCatalystInstanceDestroy() {
-        scope.cancel()
-        super.onCatalystInstanceDestroy()
+    private func performCdsiLookup(
+        username: String,
+        password: String,
+        request: [String: Any],
+        environment: String,
+        userAgent: String
+    ) async throws -> [String: Any] {
+        // TODO: Implement using Swift libsignal API
+        // The Swift API may differ - consult LibSignalClient Swift documentation
+        throw NSError(domain: "CDSI", code: -1, userInfo: [
+            NSLocalizedDescriptionKey: "iOS CDSI not yet implemented"
+        ])
     }
 }
 ```
 
-File: `android/src/main/java/com/signalclient/SignalClientCdsiPackage.kt`
+**Note:** The Swift libsignal API may have different class names and method signatures. Consult the libsignal-swift 0.76.1 documentation.
 
-```kotlin
-package com.signalclient
+### 3. JavaScript Interface
 
-import com.facebook.react.ReactPackage
-import com.facebook.react.bridge.NativeModule
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.uimanager.ViewManager
+The JS interface is already correct in `src/Cdsi.ts` and `build/Cdsi.js`. No changes needed.
 
-class SignalClientCdsiPackage : ReactPackage {
-    override fun createNativeModules(
-        reactContext: ReactApplicationContext
-    ): List<NativeModule> {
-        return listOf(SignalClientCdsiModule(reactContext))
-    }
+**Expected JS Interface:**
 
-    override fun createViewManagers(
-        reactContext: ReactApplicationContext
-    ): List<ViewManager<*, *>> {
-        return emptyList()
-    }
+```typescript
+interface CdsiLookupOptions {
+  username: string;          // From /v2/directory/auth
+  password: string;          // From /v2/directory/auth  
+  environment: 'production' | 'staging';
+  phoneNumbers: string[];    // E.164 format: +14155551234
+  appName: string;           // User-Agent string
+  prevPhoneNumbers?: string[];
+  serviceIdsAndProfileKeys?: Array<{aci: string, profileKey: string}>;
+  token?: string;            // Base64 encoded token from previous lookup
+}
+
+interface CdsiLookupResponse {
+  entries: Array<{
+    e164: string;
+    aci: string | null;
+    pni: string | null;
+  }>;
+  token: string;             // Base64 encoded token for next lookup
+  debugPermitsUsed: number;
 }
 ```
 
-### Step 5: Export from Package Index
+### 4. expo-module.config.json
 
-File: `src/index.ts`
+Already correct:
 
-```typescript
-// ... existing exports ...
-
-// CDSI exports
-export * as Cdsi from './Cdsi';
-export { 
-  CdsiAuthCredentials,
-  CdsiLookupRequest,
-  CdsiLookupResponse,
-  CdsiLookupResult,
-  CdsiEnvironment,
-} from './Cdsi';
-```
-
----
-
-## Usage Example
-
-```typescript
-import { Cdsi } from 'react-native-libsignal-client';
-
-// 1. Get CDSI auth from Signal server
-const authResponse = await fetch('https://chat.signal.org/v2/directory/auth', {
-  headers: { Authorization: `Basic ${btoa(`${aci}.${deviceId}:${password}`)}` }
-});
-const auth = await authResponse.json();
-
-// 2. Perform lookup
-const response = await Cdsi.lookup(
-  { username: auth.username, password: auth.password },
-  { 
-    e164s: ['+14155551234', '+14155555678'],
-    returnAcisWithoutUaks: true,
+```json
+{
+  "platforms": ["ios", "tvos", "android", "web"],
+  "ios": {
+    "modules": ["ReactNativeLibsignalClientModule", "ElasticCipherModule", "CdsiModule"]
+  },
+  "android": {
+    "modules": [
+      "expo.modules.libsignalclient.ReactNativeLibsignalClientModule",
+      "expo.modules.libsignalclient.ElasticCipher",
+      "expo.modules.libsignalclient.CdsiModule"
+    ]
   }
-);
-
-// 3. Process results
-for (const result of response.results) {
-  console.log(`${result.e164}: ACI=${result.aci}, PNI=${result.pni}`);
 }
-
-// 4. Store token for next request (rate limiting)
-await saveToken(response.token);
 ```
-
----
 
 ## Testing
 
-### Unit Tests
+To test CDSI:
 
-File: `__tests__/Cdsi.test.ts`
+1. Link account to Signal (get ACI, deviceId, password)
+2. Get CDSI auth credentials from `GET /v2/directory/auth`
+3. Call `cdsiLookup()` with the credentials and phone numbers
+4. Verify response contains ACIs for registered Signal users
 
-```typescript
-import { formatE164 } from '../src/Cdsi';
+## libsignal JAR Inspection Commands
 
-describe('Cdsi', () => {
-  describe('formatE164', () => {
-    it('formats US numbers correctly', () => {
-      expect(formatE164('4155551234')).toBe('+14155551234');
-      expect(formatE164('14155551234')).toBe('+14155551234');
-      expect(formatE164('+14155551234')).toBe('+14155551234');
-    });
-  });
-});
+To inspect the actual API in libsignal-android 0.76.1:
+
+```bash
+# Find the JAR
+find ~/.gradle -name "libsignal-android-0.76.1.jar" 2>/dev/null
+
+# Extract and inspect classes
+cd /tmp
+jar xf <path-to-jar> org/signal/libsignal/net/CdsiLookupRequest.class
+javap -public org.signal.libsignal.net.CdsiLookupRequest
+
+jar xf <path-to-jar> org/signal/libsignal/net/CdsiLookupResponse.class  
+javap -public org.signal.libsignal.net.CdsiLookupResponse
+
+jar xf <path-to-jar> org/signal/libsignal/net/Network.class
+javap -public org.signal.libsignal.net.Network
 ```
 
-### Integration Tests
+## Key API Differences from Earlier libsignal Versions
 
-Requires a Signal account with valid credentials:
+| Feature | Old API | libsignal 0.76.1 |
+|---------|---------|------------------|
+| Request builder | `CdsiLookupRequest.Builder()` | Constructor only |
+| Auth | `Network.Auth(username, password)` | Pass strings directly |
+| Token callback | `Function2<Long, Long, Unit>` | `Consumer<ByteArray>` |
+| Response entries | `response.entries` (property) | `response.entries()` (method) |
+| Entry ACI/PNI | `entry.aci()` (method) | `entry.aci` (field) |
+| Token in response | `response.token` | Via callback only |
 
-```typescript
-import { Cdsi } from 'react-native-libsignal-client';
+## Observed API from JAR Inspection (libsignal-android 0.76.1)
 
-describe('Cdsi Integration', () => {
-  it('performs lookup against staging', async () => {
-    const auth = { username: 'test', password: 'test' };
-    
-    // This will fail with invalid creds, but tests the bridge
-    await expect(
-      Cdsi.lookup(auth, { e164s: ['+14155551234'] }, Cdsi.CdsiEnvironment.Staging)
-    ).rejects.toThrow();
-  });
-});
+### Network class
+```
+public org.signal.libsignal.net.Network(org.signal.libsignal.net.Network$Environment, java.lang.String);
+public java.util.concurrent.CompletableFuture<org.signal.libsignal.net.CdsiLookupResponse> cdsiLookup(java.lang.String, java.lang.String, org.signal.libsignal.net.CdsiLookupRequest, java.util.function.Consumer<byte[]>);
 ```
 
----
+### CdsiLookupRequest class
+```
+public org.signal.libsignal.net.CdsiLookupRequest(java.util.Set<java.lang.String>, java.util.Set<java.lang.String>, java.util.Map<org.signal.libsignal.protocol.ServiceId, org.signal.libsignal.zkgroup.profiles.ProfileKey>, java.util.Optional<byte[]>);
+```
 
-## Error Handling
+### CdsiLookupResponse class
+```
+public final int debugPermitsUsed;
+public java.util.Map<java.lang.String, org.signal.libsignal.net.CdsiLookupResponse$Entry> entries();
+```
 
-### Common Errors
+### CdsiLookupResponse.Entry class
+```
+public final org.signal.libsignal.protocol.ServiceId$Aci aci;
+public final org.signal.libsignal.protocol.ServiceId$Pni pni;
+```
 
-| Error | Cause | Resolution |
-|-------|-------|------------|
-| `CDSI_ERROR: Invalid credentials` | Bad username/password | Refresh auth from /v2/directory/auth |
-| `CDSI_ERROR: Rate limited` | Too many requests | Use token from previous response |
-| `CDSI_ERROR: Attestation failed` | SGX verification failed | Ensure libsignal is up to date |
-| `CDSI_ERROR: Network error` | Connection issues | Retry with backoff |
+## Known Issues
 
-### Rate Limiting
+### "Cannot read property 'prototype' of undefined"
 
-CDSI uses a token-based rate limiting system:
-1. First request: No token needed
-2. Response includes a token
-3. Subsequent requests: Include the token
-4. Token tracks "permits" (quota used)
+This error occurs when the native module fails to initialize properly. Possible causes:
 
----
+1. **Missing native dependency**: The libsignal-android/libsignal-client JARs might not be properly included
+2. **API mismatch**: Using the wrong API signature causes Kotlin compilation to succeed but runtime to fail
+3. **Module registration**: expo-module.config.json might be incorrect
+4. **Metro cache**: Stale JS bundle - run `npx react-native start --reset-cache`
 
-## Security Considerations
+### Solution
 
-1. **Auth Credentials**: CDSI credentials are separate from account credentials. They expire after 24 hours.
-
-2. **Token Storage**: Store the CDSI token securely (e.g., encrypted storage) as it's tied to your rate limit quota.
-
-3. **Phone Numbers**: Phone numbers are encrypted before being sent to the enclave. The server never sees plaintext numbers.
-
-4. **SGX Attestation**: The library verifies the enclave's MRENCLAVE value to ensure code hasn't been tampered with.
-
----
-
-## References
-
-- [libsignal source](https://github.com/signalapp/libsignal)
-- [Signal CDSI protocol](https://github.com/signalapp/libsignal/tree/main/rust/net/src/cdsi)
-- [Signal Private Contact Discovery Blog](https://signal.org/blog/private-contact-discovery/)
-- [react-native-libsignal-client](https://github.com/nicklockwood/react-native-libsignal-client)
-
----
-
-## Checklist for Implementation
-
-- [ ] Update libsignal dependency versions (iOS/Android)
-- [ ] Verify libsignal includes net/cdsi modules
-- [ ] Create `src/Cdsi.ts` with TypeScript API
-- [ ] Create `ios/SignalClientCdsi.swift` native module
-- [ ] Create `ios/SignalClientCdsi.m` bridge file
-- [ ] Create `android/.../SignalClientCdsiModule.kt`
-- [ ] Create `android/.../SignalClientCdsiPackage.kt`
-- [ ] Register package in Android's `MainApplication`
-- [ ] Add exports to `src/index.ts`
-- [ ] Write unit tests
-- [ ] Write integration tests
-- [ ] Update README with CDSI documentation
-- [ ] Test on iOS device/simulator
-- [ ] Test on Android device/emulator
+For the bitkit app, the safest approach is to use a stub implementation that returns a clear error message, then implement CDSI in the upstream `react-native-libsignal-client` library properly.

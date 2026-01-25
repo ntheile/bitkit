@@ -36,7 +36,8 @@ import {
 } from '../../../storage/signal-store';
 import { sendMessage, formatPhoneNumber, clearAllCachedSessions, clearAllSessions, getRateLimitRemaining, listAllSessions, resetRateLimit, clearAllStoredSessions, clearPreKeyCache } from '../../../utils/signal/messaging';
 import type { SignalContact } from '../../../utils/signal/contacts';
-import { testCdsiAuth, checkAccountExists, isCdsiAvailable } from '../../../utils/signal/cdsi';
+import { testCdsiAuth, checkAccountExists, isCdsiAvailable, lookupPhoneNumbers, formatE164, type CdsiLookupResult } from '../../../utils/signal/cdsi';
+import { lookupByUsername, isUsernameLookupAvailable, type UsernameLookupResult } from '../../../utils/signal/username';
 
 const SignalLink = (
 	_props: SettingsScreenProps<'SignalLink'>,
@@ -60,6 +61,17 @@ const SignalLink = (
 	const [cdsiTestResult, setCdsiTestResult] = useState<string | null>(null);
 	const [cdsiTestLoading, setCdsiTestLoading] = useState(false);
 	const [aciCheckInput, setAciCheckInput] = useState('');
+	
+	// Phone number lookup state
+	const [phoneNumberInput, setPhoneNumberInput] = useState('');
+	const [lookupResults, setLookupResults] = useState<CdsiLookupResult[]>([]);
+
+	// Username lookup state
+	const [showUsernameLookup, setShowUsernameLookup] = useState(false);
+	const [usernameInput, setUsernameInput] = useState('');
+	const [usernameLookupResult, setUsernameLookupResult] = useState<UsernameLookupResult | null>(null);
+	const [usernameLookupLoading, setUsernameLookupLoading] = useState(false);
+	const [usernameLookupError, setUsernameLookupError] = useState<string | null>(null);
 
 	// Check if already linked on mount
 	useEffect(() => {
@@ -269,38 +281,53 @@ const SignalLink = (
 
 		try {
 			const input = recipientInput.trim();
+			let contact: SignalContact;
 
-			// Validate that input is a UUID (ACI)
-			const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-			if (!uuidRegex.test(input)) {
-				showToast({
-					type: 'warning',
-					title: 'Invalid ACI',
-					description: 'Please enter a valid UUID (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)',
-				});
-				setIsSending(false);
-				return;
+			// Check if input is PNI format: "PNI:uuid|phone"
+			if (input.startsWith('PNI:') && input.includes('|')) {
+				const [pniPart, phonePart] = input.split('|');
+				contact = {
+					aci: '', // No ACI available
+					pni: pniPart,
+					phoneNumber: phonePart || '',
+					name: `Contact ${phonePart || pniPart.slice(4, 12)}...`,
+				};
+				console.log('Signal: Sending to PNI:', pniPart);
+			} else {
+				// Validate that input is a UUID (ACI)
+				const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+				if (!uuidRegex.test(input)) {
+					showToast({
+						type: 'warning',
+						title: 'Invalid ACI',
+						description: 'Please enter a valid UUID (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)',
+					});
+					setIsSending(false);
+					return;
+				}
+
+				contact = {
+					aci: input,
+					phoneNumber: '',
+					name: `Contact ${input.slice(0, 8)}...`,
+				};
+				console.log('Signal: Sending to ACI:', input);
 			}
-
-			const contact: SignalContact = {
-				aci: input,
-				phoneNumber: '',
-				name: `Contact ${input.slice(0, 8)}...`,
-			};
-			console.log('Signal: Sending to ACI:', input);
 
 			const result = await sendMessage(contact, messageInput);
 
 			if (result.success) {
+				const recipientId = contact.aci || contact.pni || '';
 				showToast({
 					type: 'success',
 					title: 'Message Sent',
-					description: `Sent to ${contact.aci.slice(0, 8)}...`,
+					description: `Sent to ${recipientId.slice(0, 12)}...`,
 				});
 				setMessageInput('');
-				
+
 				// Add to contacts list
-				if (!contacts.find(c => c.aci === contact!.aci)) {
+				const contactId = contact.aci || contact.pni;
+				if (contactId && !contacts.find(c => (c.aci || c.pni) === contactId)) {
 					setContacts([...contacts, contact]);
 				}
 			} else {
@@ -449,22 +476,245 @@ const SignalLink = (
 		}
 	}, [aciCheckInput]);
 
+	const handlePhoneNumberLookup = useCallback(async () => {
+		if (!phoneNumberInput.trim()) {
+			showToast({
+				type: 'warning',
+				title: 'Missing Phone Number',
+				description: 'Enter a phone number to look up',
+			});
+			return;
+		}
+
+		setCdsiTestLoading(true);
+		setLookupResults([]);
+		setCdsiTestResult(null);
+
+		try {
+			// Parse comma-separated phone numbers
+			const phoneNumbers = phoneNumberInput
+				.split(',')
+				.map(p => p.trim())
+				.filter(p => p.length > 0);
+
+			console.log('CDSI UI: Looking up phone numbers:', phoneNumbers);
+
+			const results = await lookupPhoneNumbers(phoneNumbers);
+			setLookupResults(results);
+
+			// Count found (with ACI), PNI-only, and not found
+			const withAci = results.filter(r => r.aci !== null).length;
+			const withPniOnly = results.filter(r => r.aci === null && r.pni !== null).length;
+			const notFound = results.filter(r => r.aci === null && r.pni === null).length;
+
+			setCdsiTestResult(
+				`✅ Lookup complete!\n` +
+				`With ACI: ${withAci} | PNI only: ${withPniOnly} | Not registered: ${notFound}`
+			);
+
+			showToast({
+				type: 'success',
+				title: 'CDSI Lookup Complete',
+				description: `Found ${withAci + withPniOnly} Signal user(s)`,
+			});
+		} catch (error) {
+			const errMsg = error instanceof Error ? error.message : 'Unknown error';
+			setCdsiTestResult(`❌ Lookup failed: ${errMsg}`);
+			showToast({
+				type: 'warning',
+				title: 'CDSI Lookup Failed',
+				description: errMsg,
+			});
+		} finally {
+			setCdsiTestLoading(false);
+		}
+	}, [phoneNumberInput]);
+
+	const handleUseAciForMessaging = useCallback((aci: string) => {
+		setRecipientInput(aci);
+		setShowMessaging(true);
+		setShowCdsiTest(false);
+		showToast({
+			type: 'success',
+			title: 'ACI Copied',
+			description: 'Switched to messaging with this contact',
+		});
+	}, []);
+
+	const handleUsePniForMessaging = useCallback((pni: string, phoneNumber: string) => {
+		// Store PNI in a format we can parse later: "PNI:uuid|phone"
+		setRecipientInput(`${pni}|${phoneNumber}`);
+		setShowMessaging(true);
+		setShowCdsiTest(false);
+		showToast({
+			type: 'success',
+			title: 'PNI Copied',
+			description: 'Will try messaging with PNI (experimental)',
+		});
+	}, []);
+
+	const handleUsernameLookup = useCallback(async () => {
+		if (!usernameInput.trim()) {
+			showToast({
+				type: 'warning',
+				title: 'Missing Username',
+				description: 'Enter a Signal username to look up',
+			});
+			return;
+		}
+
+		setUsernameLookupLoading(true);
+		setUsernameLookupResult(null);
+		setUsernameLookupError(null);
+
+		try {
+			console.log('Username lookup: Looking up', usernameInput);
+			const result = await lookupByUsername(usernameInput.trim(), 'production');
+			console.log('Username lookup result:', result);
+			setUsernameLookupResult(result);
+
+			if (result.aci) {
+				showToast({
+					type: 'success',
+					title: 'Username Found!',
+					description: `ACI: ${result.aci.slice(0, 8)}...`,
+				});
+			} else {
+				showToast({
+					type: 'info',
+					title: 'Username Not Found',
+					description: 'No Signal user with this username',
+				});
+			}
+		} catch (error) {
+			const errMsg = error instanceof Error ? error.message : 'Unknown error';
+			console.error('Username lookup error:', errMsg);
+			setUsernameLookupError(errMsg);
+			showToast({
+				type: 'warning',
+				title: 'Lookup Failed',
+				description: errMsg,
+			});
+		} finally {
+			setUsernameLookupLoading(false);
+		}
+	}, [usernameInput]);
+
+	const handleUseUsernameAciForMessaging = useCallback((aci: string) => {
+		setRecipientInput(aci);
+		setShowMessaging(true);
+		setShowUsernameLookup(false);
+		showToast({
+			type: 'success',
+			title: 'ACI Copied',
+			description: 'Switched to messaging with this contact',
+		});
+	}, []);
+
 	const renderCdsiTestUI = (): ReactElement => (
 		<View style={styles.messagingContainer}>
 			<Title style={styles.sectionTitle}>📞 Contact Discovery (CDSI)</Title>
 			
 			<BodyS style={styles.note}>
 				CDSI is Signal's privacy-preserving phone number lookup service.{'\n'}
-				It uses Intel SGX enclaves to securely find Signal users.
+				Look up phone numbers to find Signal users and get their ACI.
 			</BodyS>
 			
 			{/* CDSI Status */}
 			<View style={styles.statusBox}>
-				<BodyM style={styles.statusLabel}>CDSI Native Support:</BodyM>
-				<BodyM style={isCdsiAvailable() ? styles.statusGreen : styles.statusYellow}>
-					{isCdsiAvailable() ? '✅ Available' : '⚠️ Auth Only (Native bindings needed for full lookup)'}
+				<BodyM style={styles.statusLabel}>CDSI Status:</BodyM>
+				<BodyM style={styles.statusRed}>
+					⚠️ Outdated Attestation - Use Username Lookup Instead
 				</BodyM>
+				<BodyS style={styles.statusNote}>
+					Phone lookup returns 404 because libsignal 0.76.1's CDSI enclave{'\n'}
+					attestation is outdated (Signal rotates enclaves regularly).{'\n\n'}
+					✅ Workaround: Use "Username Lookup" below - it works!{'\n'}
+					Ask your contact for their Signal username (Settings → Profile).
+				</BodyS>
 			</View>
+
+			{/* Phone Number Lookup - Still show UI for testing */}
+			<View style={styles.divider} />
+			<BodyS style={styles.inputLabel}>📱 Look Up Phone Numbers (Requires libsignal upgrade)</BodyS>
+			<TextInput
+				style={styles.input}
+				placeholder="+14155551234 (or comma-separated)"
+				placeholderTextColor="#666"
+				value={phoneNumberInput}
+				onChangeText={setPhoneNumberInput}
+				autoCapitalize="none"
+				autoCorrect={false}
+				keyboardType="phone-pad"
+			/>
+			
+			<Button
+				style={styles.button}
+				text={cdsiTestLoading ? 'Looking up...' : '🔍 Lookup Phone Numbers'}
+				size="large"
+				disabled={cdsiTestLoading || !phoneNumberInput.trim()}
+				onPress={handlePhoneNumberLookup}
+			/>
+			
+			<BodyS style={styles.hint}>
+				Enter E.164 format (e.g., +14155551234). Multiple numbers: separate with commas.
+			</BodyS>
+
+			{/* Lookup Results */}
+			{lookupResults.length > 0 && (
+				<View style={styles.resultsContainer}>
+					<BodyS style={styles.inputLabel}>Results:</BodyS>
+					{lookupResults.map((result, index) => (
+						<View key={index} style={styles.lookupResultItem}>
+							<View style={styles.lookupResultInfo}>
+								<BodyM style={styles.lookupResultPhone}>{result.e164}</BodyM>
+								{result.aci ? (
+									<>
+										<BodyS style={styles.lookupResultAci} selectable>
+											ACI: {result.aci}
+										</BodyS>
+										{result.pni && (
+											<BodyS style={styles.lookupResultPni} selectable>
+												PNI: {result.pni}
+											</BodyS>
+										)}
+									</>
+								) : result.pni ? (
+									<>
+										<BodyS style={styles.lookupResultPni} selectable>
+											PNI: {result.pni}
+										</BodyS>
+										<BodyS style={styles.lookupResultNotFound}>
+											⚠️ PNI only (no ACI available)
+										</BodyS>
+									</>
+								) : (
+									<BodyS style={styles.lookupResultNotFound}>
+										❌ Not registered on Signal
+									</BodyS>
+								)}
+							</View>
+							{result.aci ? (
+								<Button
+									style={styles.useAciButton}
+									text="📤 Message"
+									size="small"
+									onPress={() => handleUseAciForMessaging(result.aci!)}
+								/>
+							) : result.pni ? (
+								<Button
+									style={styles.useAciButton}
+									text="📤 Message (PNI)"
+									size="small"
+									onPress={() => handleUsePniForMessaging(result.pni!, result.e164)}
+								/>
+							) : null}
+						</View>
+					))}
+				</View>
+			)}
+
+			<View style={styles.divider} />
 
 			{/* Test Auth Button */}
 			<Button
@@ -522,17 +772,6 @@ const SignalLink = (
 					<BodyM style={styles.resultText}>{cdsiTestResult}</BodyM>
 				</View>
 			)}
-			
-			{/* Info about full CDSI */}
-			<View style={styles.infoBox}>
-				<BodyS style={styles.infoTitle}>ℹ️ Full Phone Number Lookup</BodyS>
-				<BodyS style={styles.infoText}>
-					Full CDSI phone → ACI lookup requires native libsignal bindings 
-					(ConnectionManager, CdsiLookup) which aren't yet available in 
-					react-native-libsignal-client.{'\n\n'}
-					See docs/CDSI_LIBSIGNAL_SPEC.md for implementation details.
-				</BodyS>
-			</View>
 		</View>
 	);
 
@@ -708,6 +947,80 @@ const SignalLink = (
 		</View>
 	);
 
+	const renderUsernameLookupUI = (): ReactElement => (
+		<View style={styles.messagingContainer}>
+			<Title style={styles.sectionTitle}>🔤 Username Lookup</Title>
+			
+			<BodyS style={styles.note}>
+				Look up Signal users by their username to get their ACI.{' '}\n
+				Usernames are in the format: name.123 (discriminator is optional)
+			</BodyS>
+
+			<View style={styles.divider} />
+			<BodyS style={styles.inputLabel}>👤 Enter Username</BodyS>
+			<TextInput
+				style={styles.input}
+				placeholder="alice.42 or alice"
+				placeholderTextColor="#666"
+				value={usernameInput}
+				onChangeText={setUsernameInput}
+				autoCapitalize="none"
+				autoCorrect={false}
+				keyboardType="default"
+			/>
+			
+			<Button
+				style={styles.button}
+				text={usernameLookupLoading ? 'Looking up...' : '🔍 Look Up Username'}
+				size="large"
+				disabled={usernameLookupLoading || !usernameInput.trim()}
+				onPress={handleUsernameLookup}
+			/>
+
+			<BodyS style={styles.hint}>
+				Signal usernames are case-insensitive. The discriminator (.XX) helps distinguish users with the same name.
+			</BodyS>
+
+			{/* Error Display */}
+			{usernameLookupError && (
+				<View style={styles.errorContainer}>
+					<BodyM style={styles.errorText}>❌ {usernameLookupError}</BodyM>
+				</View>
+			)}
+
+			{/* Result Display */}
+			{usernameLookupResult && (
+				<View style={styles.resultsContainer}>
+					<BodyS style={styles.inputLabel}>Result:</BodyS>
+					<View style={styles.lookupResultItem}>
+						<View style={styles.lookupResultInfo}>
+							<BodyM style={styles.lookupResultPhone}>
+								@{usernameLookupResult.username}
+							</BodyM>
+							{usernameLookupResult.aci ? (
+								<>
+									<BodyS style={styles.lookupResultAci} selectable>
+										ACI: {usernameLookupResult.aci}
+									</BodyS>
+									<Button
+										style={styles.smallButton}
+										text="💬 Message This User"
+										size="small"
+										onPress={() => handleUseUsernameAciForMessaging(usernameLookupResult.aci!)}
+									/>
+								</>
+							) : (
+								<BodyS style={styles.lookupResultNotFound}>
+									❌ Username not found on Signal
+								</BodyS>
+							)}
+						</View>
+					</View>
+				</View>
+			)}
+		</View>
+	);
+
 	const renderLinkedState = (): ReactElement => (
 		<View style={styles.content}>
 			<View style={styles.statusContainer}>
@@ -725,6 +1038,7 @@ const SignalLink = (
 
 			{showMessaging ? renderMessagingUI() : null}
 			{showCdsiTest ? renderCdsiTestUI() : null}
+			{showUsernameLookup ? renderUsernameLookupUI() : null}
 
 			<View style={styles.buttonContainer}>
 				<Button
@@ -733,7 +1047,23 @@ const SignalLink = (
 					size="large"
 					onPress={() => {
 						setShowMessaging(!showMessaging);
-						if (!showMessaging) setShowCdsiTest(false);
+						if (!showMessaging) {
+							setShowCdsiTest(false);
+							setShowUsernameLookup(false);
+						}
+					}}
+				/>
+				<Button
+					style={styles.button}
+					text={showUsernameLookup ? 'Hide Username Lookup' : '🔤 Username Lookup'}
+					size="large"
+					variant="secondary"
+					onPress={() => {
+						setShowUsernameLookup(!showUsernameLookup);
+						if (!showUsernameLookup) {
+							setShowMessaging(false);
+							setShowCdsiTest(false);
+						}
 					}}
 				/>
 				<Button
@@ -743,7 +1073,10 @@ const SignalLink = (
 					variant="secondary"
 					onPress={() => {
 						setShowCdsiTest(!showCdsiTest);
-						if (!showCdsiTest) setShowMessaging(false);
+						if (!showCdsiTest) {
+							setShowMessaging(false);
+							setShowUsernameLookup(false);
+						}
 					}}
 				/>
 				<Button
@@ -1081,6 +1414,15 @@ const styles = StyleSheet.create({
 	statusYellow: {
 		color: '#fbbf24',
 	},
+	statusRed: {
+		color: '#f87171',
+	},
+	statusNote: {
+		marginTop: 8,
+		fontSize: 11,
+		opacity: 0.7,
+		lineHeight: 16,
+	},
 	resultBox: {
 		backgroundColor: '#1a1a1a',
 		borderRadius: 8,
@@ -1105,6 +1447,49 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		marginBottom: 8,
 		color: '#60a5fa',
+	},
+	// CDSI Lookup Results styles
+	resultsContainer: {
+		marginTop: 16,
+		marginBottom: 8,
+	},
+	lookupResultItem: {
+		backgroundColor: '#1a1a1a',
+		borderRadius: 8,
+		padding: 12,
+		marginBottom: 8,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		borderWidth: 1,
+		borderColor: '#333',
+	},
+	lookupResultInfo: {
+		flex: 1,
+		marginRight: 12,
+	},
+	lookupResultPhone: {
+		fontWeight: '600',
+		fontSize: 16,
+		marginBottom: 4,
+	},
+	lookupResultAci: {
+		fontSize: 11,
+		fontFamily: 'monospace',
+		color: '#4ade80',
+		marginBottom: 2,
+	},
+	lookupResultPni: {
+		fontSize: 11,
+		fontFamily: 'monospace',
+		color: '#60a5fa',
+	},
+	lookupResultNotFound: {
+		color: '#f87171',
+		fontSize: 12,
+	},
+	useAciButton: {
+		minWidth: 80,
 	},
 });
 
