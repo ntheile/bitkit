@@ -28,3 +28,4 @@ allprojects {
         maven { url("$rootDir/../node_modules/detox/Detox-android") }
     }
 }
+apply plugin: "expo-root-project"

@@ -58,6 +58,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera is used to scan qrcodes in order to import or send Bitcoin and assets.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Find your Signal contacts to message them</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Enabling Face ID allows you quick and secure access to your account.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

@@ -40,6 +40,11 @@ export const contactsSelector = createSelector(
 export const contactSelector = createSelector(
 	[slashtagsState, (_slashtagsItems, url: string): string => url],
 	(slashtags, url): IContactRecord | undefined => {
+		// Handle Signal-only contacts (url format: signal:id)
+		if (url?.startsWith('signal:')) {
+			const id = url.slice(7);
+			return slashtags.contacts?.[id];
+		}
 		const { id } = parse(url);
 		return slashtags.contacts?.[id];
 	},
@@ -62,6 +67,10 @@ export const profilesCacheSelector = createSelector(
 export const profileCacheSelector = createSelector(
 	[slashtagsState, (_slashtagsItems, url: string): string => url],
 	(slashtags, url): BasicProfile | {} => {
+		// Signal-only contacts don't have cached profiles
+		if (url?.startsWith('signal:')) {
+			return {};
+		}
 		const { id } = parse(url);
 		return slashtags.profilesCache?.[id] ?? {};
 	},

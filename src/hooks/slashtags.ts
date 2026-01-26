@@ -30,7 +30,15 @@ export const useProfile = (
 	const dispatch = useAppDispatch();
 	const { webRelayClient, webRelayUrl } = useSlashtags();
 	const [resolving, setResolving] = useState(true);
+
+	// Check if this is a Signal-only contact (not a slashtags URL)
+	const isSignalUrl = origUrl?.startsWith('signal:');
+
 	const [url, profileUrl] = useMemo(() => {
+		// Signal URLs don't have slashtags profiles
+		if (isSignalUrl) {
+			return [origUrl, origUrl];
+		}
 		const parsed = parse(origUrl);
 		const url1 = format(parsed.key, {
 			query: { relay: parsed.query?.relay ?? webRelayUrl },
@@ -40,7 +48,7 @@ export const useProfile = (
 			query: { relay: parsed.query?.relay ?? webRelayUrl },
 		});
 		return [url1, url2];
-	}, [origUrl, webRelayUrl]);
+	}, [origUrl, webRelayUrl, isSignalUrl]);
 	const contact = useAppSelector((state) => {
 		return contactSelector(state, url);
 	});
@@ -56,7 +64,9 @@ export const useProfile = (
 
 	useEffect(() => {
 		// Skip resolving profile from peers to avoid blocking UI
-		if (!shouldResolve) {
+		// Also skip for Signal-only contacts which don't have slashtags profiles
+		if (!shouldResolve || isSignalUrl) {
+			setResolving(false);
 			return;
 		}
 
@@ -101,7 +111,7 @@ export const useProfile = (
 			unsubscribe();
 			unmounted = true;
 		};
-	}, [webRelayClient, profileUrl, shouldResolve, dispatch]);
+	}, [webRelayClient, profileUrl, shouldResolve, isSignalUrl, dispatch]);
 
 	return {
 		resolving,

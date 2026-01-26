@@ -1,3 +1,4 @@
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 def node_require(script)
   # Resolve script with node to allow for hoisting
   require Pod::Executable.execute_command('node', ['-p',
@@ -13,6 +14,9 @@ ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
+# LibSignal FFI prebuild checksum for v0.70.0
+ENV['LIBSIGNAL_FFI_PREBUILD_CHECKSUM'] ||= 'e12f6f64eb0ed503c363f3b3830c4c62976cceec04122cd6deee66f5106c482d'
+
 # Read min iOS version from Xcode project and set as min iOS version for Podfile
 require 'xcodeproj'
 project_path = File.expand_path('bitkit.xcodeproj', __dir__)
@@ -23,6 +27,9 @@ puts "Set minimum iOS version supported using Xcode project: #{min_ios_version_s
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# Required for libsignal - use dynamic frameworks
+use_frameworks! :linkage => :dynamic
+
 setup_permissions([
   'Camera',
   'FaceID',
@@ -30,17 +37,32 @@ setup_permissions([
   'PhotoLibrary',
 ])
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
-
 target 'bitkit' do
-  config = use_native_modules!
+  use_expo_modules!
+
+  if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
+    config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
+  else
+    config_command = [
+      'node',
+      '--no-warnings',
+      '--eval',
+      'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
+      'react-native-config',
+      '--json',
+      '--platform',
+      'ios'
+    ]
+  end
+
+  config = use_native_modules!(config_command)
 
   # Manually link lni_react_native module
   pod 'lni-react-native', :path => '../node_modules/lni_react_native'
+
+  # LibSignal for Signal protocol support
+  pod 'LibSignalClient', :git => 'https://github.com/signalapp/libsignal.git', :tag => 'v0.70.0'
+  pod 'CryptoSwift', '~> 1.8.4'
 
   use_react_native!(
     :path => config[:reactNativePath],

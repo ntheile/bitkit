@@ -1,7 +1,7 @@
 const { E2E_TESTS } = process.env;
 
 module.exports = {
-	presets: ['module:@react-native/babel-preset'],
+	presets: ['babel-preset-expo'],
 	plugins: [
 		// Support `for await () {}`
 		'@babel/plugin-proposal-async-generator-functions',

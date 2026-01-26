@@ -5,6 +5,7 @@ import InactivityTracker from './components/InactivityTracker';
 import { SlashtagsProvider } from './components/SlashtagsProvider';
 import { useAppStateHandler } from './hooks/useAppStateHandler';
 import { useNetworkConnectivity } from './hooks/useNetworkConnectivity';
+import { useSignalMessages } from './hooks/useSignalMessages';
 import { useWalletStartup } from './hooks/useWalletStartup';
 import DrawerNavigator from './navigation/root/DrawerNavigator';
 import RootNavigationContainer from './navigation/root/RootNavigationContainer';
@@ -14,6 +15,7 @@ const AppOnboarded = (): ReactElement => {
 	useWalletStartup();
 	useAppStateHandler();
 	useNetworkConnectivity();
+	useSignalMessages(); // Connect to Signal WebSocket for receiving messages
 
 	return (
 		<SlashtagsProvider>
