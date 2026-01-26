@@ -23,7 +23,10 @@ const SlashtagURL = ({
 	onPress?: () => void;
 	testID?: string;
 }): ReactElement => {
-	const { id } = parse(url);
+	// Handle Signal-only contacts (url format: signal:aci)
+	const isSignalUrl = url.startsWith('signal:');
+	const displayId = isSignalUrl ? url.slice(7) : parse(url).id;
+	const prefix = isSignalUrl ? '' : '@';
 
 	const Text = useMemo(() => {
 		switch (size) {
@@ -47,10 +50,10 @@ const SlashtagURL = ({
 			onLongPress={(): void => {
 				if (url) {
 					Clipboard.setString(url);
-					console.debug('Copied slashtag url:', url);
+					console.debug('Copied url:', url);
 				}
 			}}>
-			<Text color={color}>@{ellipsis(id, 10)}</Text>
+			<Text color={color}>{prefix}{ellipsis(displayId, 10)}</Text>
 		</TouchableOpacity>
 	);
 };

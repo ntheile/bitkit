@@ -18,6 +18,7 @@ import type { ReceiveStackParamList } from '../../sheets/ReceiveNavigation';
 import type { SendStackParamList } from '../../sheets/SendNavigation';
 import type { TreasureHuntStackParamList } from '../../sheets/TreasureHuntNavigation';
 import type { IActivityItem } from '../../store/types/activity';
+import type { SignalIdentity } from '../../store/types/slashtags';
 import type { TWidgetId, TWidgetOptions } from '../../store/types/widgets';
 import type { OnboardingStackParamList } from '../OnboardingNavigator';
 import type { SettingsStackParamList } from '../SettingsNavigator';
@@ -43,6 +44,7 @@ export type RootStackParamList = {
 	Contacts: undefined;
 	ContactEdit: { url: string };
 	Contact: { url: string };
+	Chat: { name: string; signal: SignalIdentity };
 	BuyBitcoin: undefined;
 	ShopIntro: undefined;
 	ShopDiscover: undefined;

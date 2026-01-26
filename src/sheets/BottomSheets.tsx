@@ -13,6 +13,7 @@ import PubkyAuth from './PubkyAuth';
 import ReceiveNavigation from './ReceiveNavigation';
 import ReceivedTransaction from './ReceivedTransaction';
 import SendNavigation from './SendNavigation';
+import SignalCaptchaSheet from './SignalCaptchaSheet';
 
 const BottomSheets = (): JSX.Element => {
 	return (
@@ -29,6 +30,7 @@ const BottomSheets = (): JSX.Element => {
 			<SendNavigation />
 			{/* <TreasureHuntNavigation /> */}
 			<PubkyAuth />
+			<SignalCaptchaSheet />
 		</>
 	);
 };

@@ -26,6 +26,7 @@ export const sheetIds: SheetId[] = [
 	'receive',
 	'receivedTx',
 	'send',
+	'signalCaptcha',
 	'signalInvoice',
 	'tags',
 	'transferFailed',
@@ -64,6 +65,7 @@ export type SheetsParamList = {
 				amount?: number;
 		  }
 		| undefined;
+	signalCaptcha: { challengeToken: string };
 	signalInvoice: { invoice: string; amount?: number; description?: string };
 	tags: undefined;
 	transferFailed: undefined;

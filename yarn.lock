@@ -5664,6 +5664,7 @@ __metadata:
     react-native-builder-bob: "npm:^0.39.0"
     react-native-bundle-visualizer: "npm:^3.1.3"
     react-native-camera-kit: "npm:14.2.0"
+    react-native-contacts: "npm:^7.0.8"
     react-native-device-info: "npm:14.0.4"
     react-native-dotenv: "npm:3.4.11"
     react-native-draggable-flatlist: "npm:4.0.1"
@@ -5674,7 +5675,7 @@ __metadata:
     react-native-image-picker: "npm:8.1.0"
     react-native-keyboard-accessory: "npm:0.1.16"
     react-native-keychain: "npm:9.2.3"
-    react-native-libsignal-client: "file:react-native-libsignal-client-0.1.46.tgz"
+    react-native-libsignal-client: "file:react-native-libsignal-client-v0.1.48.tgz"
     react-native-localize: "npm:3.4.1"
     react-native-mmkv: "npm:^3.2.0"
     react-native-modal: "npm:13.0.1"
@@ -13523,6 +13524,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-contacts@npm:^7.0.8":
+  version: 7.0.8
+  resolution: "react-native-contacts@npm:7.0.8"
+  peerDependencies:
+    react-native: ">=0.64.0"
+  checksum: 10/74d17da25ee3000f284537cb2183a44611347f34cc603bd84221d2a9621faef90ce7344aff2230db5eed021a8ee3b115c09278541ad86349196fc250394fbfea
+  languageName: node
+  linkType: hard
+
 "react-native-device-info@npm:14.0.4":
   version: 14.0.4
   resolution: "react-native-device-info@npm:14.0.4"
@@ -13668,9 +13678,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-libsignal-client@file:react-native-libsignal-client-0.1.46.tgz::locator=bitkit%40workspace%3A.":
-  version: 0.1.46
-  resolution: "react-native-libsignal-client@file:react-native-libsignal-client-0.1.46.tgz#react-native-libsignal-client-0.1.46.tgz::hash=2d988d&locator=bitkit%40workspace%3A."
+"react-native-libsignal-client@file:react-native-libsignal-client-v0.1.48.tgz::locator=bitkit%40workspace%3A.":
+  version: 0.1.48
+  resolution: "react-native-libsignal-client@file:react-native-libsignal-client-v0.1.48.tgz#react-native-libsignal-client-v0.1.48.tgz::hash=90fe8c&locator=bitkit%40workspace%3A."
   dependencies:
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     expo-build-properties: "npm:~0.12.5"
@@ -13681,7 +13691,7 @@ __metadata:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10/bce10b920beafd7a8f387c90185db68bceb71ad76c476cade730aeeda6a8cffa2019840ea321242fb991040eb62b2ff5c34fb6fca27f1fc5d3d3ee1485c6dcfa
+  checksum: 10/f59d01a88eae7d9250016938e3a87f70b9e8df76620591f4b32d6a1ccb60ebd25d491745ebb15828d568c63769a3ad66f3e4f41de93aedda8a2ee3c5574527bb
   languageName: node
   linkType: hard
 

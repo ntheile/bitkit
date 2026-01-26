@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, StyleSheet, View } from 'react-native';
 
 import ContactsList from '../../components/ContactsList';
+import ContactsSyncButton from '../../components/ContactsSyncButton';
 import NavigationHeader from '../../components/NavigationHeader';
 import ProfileImage from '../../components/ProfileImage';
 import SafeAreaInset from '../../components/SafeAreaInset';
@@ -79,11 +80,17 @@ const ContactsScreen = ({
 						<PlusIcon width={24} height={24} color="brand" />
 					</TouchableHighlight>
 				</View>
+				<ContactsSyncButton />
 				<View style={styles.contacts}>
 					<ContactsList
 						searchFilter={searchFilter}
 						includeMyProfile={true}
-						onPress={({ url }): void => {
+						onPress={({ url, signal, name }): void => {
+							// Handle Signal-only contacts (from device sync)
+							if (url.startsWith('signal:') && signal) {
+								navigation.navigate('Chat', { name: name || 'Contact', signal });
+								return;
+							}
 							const isContact = parse(url).id !== parse(myProfileURL).id;
 							if (isContact) {
 								navigation.navigate('Contact', { url });

@@ -4,6 +4,7 @@ import {
 	BasicProfile,
 	Link,
 	LocalLink,
+	SignalIdentity,
 	TOnboardingProfileStep,
 	TSlashtagsState,
 } from '../types/slashtags';
@@ -86,6 +87,41 @@ export const slashtagsSlice = createSlice({
 			const { id } = parse(action.payload.url);
 			delete state.profilesCache[id];
 		},
+		updateContactSignal: (
+			state,
+			action: PayloadAction<{ url: string; signal: SignalIdentity }>,
+		) => {
+			const { id } = parse(action.payload.url);
+			const contact = state.contacts[id];
+			if (contact) {
+				contact.signal = action.payload.signal;
+			}
+		},
+		addSignalContact: (
+			state,
+			action: PayloadAction<{
+				name: string;
+				signal: SignalIdentity;
+			}>,
+		) => {
+			const { name, signal } = action.payload;
+			// Use ACI as the unique ID, fallback to PNI if ACI not available
+			const id = signal.aci || signal.pni;
+			if (!id) {
+				return;
+			}
+			// Skip if contact with this ID already exists
+			if (state.contacts[id]) {
+				return;
+			}
+			// Create a synthetic URL for Signal-only contacts
+			const url = `signal:${id}`;
+			state.contacts[id] = {
+				name,
+				url,
+				signal,
+			};
+		},
 		resetSlashtagsState: () => initialSlashtagsState,
 	},
 });
@@ -106,6 +142,8 @@ export const {
 	updateLastPaidContacts,
 	cacheProfile,
 	deleteProfileCache,
+	updateContactSignal,
+	addSignalContact,
 	resetSlashtagsState,
 } = actions;
 

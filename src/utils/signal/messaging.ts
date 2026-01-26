@@ -281,6 +281,65 @@ export interface SendResult {
 	messageId?: string;
 	timestamp?: number;
 	error?: string;
+	captchaRequired?: {
+		challengeToken: string;
+		options: string[];
+	};
+}
+
+/**
+ * Submit captcha solution to Signal server.
+ * Must be called before retrying a message after 428.
+ */
+export async function submitCaptchaSolution(
+	challengeToken: string,
+	captchaToken: string,
+): Promise<{ success: boolean; error?: string }> {
+	const accountInfo = getAccountInfo();
+	if (!accountInfo) {
+		return { success: false, error: 'No account info' };
+	}
+
+	const password = await getAuthPassword();
+	if (!password) {
+		return { success: false, error: 'No auth password' };
+	}
+
+	const credentials = `${accountInfo.aci}.${accountInfo.deviceId}:${password}`;
+	const authHeader = `Basic ${Buffer.from(credentials).toString('base64')}`;
+
+	console.log('Signal Captcha: Submitting solution to /v1/challenge');
+	console.log('Signal Captcha: Challenge token:', challengeToken);
+	console.log('Signal Captcha: Captcha token:', captchaToken.slice(0, 50) + '...');
+
+	try {
+		const response = await fetch(`${SIGNAL_SERVER}/v1/challenge`, {
+			method: 'PUT',
+			headers: {
+				'Authorization': authHeader,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				type: 'captcha',
+				token: challengeToken,
+				captcha: captchaToken,
+			}),
+		});
+
+		console.log('Signal Captcha: Challenge response:', response.status);
+
+		if (response.ok) {
+			console.log('Signal Captcha: Challenge accepted!');
+			return { success: true };
+		} else {
+			const errorText = await response.text();
+			console.log('Signal Captcha: Challenge failed:', errorText);
+			return { success: false, error: `${response.status}: ${errorText}` };
+		}
+	} catch (error) {
+		console.error('Signal Captcha: Error submitting challenge:', error);
+		return { success: false, error: error instanceof Error ? error.message : 'Network error' };
+	}
 }
 
 export interface Conversation {
@@ -393,14 +452,15 @@ export function clearPreKeyCache(aci?: string): void {
 
 /**
  * Send a text message to a Signal contact.
- * 
+ *
  * Flow:
  * 1. Fetch recipient's PreKey bundle from server
  * 2. Build Signal session using createAndProcessPreKeyBundle
  * 3. Encrypt message using signalEncrypt
  * 4. Send to Signal server via PUT /v1/messages/{destination}
- * 
+ *
  * Note: When sending to self, we exclude our own device (can't send to yourself).
+ * Note: If you get a 428 captcha challenge, call submitCaptchaSolution() first, then retry.
  */
 export async function sendMessage(
 	recipient: SignalContact,
@@ -731,6 +791,15 @@ export async function sendMessage(
 			}
 		}
 		
+		// Handle 428 captcha challenge
+		if (sendResult.captchaRequired) {
+			return {
+				success: false,
+				error: 'Captcha required',
+				captchaRequired: sendResult.captchaRequired,
+			};
+		}
+
 		if (sendResult.success) {
 			return {
 				success: true,
@@ -755,12 +824,13 @@ export async function sendMessage(
 /**
  * Send encrypted messages to Signal server.
  * Returns staleDevices array if server returns 410.
+ * Returns captchaRequired if server returns 428.
  */
 async function sendToServer(
 	recipientAci: string,
 	messages: Array<{ destinationDeviceId: number; destinationRegistrationId: number; content: string; type: number }>,
 	timestamp: number,
-): Promise<{ success: boolean; error?: string; staleDevices?: number[] }> {
+): Promise<{ success: boolean; error?: string; staleDevices?: number[]; captchaRequired?: { challengeToken: string; options: string[] } }> {
 	const accountInfo = getAccountInfo();
 	if (!accountInfo) {
 		return { success: false, error: 'No account info' };
@@ -808,6 +878,28 @@ async function sendToServer(
 			const errorText = await response.text();
 			console.log('Signal DM: Send failed:', response.status, errorText);
 			
+			// Handle 428 captcha challenge
+			if (response.status === 428) {
+				try {
+					const errorData = JSON.parse(errorText);
+					if (errorData.token && errorData.options) {
+						console.log('Signal DM: Captcha challenge required, token:', errorData.token);
+						console.log('Signal DM: Options:', errorData.options);
+						return {
+							success: false,
+							error: 'Captcha required',
+							captchaRequired: {
+								challengeToken: errorData.token,
+								options: errorData.options,
+							},
+						};
+					}
+				} catch (e) {
+					console.log('Signal DM: Could not parse 428 response');
+				}
+				return { success: false, error: 'Captcha required but could not parse challenge' };
+			}
+
 			// Handle 410 stale devices
 			if (response.status === 410) {
 				try {
@@ -820,7 +912,7 @@ async function sendToServer(
 					// Couldn't parse error response
 				}
 			}
-			
+
 			return { success: false, error: `${response.status}: ${errorText}` };
 		}
 	} catch (error) {

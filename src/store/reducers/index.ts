@@ -12,6 +12,8 @@ import lightning from '../slices/lightning';
 import metadata from '../slices/metadata';
 import receive from '../slices/receive';
 import settings from '../slices/settings';
+import signalContacts from '../slices/signalContacts';
+import signalMessages from '../slices/signalMessages';
 import slashtags from '../slices/slashtags';
 import todos from '../slices/todos';
 import ui from '../slices/ui';
@@ -29,6 +31,8 @@ const appReducer = combineReducers({
 	metadata,
 	receive,
 	settings,
+	signalContacts,
+	signalMessages,
 	slashtags,
 	todos,
 	ui,

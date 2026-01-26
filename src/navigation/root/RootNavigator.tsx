@@ -23,6 +23,7 @@ import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import ActivityAssignContact from '../../screens/Activity/ActivityAssignContact';
 import ActivityDetail from '../../screens/Activity/ActivityDetail';
 import BuyBitcoin from '../../screens/BuyBitcoin';
+import Chat from '../../screens/Chat/Chat';
 import Contact from '../../screens/Contacts/Contact';
 import ContactEdit from '../../screens/Contacts/ContactEdit';
 import Contacts from '../../screens/Contacts/Contacts';
@@ -155,6 +156,7 @@ const RootNavigator = (): ReactElement => {
 				<Stack.Screen name="Contacts" component={Contacts} />
 				<Stack.Screen name="ContactEdit" component={ContactEdit} />
 				<Stack.Screen name="Contact" component={Contact} />
+				<Stack.Screen name="Chat" component={Chat} />
 				<Stack.Screen name="BuyBitcoin" component={BuyBitcoin} />
 				<Stack.Screen name="ShopIntro" component={ShopIntro} />
 				<Stack.Screen name="ShopDiscover" component={ShopDiscover} />

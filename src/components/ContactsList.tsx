@@ -8,6 +8,7 @@ import { useProfile, useSlashtags } from '../hooks/slashtags';
 import { contactsSelector } from '../store/reselect/slashtags';
 import { IContactRecord } from '../store/types/slashtags';
 import { View as ThemedView } from '../styles/components';
+import { NoteIcon } from '../styles/icons';
 import { BodyMSB, Caption13Up } from '../styles/text';
 import { IThemeColors } from '../styles/themes';
 import { truncate } from '../utils/helpers';
@@ -34,6 +35,8 @@ export const ContactItem = ({
 		return truncate(profile?.name || contact?.name || fallbackName, 30);
 	}, [contact, profile?.name, myProfileURL, t]);
 
+	const hasSignal = Boolean(contact.signal?.aci || contact.signal?.pni);
+
 	return (
 		<TouchableOpacity
 			activeOpacity={0.7}
@@ -43,16 +46,22 @@ export const ContactItem = ({
 			{size !== 'small' && <Divider />}
 			<View style={cstyles.container}>
 				<ProfileImage
-					url={contact.url}
 					image={profile?.image}
 					size={size === 'small' ? 32 : 48}
 				/>
 				<View style={cstyles.column} pointerEvents="none">
-					<BodyMSB
-						numberOfLines={1}
-						style={size !== 'small' ? cstyles.name : undefined}>
-						{name}
-					</BodyMSB>
+					<View style={cstyles.nameRow}>
+						<BodyMSB
+							numberOfLines={1}
+							style={size !== 'small' ? cstyles.name : undefined}>
+							{name}
+						</BodyMSB>
+						{hasSignal && (
+							<View style={cstyles.signalBadge}>
+								<NoteIcon width={14} height={14} color="brand" />
+							</View>
+						)}
+					</View>
 					<SlashtagURL url={contact.url} color="secondary" size="small" />
 				</View>
 			</View>
@@ -174,8 +183,17 @@ const cstyles = StyleSheet.create({
 	},
 	column: {
 		marginLeft: 16,
+		flex: 1,
+	},
+	nameRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
 	},
 	name: {
+		marginBottom: 4,
+	},
+	signalBadge: {
+		marginLeft: 6,
 		marginBottom: 4,
 	},
 });
