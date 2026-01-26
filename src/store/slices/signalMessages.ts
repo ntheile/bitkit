@@ -31,6 +31,13 @@ const signalMessagesSlice = createSlice({
 			if (!state.conversations[contactId]) {
 				state.conversations[contactId] = [];
 			}
+			// Check for duplicate message (same ID)
+			const exists = state.conversations[contactId].some(
+				(m) => m.id === message.id,
+			);
+			if (exists) {
+				return; // Skip duplicate
+			}
 			// Add to beginning (newest first)
 			state.conversations[contactId].unshift(message);
 		},

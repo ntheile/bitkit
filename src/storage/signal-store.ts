@@ -275,10 +275,18 @@ export function storeSession(address: string, sessionData: Uint8Array): void {
  * Retrieve session data for a recipient.
  */
 export function getSession(address: string): Uint8Array | null {
-	const key = MMKV_KEYS.SESSION + address;
-	const base64 = signalStorage.getString(key);
-	if (!base64) return null;
-	return Uint8Array.from(Buffer.from(base64, 'base64'));
+	try {
+		const key = MMKV_KEYS.SESSION + address;
+		const base64 = signalStorage.getString(key);
+		if (!base64 || typeof base64 !== 'string' || base64.length === 0) {
+			return null;
+		}
+		const buffer = Buffer.from(base64, 'base64');
+		return new Uint8Array(buffer);
+	} catch (error) {
+		console.error(`SignalStore: Error reading session ${address}:`, error);
+		return null;
+	}
 }
 
 /**
@@ -316,10 +324,18 @@ export function storePreKey(keyId: number, preKeyData: Uint8Array): void {
  * Retrieve a PreKey.
  */
 export function getPreKey(keyId: number): Uint8Array | null {
-	const key = MMKV_KEYS.PRE_KEY + keyId;
-	const base64 = signalStorage.getString(key);
-	if (!base64) return null;
-	return Uint8Array.from(Buffer.from(base64, 'base64'));
+	try {
+		const key = MMKV_KEYS.PRE_KEY + keyId;
+		const base64 = signalStorage.getString(key);
+		if (!base64 || typeof base64 !== 'string' || base64.length === 0) {
+			return null;
+		}
+		const buffer = Buffer.from(base64, 'base64');
+		return new Uint8Array(buffer);
+	} catch (error) {
+		console.error(`SignalStore: Error reading prekey ${keyId}:`, error);
+		return null;
+	}
 }
 
 /**
@@ -328,6 +344,18 @@ export function getPreKey(keyId: number): Uint8Array | null {
 export function deletePreKey(keyId: number): void {
 	const key = MMKV_KEYS.PRE_KEY + keyId;
 	signalStorage.delete(key);
+}
+
+/**
+ * Get all stored prekey IDs.
+ */
+export function getAllPreKeyIds(): number[] {
+	const allKeys = signalStorage.getAllKeys();
+	const prefix = MMKV_KEYS.PRE_KEY;
+	return allKeys
+		.filter((key) => key.startsWith(prefix))
+		.map((key) => parseInt(key.slice(prefix.length), 10))
+		.filter((id) => !isNaN(id));
 }
 
 // ============================================================================
@@ -349,10 +377,72 @@ export function storeSignedPreKey(
  * Retrieve a Signed PreKey.
  */
 export function getSignedPreKey(keyId: number): Uint8Array | null {
-	const key = MMKV_KEYS.SIGNED_PRE_KEY + keyId;
-	const base64 = signalStorage.getString(key);
-	if (!base64) return null;
-	return Uint8Array.from(Buffer.from(base64, 'base64'));
+	try {
+		const key = MMKV_KEYS.SIGNED_PRE_KEY + keyId;
+		const base64 = signalStorage.getString(key);
+		if (!base64 || typeof base64 !== 'string' || base64.length === 0) {
+			return null;
+		}
+		const buffer = Buffer.from(base64, 'base64');
+		return new Uint8Array(buffer);
+	} catch (error) {
+		console.error(`SignalStore: Error reading signed prekey ${keyId}:`, error);
+		return null;
+	}
+}
+
+/**
+ * Get all stored signed prekey IDs.
+ */
+export function getAllSignedPreKeyIds(): number[] {
+	const allKeys = signalStorage.getAllKeys();
+	const prefix = MMKV_KEYS.SIGNED_PRE_KEY;
+	return allKeys
+		.filter((key) => key.startsWith(prefix))
+		.map((key) => parseInt(key.slice(prefix.length), 10))
+		.filter((id) => !isNaN(id));
+}
+
+// ============================================================================
+// Kyber PreKey Storage (post-quantum)
+// ============================================================================
+
+/**
+ * Store a Kyber PreKey.
+ */
+export function storeKyberPreKey(keyId: number, kyberPreKeyData: Uint8Array): void {
+	const key = MMKV_KEYS.KYBER_PRE_KEY + keyId;
+	signalStorage.set(key, Buffer.from(kyberPreKeyData).toString('base64'));
+}
+
+/**
+ * Retrieve a Kyber PreKey.
+ */
+export function getKyberPreKey(keyId: number): Uint8Array | null {
+	try {
+		const key = MMKV_KEYS.KYBER_PRE_KEY + keyId;
+		const base64 = signalStorage.getString(key);
+		if (!base64 || typeof base64 !== 'string' || base64.length === 0) {
+			return null;
+		}
+		const buffer = Buffer.from(base64, 'base64');
+		return new Uint8Array(buffer);
+	} catch (error) {
+		console.error(`SignalStore: Error reading kyber prekey ${keyId}:`, error);
+		return null;
+	}
+}
+
+/**
+ * Get all stored kyber prekey IDs.
+ */
+export function getAllKyberPreKeyIds(): number[] {
+	const allKeys = signalStorage.getAllKeys();
+	const prefix = MMKV_KEYS.KYBER_PRE_KEY;
+	return allKeys
+		.filter((key) => key.startsWith(prefix))
+		.map((key) => parseInt(key.slice(prefix.length), 10))
+		.filter((id) => !isNaN(id));
 }
 
 // ============================================================================

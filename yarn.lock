@@ -5675,7 +5675,7 @@ __metadata:
     react-native-image-picker: "npm:8.1.0"
     react-native-keyboard-accessory: "npm:0.1.16"
     react-native-keychain: "npm:9.2.3"
-    react-native-libsignal-client: "file:react-native-libsignal-client-v0.1.48.tgz"
+    react-native-libsignal-client: ./react-native-libsignal-client-0.1.53.tgz
     react-native-localize: "npm:3.4.1"
     react-native-mmkv: "npm:^3.2.0"
     react-native-modal: "npm:13.0.1"
@@ -13678,9 +13678,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-libsignal-client@file:react-native-libsignal-client-v0.1.48.tgz::locator=bitkit%40workspace%3A.":
-  version: 0.1.48
-  resolution: "react-native-libsignal-client@file:react-native-libsignal-client-v0.1.48.tgz#react-native-libsignal-client-v0.1.48.tgz::hash=90fe8c&locator=bitkit%40workspace%3A."
+"react-native-libsignal-client@file:./react-native-libsignal-client-0.1.53.tgz::locator=bitkit%40workspace%3A.":
+  version: 0.1.53
+  resolution: "react-native-libsignal-client@file:./react-native-libsignal-client-0.1.53.tgz#./react-native-libsignal-client-0.1.53.tgz::hash=2976d4&locator=bitkit%40workspace%3A."
   dependencies:
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     expo-build-properties: "npm:~0.12.5"
@@ -13691,7 +13691,7 @@ __metadata:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10/f59d01a88eae7d9250016938e3a87f70b9e8df76620591f4b32d6a1ccb60ebd25d491745ebb15828d568c63769a3ad66f3e4f41de93aedda8a2ee3c5574527bb
+  checksum: 10/c5311478e326bcf21ad0ed4c278001b1a18a60abb09312b79a09a34f4c9f561a46f5abc5354d7b81382032126eb551548af62f5877f773a252f1b7950c857240
   languageName: node
   linkType: hard
 

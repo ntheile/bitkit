@@ -11,8 +11,18 @@ import {
 	PrivateKey,
 	PublicKey,
 	KyberPreKeyRecord,
+	SignedPreKeyRecord,
+	PreKeyRecord,
 } from 'react-native-libsignal-client';
-import { getIdentityKey, storeAccountInfo, storeAuthPassword, type SignalAccountInfo } from '../../storage/signal-store';
+import {
+	getIdentityKey,
+	storeAccountInfo,
+	storeAuthPassword,
+	storeSignedPreKey,
+	storeKyberPreKey,
+	storePreKey,
+	type SignalAccountInfo,
+} from '../../storage/signal-store';
 import type { IProvisionMessage } from './protos/provisioning';
 
 const SIGNAL_SERVER = 'https://chat.signal.org';
@@ -70,21 +80,25 @@ async function generateKyberSignedPreKey(
 		// and signing the public key with the identity private key
 		const timestamp = Date.now();
 		const kyberRecord = KyberPreKeyRecord.new(keyId, timestamp, identityPrivateKey);
-		
+
+		// Store the full record (includes private key) for later decryption
+		storeKyberPreKey(keyId, kyberRecord.serialized);
+		console.log('DeviceRegistration: Stored Kyber prekey', keyId);
+
 		// Get the public key from the record
 		const publicKey = kyberRecord.publicKey();
 		const publicKeyBytes = new Uint8Array(publicKey.serialized);
-		
+
 		// Get the signature that was generated
 		const signature = new Uint8Array(kyberRecord.signature());
-		
+
 		console.log('DeviceRegistration: Kyber public key size:', publicKeyBytes.length);
 		console.log('DeviceRegistration: Kyber signature size:', signature.length);
-		
+
 		if (publicKeyBytes.length === 0) {
 			throw new Error('Kyber public key is empty');
 		}
-		
+
 		return {
 			keyId,
 			publicKey: publicKeyBytes,
@@ -97,25 +111,75 @@ async function generateKyberSignedPreKey(
 }
 
 /**
- * Generate a signed pre-key.
+ * Generate a signed pre-key using SignedPreKeyRecord.
+ * This properly handles key generation, signing, and storage.
  */
 async function generateSignedPreKey(
 	identityPrivateKey: Uint8Array,
 	keyId: number,
 ): Promise<{ keyId: number; publicKey: Uint8Array; signature: Uint8Array }> {
-	// Generate a new key pair
-	const privateKey = PrivateKey.generate();
-	const publicKey = privateKey.getPublicKey();
-	const publicKeyBytes = new Uint8Array(publicKey.serialized);
-	
+	const timestamp = Date.now();
+
+	// Generate a new EC key pair for the signed prekey
+	const preKeyPrivate = PrivateKey.generate();
+	const preKeyPublic = preKeyPrivate.getPublicKey();
+
 	// Sign the public key with our identity key
-	const signature = await signWithIdentityKey(publicKeyBytes, identityPrivateKey);
-	
+	const identityKey = PrivateKey._fromSerialized(identityPrivateKey);
+	const signature = identityKey.sign(preKeyPublic.serialized);
+
+	// Create SignedPreKeyRecord with the generated keys
+	const record = SignedPreKeyRecord.new(
+		keyId,
+		timestamp,
+		preKeyPublic,
+		preKeyPrivate,
+		signature,
+	);
+
+	// Store the full record (includes private key) for later decryption
+	storeSignedPreKey(keyId, record.serialized);
+	console.log('DeviceRegistration: Stored signed prekey', keyId);
+
+	// Return the public parts for registration
 	return {
 		keyId,
-		publicKey: publicKeyBytes,
-		signature,
+		publicKey: new Uint8Array(record.publicKey().serialized),
+		signature: new Uint8Array(record.signature()),
 	};
+}
+
+/**
+ * Generate a batch of one-time pre-keys.
+ * These are used for initial session establishment (X3DH key agreement).
+ * Each prekey can only be used once.
+ */
+function generateOneTimePreKeys(
+	startId: number,
+	count: number,
+): Array<{ keyId: number; publicKey: Uint8Array }> {
+	const preKeys: Array<{ keyId: number; publicKey: Uint8Array }> = [];
+
+	for (let i = 0; i < count; i++) {
+		const keyId = startId + i;
+
+		// Generate a new EC key pair
+		const privateKey = PrivateKey.generate();
+		const publicKey = privateKey.getPublicKey();
+
+		// Create PreKeyRecord and store it
+		const record = PreKeyRecord.new(keyId, publicKey, privateKey);
+		storePreKey(keyId, record.serialized);
+
+		// Add public key to list for upload
+		preKeys.push({
+			keyId,
+			publicKey: new Uint8Array(publicKey.serialized),
+		});
+	}
+
+	console.log(`DeviceRegistration: Generated and stored ${count} one-time prekeys`);
+	return preKeys;
 }
 
 /**
@@ -171,20 +235,31 @@ export async function registerLinkedDevice(
 		console.log('DeviceRegistration: Code preview:', provisioningCode.slice(0, 20));
 
 		// Generate signed pre-keys (EC keys)
+		// Use different IDs for ACI and PNI to avoid storage conflicts
 		const aciSignedPreKey = await generateSignedPreKey(aciIdentity.privateKey, 1);
-		const pniSignedPreKey = pniIdentity 
-			? await generateSignedPreKey(pniIdentity.privateKey, 1)
-			: await generateSignedPreKey(aciIdentity.privateKey, 1);
+		const pniSignedPreKey = pniIdentity
+			? await generateSignedPreKey(pniIdentity.privateKey, 1001) // Different ID for PNI
+			: await generateSignedPreKey(aciIdentity.privateKey, 1001);
 
 		console.log('DeviceRegistration: Generated signed EC pre-keys');
 
 		// Generate Kyber-1024 "last resort" pre-keys (post-quantum)
+		// Use different IDs for ACI and PNI to avoid storage conflicts
 		const aciPqLastResortPreKey = await generateKyberSignedPreKey(aciIdentity.privateKey, 1);
-		const pniPqLastResortPreKey = pniIdentity 
-			? await generateKyberSignedPreKey(pniIdentity.privateKey, 1)
-			: await generateKyberSignedPreKey(aciIdentity.privateKey, 1);
+		const pniPqLastResortPreKey = pniIdentity
+			? await generateKyberSignedPreKey(pniIdentity.privateKey, 1001) // Different ID for PNI
+			: await generateKyberSignedPreKey(aciIdentity.privateKey, 1001);
 
 		console.log('DeviceRegistration: Generated Kyber last resort pre-keys');
+
+		// Generate one-time pre-keys (100 each for ACI and PNI)
+		// These are consumed during initial session establishment
+		// Use non-overlapping ID ranges to avoid storage conflicts
+		const ONE_TIME_PREKEY_COUNT = 100;
+		const aciPreKeys = generateOneTimePreKeys(1, ONE_TIME_PREKEY_COUNT);
+		const pniPreKeys = generateOneTimePreKeys(1001, ONE_TIME_PREKEY_COUNT); // Different range for PNI
+
+		console.log('DeviceRegistration: Generated one-time pre-keys');
 
 		// Device capabilities required by Signal
 		// These must match the capabilities of other devices on the account
@@ -235,6 +310,16 @@ export async function registerLinkedDevice(
 				publicKey: Buffer.from(pniPqLastResortPreKey.publicKey).toString('base64'),
 				signature: Buffer.from(pniPqLastResortPreKey.signature).toString('base64'),
 			},
+
+			// One-time pre-keys for initial session establishment
+			aciPreKeys: aciPreKeys.map((pk) => ({
+				keyId: pk.keyId,
+				publicKey: Buffer.from(pk.publicKey).toString('base64'),
+			})),
+			pniPreKeys: pniPreKeys.map((pk) => ({
+				keyId: pk.keyId,
+				publicKey: Buffer.from(pk.publicKey).toString('base64'),
+			})),
 		};
 
 		console.log('DeviceRegistration: Sending PUT /v1/devices/link...');

@@ -68,3 +68,13 @@ export {
 	type UsernameLookupResult,
 	type UsernameEnvironment,
 } from './username';
+
+// Message receiving
+export {
+	MessageSocket,
+	getMessageSocket,
+	disconnectMessageSocket,
+	EnvelopeType,
+	type MessageSocketCallbacks,
+	type ReceivedMessage,
+} from './message-socket';
